@@ -778,11 +778,11 @@ jQuery(document).ready(function(){
 	
 	<div class="accordion-group">
 		<div class="accordion-heading">
-			<a class="accordion-toggle" data-toggle="collapse" href="#availableCommitteeMemberRoleTypes"><strong>Available Committee Member Role Types</strong></a>			
+			<a class="accordion-toggle" data-toggle="collapse" href="#availableCommitteeMemberRoleTypes"><strong>Committee Member Settings</strong></a>			
 		</div>
 		<div id="availableCommitteeMemberRoleTypes" class="accordion-body collapse ${ "availableCommitteeMemberRoleTypes".equals(flash.get("open")) ? "in" : "" }">
 			<div class="accordion-inner">
-				<h2>AVAILABLE COMMITTEE MEMBER ROLE TYPES</h2>
+				<h2>AVAILABLE COMMITTEE MEMBER ROLE TYPES ${org.tdl.vireo.model.Configuration.DEFAULTS.get("committee_member_add_enabled")}</h2>
 				
 				<p>
                     <a class="confirm" href="@{settings.ConfigurableSettingsTab.removeAllCommitteeMemberRoleTypes}" 
@@ -857,6 +857,32 @@ jQuery(document).ready(function(){
 				    </form>
 				</div>
 				<br/><br/>
+                <h2>COMMITTEE MEMBER ADDITION ${org.tdl.vireo.model.Configuration.DEFAULTS.get("committee_member_add_enabled")}</h2>
+                
+                <ul class="unstyled">
+                    <li>
+                        <label>Committee Member Count:</label>
+                        <span>
+                             <input class="application-text monospace" name="${org.tdl.vireo.constant.AppConfig.COMMITTEE_MEMBER_DEFAULT_COUNT}" type="text" value="${COMMITTEE_MEMBER_DEFAULT_COUNT}" />
+                        </span>
+                    </li>
+                    <li>
+                        <label>Committee Member Addition Count:</label>
+                        <span>
+                             <input class="application-text monospace" name="${org.tdl.vireo.constant.AppConfig.COMMITTEE_MEMBER_DEFAULT_ADD_COUNT}" type="text" value="${COMMITTEE_MEMBER_DEFAULT_ADD_COUNT}" />
+                        </span>
+                    </li>
+                    <li>
+                        <label>Committee Member Addition:</label>
+                        <span>
+                            <div class="btn-group" data-toggle="buttons-radio">
+                                <button name="${org.tdl.vireo.constant.AppConfig.COMMITTEE_MEMBER_ADD_ENABLED}" class="btn application-toggle #{if !"false".equals(COMMITTEE_MEMBER_ADD_ENABLED)}active#{/if}" value="true">Yes</button>
+                                <button name="${org.tdl.vireo.constant.AppConfig.COMMITTEE_MEMBER_ADD_ENABLED}" class="btn application-toggle #{if "false".equals(COMMITTEE_MEMBER_ADD_ENABLED)}active#{/if}" value="false">No</button>
+                            </div>
+                        </span>
+                    </li>
+                </ul>
+                <br/><br/>
 			</div>
 		</div>
 	</div>

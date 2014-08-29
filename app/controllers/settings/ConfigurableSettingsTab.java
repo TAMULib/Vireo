@@ -1,5 +1,7 @@
 package controllers.settings;
 
+import static org.tdl.vireo.constant.AppConfig.CUSTOM_CSS;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -71,6 +73,9 @@ public class ConfigurableSettingsTab extends SettingsTab {
 		renderArgs.put("UNDERGRADUATE", DegreeLevel.UNDERGRADUATE);
 		renderArgs.put("MASTERS", DegreeLevel.MASTERS);
 		renderArgs.put("DOCTORAL", DegreeLevel.DOCTORAL);
+		renderArgs.put("COMMITTEE_MEMBER_DEFAULT_COUNT", settingRepo.getConfigValue("committee_member_default_count"));
+		renderArgs.put("COMMITTEE_MEMBER_DEFAULT_ADD_COUNT", settingRepo.getConfigValue("committee_member_default_add_count"));
+		renderArgs.put("COMMITTEE_MEMBER_ADD_ENABLED", settingRepo.getConfigValue("committee_member_add_enabled"));
 		
 		String nav = "settings";
 		String subNav = "config";
