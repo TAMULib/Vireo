@@ -386,6 +386,10 @@ public class TestDataLoader extends Job {
 		4, 7, 11 // 0 = january, 11 = december
 	};
 	
+	private static final int[] PROG_MONTHS_DEFINITIONS = {
+		4, 7, 11 // 0 = january, 11 = december
+	};
+	
 	/**
 	 * Initial Embargo Types to create
 	 */
@@ -639,6 +643,11 @@ public class TestDataLoader extends Job {
 		// Create all graduation months
 		for(int gradMonthDefinition : GRAD_MONTHS_DEFINITIONS) {
 			settingRepo.createGraduationMonth(gradMonthDefinition).save();
+		}
+		
+		// Create all program months
+		for(int progMonthDefinition : PROG_MONTHS_DEFINITIONS) {
+			settingRepo.createProgramMonth(progMonthDefinition).save();
 		}
 		
 		// Create all embargo types

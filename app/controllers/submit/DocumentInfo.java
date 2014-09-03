@@ -270,6 +270,10 @@ public class DocumentInfo extends AbstractSubmitStep {
 		List<Integer> degreeYears = getDegreeYears();
 		renderArgs.put("degreeYears", degreeYears);
 
+		// List of valid degree years for drop-down population
+		List<Integer> programYears = getProgramYears();
+		renderArgs.put("programYears", programYears);
+		
 		// List of all document types
 		List<String> docTypes = getValidDocumentTypes(sub);
 		renderArgs.put("docTypes", docTypes);
@@ -523,6 +527,34 @@ public class DocumentInfo extends AbstractSubmitStep {
 	 * @return list of current valid degree years
 	 */
 	protected static List<Integer> getDegreeYears() {
+		Integer currentYear = Calendar.getInstance().get(Calendar.YEAR);
+
+		List<Integer> validYears = new ArrayList<Integer>();
+		validYears.add(currentYear - 3);
+		validYears.add(currentYear - 2);
+		validYears.add(currentYear - 1);
+		validYears.add(currentYear);
+		validYears.add(currentYear + 1);
+		validYears.add(currentYear + 2);
+		validYears.add(currentYear + 3);
+		validYears.add(currentYear + 4);
+		validYears.add(currentYear + 5);
+		validYears.add(currentYear + 6);
+		validYears.add(currentYear + 7);
+		validYears.add(currentYear + 8);
+		validYears.add(currentYear + 9);
+		
+		return validYears;
+	}
+	
+	/**
+	 * For now, this method returns the current valid years based on 
+	 * the subsequent two years.  This will possible move into a 
+	 * configuration setting eventually.
+	 * 
+	 * @return list of current valid program years
+	 */
+	protected static List<Integer> getProgramYears() {
 		Integer currentYear = Calendar.getInstance().get(Calendar.YEAR);
 
 		List<Integer> validYears = new ArrayList<Integer>();
