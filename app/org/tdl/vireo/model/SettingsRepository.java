@@ -307,6 +307,36 @@ public interface SettingsRepository {
 	 */
 	public List<GraduationMonth> findAllGraduationMonths();
 
+	// ////////////////////////
+	// Program Month Model
+	// ////////////////////////
+
+	/**
+	 * Create a new program month.
+	 * 
+	 * @param month
+	 *            The program month.
+	 * @return A new program month object.
+	 */
+	public ProgramMonth createProgramMonth(int month);
+
+	/**
+	 * Find a program month by id.
+	 * 
+	 * @param id
+	 *            The month's id.
+	 * @return The program month object, or null if not found.
+	 */
+	public ProgramMonth findProgramMonth(Long id);
+
+	/**
+	 * Find all program months in order.
+	 * 
+	 * @return A list of all program months, or an empty list if there are
+	 *         none.
+	 */
+	public List<ProgramMonth> findAllProgramMonths();
+	
 	// /////////////////////
 	// Committee Member Role Type Model
 	// /////////////////////

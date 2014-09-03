@@ -175,6 +175,13 @@ public enum FieldConfig {
 			"submit_graduation_date_enabled",
 			"The date the submitter intends to graduate (month and year). The select months are available to choose from, and the year must be within 7 years plus or minus of the current year."),
 	
+	PROGRAM_DATE(
+			"Program Date",
+			"submit_program_date_label",
+			"submit_program_date_help",
+			"submit_program_date_enabled",
+			"This is the completion date of the program (month and year)."),
+
 	DEFENSE_DATE(
 			"Defense Date",
 			"submit_defense_date_label",
