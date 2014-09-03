@@ -467,6 +467,36 @@ public class JpaSubmissionImplTests extends UnitTest {
 	}
 	
 	/**
+	 * Test validation of program months.
+	 */
+	@Test
+	public void testProgramMonth() {
+		
+		Submission sub = subRepo.createSubmission(person).save();
+		
+		sub.setProgramMonth(0);
+		assertEquals(Integer.valueOf(0),sub.getProgramMonth());
+		
+		sub.setProgramMonth(11);
+		assertEquals(Integer.valueOf(11),sub.getProgramMonth());
+
+		sub.setProgramMonth(null);
+		assertNull(sub.getProgramMonth());		
+
+		try {
+			sub.setProgramMonth(-1);
+			fail("able to set month to -1");
+		} catch (IllegalArgumentException iae) { /* yay */ }
+
+		try {
+			sub.setProgramMonth(12);
+			fail("able to set month to 12");
+		} catch (IllegalArgumentException iae) { /* yay */ }
+		
+		sub.delete();
+	}
+	
+	/**
 	 * Test get/setting email hashes, and ensure they are unique.
 	 */
 	@Test
@@ -649,6 +679,8 @@ public class JpaSubmissionImplTests extends UnitTest {
 		sub.setDocumentType("docType");
 		sub.setGraduationMonth(0);
 		sub.setGraduationYear(2002);
+		sub.setProgramMonth(0);
+		sub.setProgramYear(2002);
 		sub.setUMIRelease(false);
 		sub.setDepositId("depositId");
 		sub.setDepositDate(now);
@@ -679,6 +711,8 @@ public class JpaSubmissionImplTests extends UnitTest {
 		sub.setDocumentType(null);
 		sub.setGraduationMonth(null);
 		sub.setGraduationYear(null);
+		sub.setProgramMonth(null);
+		sub.setProgramYear(null);
 		sub.setUMIRelease(null);
 		sub.setDepositId(null);
 		sub.setDepositDate(null);
@@ -702,6 +736,8 @@ public class JpaSubmissionImplTests extends UnitTest {
 		assertEquals("Reviewer notes cleared", logItr.next().getEntry());
 		assertEquals("Repository deposit ID cleared", logItr.next().getEntry());
 		assertEquals("UMI Release cleared", logItr.next().getEntry());
+		assertEquals("Program year cleared", logItr.next().getEntry());
+		assertEquals("Program month cleared", logItr.next().getEntry());
 		assertEquals("Graduation year cleared", logItr.next().getEntry());
 		assertEquals("Graduation month cleared", logItr.next().getEntry());
 		assertEquals("Document type cleared", logItr.next().getEntry());
@@ -728,6 +764,8 @@ public class JpaSubmissionImplTests extends UnitTest {
 		assertEquals("Reviewer notes changed to 'notes'", logItr.next().getEntry());
 		assertEquals("Repository deposit ID changed to 'depositId'", logItr.next().getEntry());
 		assertEquals("UMI Release changed to 'No'", logItr.next().getEntry());
+		assertEquals("Program year changed to '2002'", logItr.next().getEntry());
+		assertEquals("Program month changed to 'January'", logItr.next().getEntry());
 		assertEquals("Graduation year changed to '2002'", logItr.next().getEntry());
 		assertEquals("Graduation month changed to 'January'", logItr.next().getEntry());
 		assertEquals("Document type changed to 'docType'", logItr.next().getEntry());
@@ -805,6 +843,8 @@ public class JpaSubmissionImplTests extends UnitTest {
 		sub.setDocumentType("docType");
 		sub.setGraduationMonth(0);
 		sub.setGraduationYear(2002);
+		sub.setProgramMonth(0);
+		sub.setProgramYear(2002);
 		sub.setUMIRelease(false);
 		sub.setDepositId("depositId");
 		sub.setDepositDate(now);
@@ -842,6 +882,8 @@ public class JpaSubmissionImplTests extends UnitTest {
 		assertEquals("docType",sub.getDocumentType());
 		assertEquals(Integer.valueOf(0),sub.getGraduationMonth());
 		assertEquals(Integer.valueOf(2002),sub.getGraduationYear());
+		assertEquals(Integer.valueOf(0),sub.getProgramMonth());
+		assertEquals(Integer.valueOf(2002),sub.getProgramYear());
 		assertEquals(Boolean.valueOf(false),sub.getUMIRelease());
 		assertEquals("depositId",sub.getDepositId());
 		assertEquals(now,sub.getDepositDate());
@@ -908,6 +950,8 @@ public class JpaSubmissionImplTests extends UnitTest {
 		sub.setDocumentType("docType");
 		sub.setGraduationMonth(0);
 		sub.setGraduationYear(2002);
+		sub.setProgramMonth(0);
+		sub.setProgramYear(2002);
 		sub.setUMIRelease(false);
 		sub.setDepositId("depositId");
 		sub.setDepositDate(now);
@@ -945,6 +989,8 @@ public class JpaSubmissionImplTests extends UnitTest {
 		assertEquals("docType",sub.getDocumentType());
 		assertEquals(Integer.valueOf(0),sub.getGraduationMonth());
 		assertEquals(Integer.valueOf(2002),sub.getGraduationYear());
+		assertEquals(Integer.valueOf(0),sub.getProgramMonth());
+		assertEquals(Integer.valueOf(2002),sub.getProgramYear());
 		assertEquals(Boolean.valueOf(false),sub.getUMIRelease());
 		assertEquals("depositId",sub.getDepositId());
 		assertEquals(now,sub.getDepositDate());
