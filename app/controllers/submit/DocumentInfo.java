@@ -77,7 +77,10 @@ public class DocumentInfo extends AbstractSubmitStep {
 		String title = params.get("title");
 		String degreeMonth = params.get("degreeMonth");
 		String degreeYear = params.get("degreeYear");
-		
+
+		String programMonth = params.get("programMonth");
+		String programYear = params.get("programYear");
+
 		Date defenseDate = null;
 		DateFormat formatter = new SimpleDateFormat("MM/dd/yyyy");
 		try {
@@ -140,6 +143,28 @@ public class DocumentInfo extends AbstractSubmitStep {
 					}
 				} else {
 					sub.setGraduationYear(null);
+				}
+			}
+			
+			if (isFieldEnabled(PROGRAM_DATE)) {				
+				if (!isEmpty(programMonth)) {
+					try {
+						sub.setProgramMonth(Integer.parseInt(programMonth));
+					} catch (RuntimeException re) {
+						validation.addError("programMonth", "Please select a valid program month");
+					}
+				} else {
+					sub.setProgramMonth(null);
+				}
+				
+				if (!isEmpty(programYear)) {
+					try {
+						sub.setProgramYear(Integer.parseInt(programYear));
+					} catch (RuntimeException re) {
+						validation.addError("programYear", "Please select a valid program year");
+					}
+				} else {
+					sub.setProgramYear(null);
 				}
 			}
 			

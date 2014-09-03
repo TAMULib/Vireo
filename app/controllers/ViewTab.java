@@ -131,6 +131,10 @@ public class ViewTab extends AbstractVireoController {
 		if(submission.getGraduationMonth() != null)
 			gradMonth = new DateFormatSymbols().getMonths()[submission.getGraduationMonth()];
 		
+		String progMonth = null;		
+		if(submission.getProgramMonth() != null)
+			progMonth = new DateFormatSymbols().getMonths()[submission.getProgramMonth()];
+
 		List<ActionLog> actionLogs	= subRepo.findActionLog(submission);
 		
 		List<State> states = stateManager.getAllStates();
@@ -156,7 +160,8 @@ public class ViewTab extends AbstractVireoController {
 				submitter,
 				isManager,
 				advisorUrl,
-				gradMonth, 
+				gradMonth,
+				progMonth,
 				actionLogs, 
 				settingRepo, 
 				states,
