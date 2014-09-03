@@ -18,6 +18,7 @@ import org.tdl.vireo.model.DocumentType;
 import org.tdl.vireo.model.EmailTemplate;
 import org.tdl.vireo.model.EmbargoType;
 import org.tdl.vireo.model.GraduationMonth;
+import org.tdl.vireo.model.ProgramMonth;
 import org.tdl.vireo.model.Language;
 import org.tdl.vireo.model.Major;
 import org.tdl.vireo.model.MockCommitteeMemberRoleType;
@@ -512,6 +513,24 @@ public class FirstUserTest extends AbstractVireoFunctionalTest {
 
 		@Override
 		public Language findLanguageByName(String name) {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public ProgramMonth createProgramMonth(int month) {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public ProgramMonth findProgramMonth(Long id) {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public List<ProgramMonth> findAllProgramMonths() {
 			// TODO Auto-generated method stub
 			return null;
 		}
