@@ -54,7 +54,7 @@ public class JpaProgramMonthImplTest extends UnitTest {
 	}
 	
 	/**
-	 * Test creating the grad month out of bounds.
+	 * Test creating the program month out of bounds.
 	 */
 	@Test
 	public void testBadCreate() {
@@ -213,7 +213,7 @@ public class JpaProgramMonthImplTest extends UnitTest {
 	}
 	
 	/**
-	 * Test that the grad month is persistence
+	 * Test that the program month is persisted
 	 */
 	@Test
 	public void testPersistance() {

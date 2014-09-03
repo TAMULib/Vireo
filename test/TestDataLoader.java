@@ -832,6 +832,11 @@ public class TestDataLoader extends Job {
 					sub.setGraduationMonth(GRAD_MONTHS_DEFINITIONS[random.nextInt(GRAD_MONTHS_DEFINITIONS.length-1)]);
 				}
 				
+				if (random.nextInt(100) > 5) {
+					sub.setProgramYear(random.nextInt(10)+2002);
+					sub.setProgramMonth(PROG_MONTHS_DEFINITIONS[random.nextInt(PROG_MONTHS_DEFINITIONS.length-1)]);
+				}
+				
 				if (random.nextInt(100) > 50)
 					sub.setDefenseDate(generateRandomDate(random,2,2010));
 				
