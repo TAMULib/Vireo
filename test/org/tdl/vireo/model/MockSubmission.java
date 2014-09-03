@@ -54,6 +54,8 @@ public class MockSubmission extends AbstractMock implements Submission {
 	public String documentType;
 	public Integer graduationYear;
 	public Integer graduationMonth;
+	public Integer programYear;
+	public Integer programMonth;
 	public State state;
 	public Person assignee;
 	public Boolean UMIRelease;
@@ -478,6 +480,26 @@ public class MockSubmission extends AbstractMock implements Submission {
 		this.graduationMonth = month;
 	}
 
+	@Override
+	public Integer getProgramYear() {
+		return programYear;
+	}
+
+	@Override
+	public void setProgramYear(Integer year) {
+		this.programYear = year;
+	}
+
+	@Override
+	public Integer getProgramMonth() {
+		return programMonth;
+	}
+
+	@Override
+	public void setProgramMonth(Integer month) {
+		this.programMonth = month;
+	}	
+	
 	@Override
 	public State getState() {
 		return state;

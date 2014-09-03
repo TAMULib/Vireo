@@ -130,6 +130,9 @@ public class JpaSubmissionImpl extends JpaAbstractModel<JpaSubmissionImpl> imple
 
 	public Integer graduationYear;
 	public Integer graduationMonth;
+	
+	public Integer programYear;
+	public Integer programMonth;
 
 	public String stateName;
 
@@ -918,6 +921,50 @@ public class JpaSubmissionImpl extends JpaAbstractModel<JpaSubmissionImpl> imple
 				generateChangeLog("Graduation month", null,false);
 			else
 				generateChangeLog("Graduation month", new DateFormatSymbols().getMonths()[month],false);
+		}
+	}
+	
+	@Override
+	public Integer getProgramYear() {
+		return programYear;
+	}
+
+	@Override
+	public void setProgramYear(Integer year) {
+		assertReviewerOrOwner(submitter);
+		
+		if (!equals(this.programYear,year)) {
+			this.programYear = year;
+			
+			if (year == null)
+				generateChangeLog("Program year", null,false);
+			else
+				generateChangeLog("Program year", String.valueOf(year),false);
+			
+			updatePrimaryDocumentName();
+		}
+	}
+
+	@Override
+	public Integer getProgramMonth() {
+		return programMonth;
+	}
+
+	@Override
+	public void setProgramMonth(Integer month) {
+		
+		if (month != null && (month < 0 || month > 11))
+			throw new IllegalArgumentException("Month is out of bounds.");
+		
+		assertReviewerOrOwner(submitter);
+		
+		if (!equals(this.programMonth,month)) {
+			this.programMonth = month;
+			
+			if (month == null)
+				generateChangeLog("Program month", null,false);
+			else
+				generateChangeLog("Program month", new DateFormatSymbols().getMonths()[month],false);
 		}
 	}
 
