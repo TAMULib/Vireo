@@ -476,6 +476,10 @@ public abstract class AbstractSubmissionTests extends AbstractVireoFunctionalTes
 	 *            Graduation Month
 	 * @param degreeYear
 	 *            Graduation Year
+	 * @param programMonth
+	 *            Program Month
+	 * @param programYear
+	 *            Program Year
 	 * @param docType
 	 *            Document Type
 	 * @param abstractText
@@ -499,7 +503,7 @@ public abstract class AbstractSubmissionTests extends AbstractVireoFunctionalTes
 	 * @param umi
 	 *            UMI release flag.
 	 */
-	public void documentInfo(String title, String degreeMonth, String degreeYear, String defenseDate, String docType, String abstractText, String keywords,
+	public void documentInfo(String title, String degreeMonth, String degreeYear, String programMonth, String programYear, String defenseDate, String docType, String abstractText, String keywords,
 			String subjectPrimary, String subjectSecondary, String subjectTertiary, String language, List<Map<String,String>> committee, String chairEmail, 
 			String publishedMaterial, String embargo)  {
 
@@ -517,6 +521,10 @@ public abstract class AbstractSubmissionTests extends AbstractVireoFunctionalTes
 			params.put("degreeMonth",degreeMonth);
 		if (degreeYear != null)
 			params.put("degreeYear",degreeYear);
+		if (programMonth != null)
+			params.put("programMonth",programMonth);
+		if (programYear != null)
+			params.put("programYear",programYear);
 		if (defenseDate != null)
 			params.put("defenseDate", defenseDate);
 		if (docType != null)
@@ -570,6 +578,10 @@ public abstract class AbstractSubmissionTests extends AbstractVireoFunctionalTes
 			assertEquals(Integer.valueOf(degreeMonth),sub.getGraduationMonth());
 		if (degreeYear != null)
 			assertEquals(Integer.valueOf(degreeYear),sub.getGraduationYear());
+		if (programMonth != null)
+			assertEquals(Integer.valueOf(programMonth),sub.getProgramMonth());
+		if (programYear != null)
+			assertEquals(Integer.valueOf(programYear),sub.getProgramYear());
 		if (defenseDate != null) {
 			DateFormat formatter = new SimpleDateFormat("MM/dd/yyyy");
 			assertEquals(defenseDate,formatter.format(sub.getDefenseDate()));

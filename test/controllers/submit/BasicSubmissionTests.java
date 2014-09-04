@@ -159,6 +159,8 @@ public class BasicSubmissionTests extends AbstractSubmissionTests {
 				"Clair Danes Thesis on Testing", // title
 				String.valueOf(settingRepo.findAllGraduationMonths().get(0).getMonth()), // degreeMonth 
 				String.valueOf(Calendar.getInstance().get(Calendar.YEAR)), // degreeYear 
+				String.valueOf(settingRepo.findAllProgramMonths().get(0).getMonth()), // programMonth 
+				String.valueOf(Calendar.getInstance().get(Calendar.YEAR)), // programYear 
 				"12/12/2012", // defenseDate
 				settingRepo.findAllDocumentTypes().get(0).getName(), // docType
 				"This is really cool work!", // abstractText 
@@ -256,6 +258,8 @@ public class BasicSubmissionTests extends AbstractSubmissionTests {
 				"Clair Danes Thesis on Testing ", // title
 				String.valueOf(settingRepo.findAllGraduationMonths().get(0).getMonth()), // degreeMonth 
 				String.valueOf(Calendar.getInstance().get(Calendar.YEAR)), // degreeYear
+				String.valueOf(settingRepo.findAllProgramMonths().get(0).getMonth()), // programMonth 
+				String.valueOf(Calendar.getInstance().get(Calendar.YEAR)), // programYear 
 				null, // defenseDate
 				settingRepo.findAllDocumentTypes().get(0).getName(), // docType
 				"This is really cool work!", // abstractText 
@@ -379,6 +383,8 @@ public class BasicSubmissionTests extends AbstractSubmissionTests {
 				"Clair Danes Thesis on Testing", // title
 				String.valueOf(settingRepo.findAllGraduationMonths().get(0).getMonth()), // degreeMonth 
 				String.valueOf(Calendar.getInstance().get(Calendar.YEAR)), // degreeYear
+				String.valueOf(settingRepo.findAllProgramMonths().get(0).getMonth()), // programMonth 
+				String.valueOf(Calendar.getInstance().get(Calendar.YEAR)), // programYear 
 				"12/12/2012", // defenseDate
 				settingRepo.findAllDocumentTypes().get(0).getName(), // docType
 				"This is really cool work!", // abstractText 
@@ -508,6 +514,8 @@ public class BasicSubmissionTests extends AbstractSubmissionTests {
 				"Clair Danes Thesis on Testing", // title
 				String.valueOf(settingRepo.findAllGraduationMonths().get(0).getMonth()), // degreeMonth 
 				String.valueOf(Calendar.getInstance().get(Calendar.YEAR)), // degreeYear 
+				String.valueOf(settingRepo.findAllProgramMonths().get(0).getMonth()), // programMonth 
+				String.valueOf(Calendar.getInstance().get(Calendar.YEAR)), // programYear 
 				"12/12/2012", // defenseDate
 				settingRepo.findAllDocumentTypes().get(0).getName(), // docType
 				"This is really cool work!", // abstractText 
@@ -716,6 +724,8 @@ public class BasicSubmissionTests extends AbstractSubmissionTests {
 				"Clair Danes Thesis on Testing", // title
 				String.valueOf(settingRepo.findAllGraduationMonths().get(0).getMonth()), // degreeMonth 
 				String.valueOf(Calendar.getInstance().get(Calendar.YEAR)), // degreeYear
+				String.valueOf(settingRepo.findAllProgramMonths().get(0).getMonth()), // programMonth 
+				String.valueOf(Calendar.getInstance().get(Calendar.YEAR)), // programYear 
 				"12/12/2012", // defenseDate
 				settingRepo.findAllDocumentTypes().get(0).getName(), // docType
 				"This is really cool work!", // abstractText 
@@ -840,6 +850,8 @@ public class BasicSubmissionTests extends AbstractSubmissionTests {
 				null, // title
 				null, // degreeMonth 
 				null, // degreeYear
+				null, // programMonth
+				null, // programYear
 				null, // defenseDate
 				null, // docType
 				null, // abstractText 
@@ -925,6 +937,8 @@ public class BasicSubmissionTests extends AbstractSubmissionTests {
 				null, // title
 				null, // degreeMonth 
 				null, // degreeYear
+				null, // programMonth 
+				null, // programYear
 				null, // defenseDate
 				null, // docType
 				null, // abstractText 

@@ -228,7 +228,32 @@
     <!-- 0=january, 11=december -->
     <graduationMonth int="${ sub.getGraduationMonth() }">${ monthName }</graduationMonth>
     #{/if}
+
+    #{if sub.getProgramYear() != null }
+    %{
+        def programDate = sub.getProgramYear();
+        if (sub.getProgramMonth() != null) {
+            programDate += "-";
+            programDate += sub.getProgramMonth()+1;
+        }
+    }% 
+    <programDate>${ programDate }</programDate>
+    #{/if}
     
+    #{if sub.getProgramYear() != null } 
+    <programYear>${ sub.getProgramYear() }</programYear>
+    #{/if}
+    
+    #{if sub.getProgramMonth() != null }
+    %{
+        String monthName = "Unknown";
+        if (sub.getProgramMonth() >= 0 && sub.getProgramMonth() <= 11)
+           monthName = new java.text.DateFormatSymbols().getMonths()[sub.getProgramMonth()]; 
+    }% 
+    <!-- 0=january, 11=december -->
+    <programMonth int="${ sub.getProgramMonth() }">${ monthName }</programMonth>
+    #{/if}
+
     #{if sub.getUMIRelease() != null } 
     <umi #{if sub.getUMIRelease()}release="true"#{/if}#{else}release="false"#{/else}/>
     #{/if}
