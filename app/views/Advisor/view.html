@@ -86,23 +86,39 @@
 	</div>
 
 	<legend>Approval</legend>
-	<div class="control-group">
-		<label class="control-label"><b>Approve Embargo:</b></label>
-		<div class="controls">
-			#{if sub.getCommitteeEmbargoApprovalDate() != null }
-			<p>Approved on ${ sub.getCommitteeEmbargoApprovalDate().format("dd MMMM yyyy 'at' hh:mm a") }</p>
-			#{/if}
-			#{else}
-			<label class="checkbox">
-				<input type="radio" name="embargoApproval" value="approve"/> I approve of the embargo selection.
-			</label>
-			<label class="checkbox">
-				<input type="radio" name="embargoApproval" value="reject" ${ "reject".equals(params.get("embargoApproval")) ? "checked='true'" : ""}/> I reject the embargo selection. <em>(Please leave a comment explaining why below)</em>
-			</label>
-			#{/else}
-			<br/>
+
+		#{ifEnabled EMBARGO_TYPE }
+			<div class="control-group">
+		#{/ifEnabled}
+		#{else}
+			<div class="control-group hidden">
+		#{/else}	
+		
+			<label class="control-label"><b>Approve Embargo:</b></label>
+			<div class="controls">
+				#{if sub.getCommitteeEmbargoApprovalDate() != null }
+				<p>Approved on ${ sub.getCommitteeEmbargoApprovalDate().format("dd MMMM yyyy 'at' hh:mm a") }</p>
+				#{/if}
+				#{else}
+				
+				<label class="checkbox">
+					
+					#{ifEnabled EMBARGO_TYPE }
+						<input type="radio" name="embargoApproval" value="approve" /> I approve of the embargo selection.
+					#{/ifEnabled}
+					#{else}
+						<input type="radio" name="embargoApproval" value="approve" checked /> I approve of the embargo selection.
+					#{/else}
+				</label>
+				
+				<label class="checkbox">
+					<input type="radio" name="embargoApproval" value="reject" ${ "reject".equals(params.get("embargoApproval")) ? "checked='true'" : ""}/> I reject the embargo selection. <em>(Please leave a comment explaining why below)</em>
+				</label>
+				#{/else}
+				<br/>
+			</div>
 		</div>
-	</div>
+
 	<div class="control-group">
 		<label class="control-label"><b>Approve Application:</b></label>
 		<div class="controls">
