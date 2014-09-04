@@ -83,6 +83,11 @@ public class AppConfig {
 	/** Instructions to show after submitting corrections */
 	public final static String CORRECTION_INSTRUCTIONS = "correction_instructions";
 	
+	//Configurable Settings
+	public final static String COMMITTEE_MEMBER_DEFAULT_COUNT = "committee_member_default_count";
+	public final static String COMMITTEE_MEMBER_DEFAULT_ADD_COUNT = "committee_member_default_add_count";
+	public final static String COMMITTEE_MEMBER_ADD_ENABLED = "committee_member_add_enabled";
+
 	//ORCID settings
 	/** Whether or not to validate ORCID IDs when changed */
 	public final static String ORCID_VALIDATION = "orcid_validation";

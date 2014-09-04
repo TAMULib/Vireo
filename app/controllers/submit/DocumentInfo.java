@@ -289,13 +289,19 @@ public class DocumentInfo extends AbstractSubmitStep {
 		// List of all languages
 		List<Language> languages = settingRepo.findAllLanguages();
 		renderArgs.put("docLanguages", languages);
-		
+
+		renderArgs.put("committeeAddEnabled", settingRepo.getConfigValue(COMMITTEE_MEMBER_ADD_ENABLED));
+
 		// Figure out how mayn committee spots to show.
-		int committeeSlots = 4;
-		if (committee.size() > 3)
+		int committeeAddCount = 0;
+		if (settingRepo.getConfigValue(COMMITTEE_MEMBER_ADD_ENABLED).equals("true")) {
+			committeeAddCount = Integer.parseInt(settingRepo.getConfigValue(COMMITTEE_MEMBER_DEFAULT_ADD_COUNT));
+		}
+		int committeeSlots = Integer.parseInt(settingRepo.getConfigValue(COMMITTEE_MEMBER_DEFAULT_COUNT));
+		if (committee.size() >= committeeSlots)
 			committeeSlots = committee.size();
 		if (params.get("submit_add") != null)
-			committeeSlots += 4;
+			committeeSlots += committeeAddCount;
 		
 		List<String> stickies = new ArrayList<String>();
 		String stickiesRaw = settingRepo.getConfigValue(SUBMIT_DOCUMENT_INFO_STICKIES);

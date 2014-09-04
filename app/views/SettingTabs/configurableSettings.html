@@ -3,7 +3,9 @@
 <script type="text/javascript">
 jQuery(document).ready(function(){
 
-	
+    // Settings toggle and input/textarea fields
+     jQuery(".vireo-ajax-toggle").click(applicationSettingsHandler('@{settings.ConfigurableSettingsTab.updateConfigurableSettingsJSON()}'));
+     jQuery(".vireo-ajax-text").change(applicationSettingsHandler('@{settings.ConfigurableSettingsTab.updateConfigurableSettingsJSON()}'));
 	
 	
 	 // Global handler for stray clicks to cancel editing.
@@ -778,7 +780,7 @@ jQuery(document).ready(function(){
 	
 	<div class="accordion-group">
 		<div class="accordion-heading">
-			<a class="accordion-toggle" data-toggle="collapse" href="#availableCommitteeMemberRoleTypes"><strong>Available Committee Member Role Types</strong></a>			
+			<a class="accordion-toggle" data-toggle="collapse" href="#availableCommitteeMemberRoleTypes"><strong>Committee Member Settings</strong></a>			
 		</div>
 		<div id="availableCommitteeMemberRoleTypes" class="accordion-body collapse ${ "availableCommitteeMemberRoleTypes".equals(flash.get("open")) ? "in" : "" }">
 			<div class="accordion-inner">
@@ -857,6 +859,36 @@ jQuery(document).ready(function(){
 				    </form>
 				</div>
 				<br/><br/>
+                <div id="committeeMemberadditionSettings">
+                    <h2>COMMITTEE MEMBER ADDITION</h2>
+                    
+                    <ul class="unstyled">
+                        <li>
+                            <label>Committee Member Count:</label>
+                            <span>
+                                 <input class="vireo-ajax-text monospace" name="${org.tdl.vireo.constant.AppConfig.COMMITTEE_MEMBER_DEFAULT_COUNT}" type="text" value="${COMMITTEE_MEMBER_DEFAULT_COUNT}" />
+                                 <a href="#" class="tooltip-icon" rel="tooltip" data-original-title="The code assigned by ProQuest/UMI to identify the institution associated with all submissions when submitting to their catalogue."><i class="icon-info-sign"></i></a>
+                            </span>
+                        </li>
+                        <li>
+                            <label>Committee Member Addition Count:</label>
+                            <span>
+                                 <input class="vireo-ajax-text monospace" name="${org.tdl.vireo.constant.AppConfig.COMMITTEE_MEMBER_DEFAULT_ADD_COUNT}" type="text" value="${COMMITTEE_MEMBER_DEFAULT_ADD_COUNT}" />
+                                 <a href="#" class="tooltip-icon" rel="tooltip" data-original-title="The code assigned by ProQuest/UMI to identify the institution associated with all submissions when submitting to their catalogue."><i class="icon-info-sign"></i></a>
+                            </span>
+                        </li>
+                        <li>
+                            <label>Committee Member Addition:</label>
+                            <span>
+                <div class="btn-group" data-toggle="buttons-radio">
+                    <button name="${org.tdl.vireo.constant.AppConfig.COMMITTEE_MEMBER_ADD_ENABLED}" class="btn vireo-ajax-toggle #{if !"false".equals(COMMITTEE_MEMBER_ADD_ENABLED)}active#{/if}" value="true">Yes</button>
+                    <button name="${org.tdl.vireo.constant.AppConfig.COMMITTEE_MEMBER_ADD_ENABLED}" class="btn vireo-ajax-toggle #{if "false".equals(COMMITTEE_MEMBER_ADD_ENABLED)}active#{/if}" value="false">No</button>
+                </div>
+                            </span>
+                        </li>
+                    </ul>
+                </div>
+                <br/><br/>
 			</div>
 		</div>
 	</div>
