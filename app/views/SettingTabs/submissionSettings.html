@@ -216,16 +216,105 @@ list pages.</p>
         <div id="submissionStep4" class="accordion-body collapse ${ "submissionStep4".equals(flash.get("open")) ? "in" : "" }">
             <div class="accordion-inner">
                 
-                <div class="fields span7">
-	                <h3>Fields <span class="heading-note">(<a href="javascript: void(0);" class="toggle-all-fields">expand all</a>)</span></h3>
-	                
-	                <p><a class="confirm" data-confirm="<em class='icon-refresh'></em> (Are you sure?)" href="@{settings.SubmissionSettingsTab.resetSettings('upload-files-fields')}"><em class="icon-refresh"></em> Reset fields</a></p>
-	                
-	                <ul>
-		                #{list items:UPLOAD_FILES_FIELDS, as:'field'}
-		                     #{include 'SettingTabs/submissionField.include'/}
-		                #{/list}
-	                </ul>
+                <div class="span7 fields">
+                    <div>
+                        <h3>Fields <span class="heading-note">(<a href="javascript: void(0);" class="toggle-all-fields">expand all</a>)</span></h3>
+    	                
+    	                <p><a class="confirm" data-confirm="<em class='icon-refresh'></em> (Are you sure?)" href="@{settings.SubmissionSettingsTab.resetSettings('upload-files-fields')}"><em class="icon-refresh"></em> Reset fields</a></p>
+    	                
+    	                <ul>
+    		                #{list items:UPLOAD_FILES_FIELDS, as:'field'}
+    		                     #{include 'SettingTabs/submissionField.include'/}
+    		                #{/list}
+    	                </ul>
+                    </div>
+                    <div>
+                        <h3>Additional Page Elements <span class="heading-note">(<a href="javascript: void(0);" class="toggle-all-fields">expand all</a>)</span></h3>
+                        
+                        <ul>
+                            <li>
+                                <a class="field-item toggle-field" href="javascript:void(0);">
+                                   <em class="icon-plus"></em> Step Description <span class="required-field">*</span>
+                                </a>
+                                <form class="form-horizontal" style="display: none;">
+                                   <fieldset>
+                                       <div class="control-group warning">
+                                           <label class="control-label"><strong>Usage:</strong></label>
+                                           <div class="controls">
+                                               <p class="help-block span4">The text which appears at the top of the "Upload Files" step.</p>
+                                           </div>
+                                       </div>
+                                   </fieldset>
+                                   <div class="control-group">
+                                       <label class="control-label" for="${org.tdl.vireo.constant.AppConfig.SUBMIT_UPLOAD_FILES_STEP_DESCRIPTION}"><strong>Display Text</strong>:</label>
+                                       <div class="controls">
+                                           <textarea name="${org.tdl.vireo.constant.AppConfig.SUBMIT_UPLOAD_FILES_STEP_DESCRIPTION}" class="span4" placeholder="#{verbatim}${SUBMIT_UPLOAD_FILES_STEP_DESCRIPTION}#{/verbatim}">#{verbatim}${SUBMIT_UPLOAD_FILES_STEP_DESCRIPTION}#{/verbatim}</textarea>
+                                       </div>
+                                   </div>
+                                   <div class="control-group">
+                                       <label class="control-label"></label>
+                                       <div class="controls close-form">
+                                           <p class="span4"><a class="toggle-field" href="javascript:void(0);">close</a></p>
+                                       </div>
+                                   </div>
+                                </form>
+                            </li>
+                            <li>
+                                <a class="field-item toggle-field" href="javascript:void(0);">
+                                   <em class="icon-plus"></em> Additional Files Heading <span class="required-field">*</span>
+                                </a>
+                                <form class="form-horizontal" style="display: none;">
+                                   <fieldset>
+                                       <div class="control-group warning">
+                                           <label class="control-label"><strong>Usage:</strong></label>
+                                           <div class="controls">
+                                               <p class="help-block span4">The Heading for the "Additional Files" section of the "Upload Files" step.</p>
+                                           </div>
+                                       </div>
+                                   </fieldset>
+                                   <div class="control-group">
+                                       <label class="control-label" for="${org.tdl.vireo.constant.AppConfig.SUBMIT_ADDITIONAL_FILES_HEADING}"><strong>Display Heading</strong>:</label>
+                                       <div class="controls">
+                                           <input name="${org.tdl.vireo.constant.AppConfig.SUBMIT_ADDITIONAL_FILES_HEADING}" class="span4" type="text" value="${SUBMIT_ADDITIONAL_FILES_HEADING}" placeholder="${SUBMIT_ADDITIONAL_FILES_HEADING}">
+                                       </div>
+                                   </div>
+                                   <div class="control-group">
+                                       <label class="control-label"></label>
+                                       <div class="controls close-form">
+                                           <p class="span4"><a class="toggle-field" href="javascript:void(0);">close</a></p>
+                                       </div>
+                                   </div>
+                                </form>
+                            </li>
+                            <li>
+                                <a class="field-item toggle-field" href="javascript:void(0);">
+                                   <em class="icon-plus"></em> Additional Documents Label <span class="required-field">*</span>
+                                </a>
+                                <form class="form-horizontal" style="display: none;">
+                                   <fieldset>
+                                       <div class="control-group warning">
+                                           <label class="control-label"><strong>Usage:</strong></label>
+                                           <div class="controls">
+                                               <p class="help-block span4">The label which appears beside the file selection button in the "Upload Additional Files" section of the "Upload Files" step.</p>
+                                           </div>
+                                       </div>
+                                   </fieldset>
+                                   <div class="control-group">
+                                       <label class="control-label" for="${org.tdl.vireo.constant.AppConfig.SUBMIT_ADDITIONAL_DOCUMENTS_LABELS}"><strong>Display Label</strong>:</label>
+                                       <div class="controls">
+                                           <input name="${org.tdl.vireo.constant.AppConfig.SUBMIT_ADDITIONAL_DOCUMENTS_LABELS}" class="span4" type="text" value="${SUBMIT_ADDITIONAL_DOCUMENTS_LABELS}" placeholder="${SUBMIT_ADDITIONAL_DOCUMENTS_LABELS}">
+                                       </div>
+                                   </div>
+                                   <div class="control-group">
+                                       <label class="control-label"></label>
+                                       <div class="controls close-form">
+                                           <p class="span4"><a class="toggle-field" href="javascript:void(0);">close</a></p>
+                                       </div>
+                                   </div>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
                 
                 <div class="sticky span4">

@@ -79,7 +79,12 @@ public class AppConfig {
 	
 	/** Instructions to show after completing a submission */
 	public final static String SUBMIT_INSTRUCTIONS = "submit_instructions";
-
+	
+	/** The ProQuest license students may have to agree to during submission */
+	public final static String SUBMIT_UPLOAD_FILES_STEP_DESCRIPTION = "submit_upload_files_step_description";
+	public final static String SUBMIT_ADDITIONAL_FILES_HEADING  = "submit_additional_files_heading";
+	public final static String SUBMIT_ADDITIONAL_DOCUMENTS_LABELS  = "submit_additional_documents_label";
+	
 	/** Instructions to show after submitting corrections */
 	public final static String CORRECTION_INSTRUCTIONS = "correction_instructions";
 	
