@@ -89,6 +89,11 @@ public class AppConfig {
 	
 	/** Whether or not to authenticate the Student against the ORCID ID. */
 	public final static String ORCID_AUTHENTICATION = "orcid_authentication";
+
+	//Configurable Settings
+	public final static String COMMITTEE_MEMBER_DEFAULT_COUNT = "committee_member_default_count";
+	public final static String COMMITTEE_MEMBER_DEFAULT_ADD_COUNT = "committee_member_default_add_count";
+	public final static String COMMITTEE_MEMBER_ADD_ENABLED = "committee_member_add_enabled";
 	
 	//Proquest settings
 	/** The proquest institution code visible during export. */

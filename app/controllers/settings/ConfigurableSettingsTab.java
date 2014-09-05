@@ -1,5 +1,8 @@
 package controllers.settings;
 
+import static org.tdl.vireo.constant.AppConfig.*;
+import org.tdl.vireo.constant.AppConfig;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -16,6 +19,7 @@ import org.tdl.vireo.model.AbstractOrderedModel;
 import org.tdl.vireo.model.College;
 import org.tdl.vireo.model.CommitteeMember;
 import org.tdl.vireo.model.CommitteeMemberRoleType;
+import org.tdl.vireo.model.Configuration;
 import org.tdl.vireo.model.Degree;
 import org.tdl.vireo.model.DegreeLevel;
 import org.tdl.vireo.model.Department;
@@ -71,6 +75,9 @@ public class ConfigurableSettingsTab extends SettingsTab {
 		renderArgs.put("UNDERGRADUATE", DegreeLevel.UNDERGRADUATE);
 		renderArgs.put("MASTERS", DegreeLevel.MASTERS);
 		renderArgs.put("DOCTORAL", DegreeLevel.DOCTORAL);
+		renderArgs.put("COMMITTEE_MEMBER_DEFAULT_COUNT", settingRepo.getConfigValue(COMMITTEE_MEMBER_DEFAULT_COUNT));
+		renderArgs.put("COMMITTEE_MEMBER_DEFAULT_ADD_COUNT", settingRepo.getConfigValue(COMMITTEE_MEMBER_DEFAULT_ADD_COUNT));
+		renderArgs.put("COMMITTEE_MEMBER_ADD_ENABLED", settingRepo.getConfigValue(COMMITTEE_MEMBER_ADD_ENABLED));
 		
 		String nav = "settings";
 		String subNav = "config";
@@ -1974,6 +1981,65 @@ public class ConfigurableSettingsTab extends SettingsTab {
 			}
 
 		};
+	}
+	
+	/**
+	 * Handle updating the individual values under the application settings tab.
+	 * 
+	 * If the field is defined as a boolean, then value should either be an
+	 * null/empty string to be turned off, otherwise any other value will be
+	 * interpreted as on.
+	 * 
+	 * @param field
+	 *            The field being updated.
+	 * @param value
+	 *            The value of the new field.
+	 */
+	@Security(RoleType.MANAGER)
+	public static void updateConfigurableSettingsJSON(String field, String value) {
+
+		try {
+			/*create arrays of field names grouped by type (booleans, text input)
+			 * 
+			 */
+			List<String> textFields = new ArrayList<String>();
+			textFields.add(COMMITTEE_MEMBER_DEFAULT_COUNT);
+			textFields.add(COMMITTEE_MEMBER_DEFAULT_ADD_COUNT);
+			textFields.add(COMMITTEE_MEMBER_ADD_ENABLED);
+
+			if (textFields.contains(field)) {
+				// This is a free-form text field
+				
+				String oldValue = null;
+				Configuration config = settingRepo.findConfigurationByName(field);
+				
+				if (config == null)
+					config = settingRepo.createConfiguration(field, value);
+				else {
+					oldValue = config.getValue();
+					config.setValue(value);
+				}
+				config.save();
+				
+				
+			} else {
+				throw new IllegalArgumentException("Unknown field '"+field+"'");
+			}
+			
+		
+			field = escapeJavaScript(field);
+			value = escapeJavaScript(value);
+			
+			
+			renderJSON("{ \"success\": \"true\", \"field\": \""+field+"\", \"value\": \""+value+"\" }");
+		} catch (IllegalArgumentException iae) {
+			String message = escapeJavaScript(iae.getMessage());			
+			renderJSON("{ \"failure\": \"true\", \"message\": \""+message+"\" }");
+		} catch (RuntimeException re) {
+			Logger.error(re,"Unable to update application settings");
+			String message = escapeJavaScript(re.getMessage());			
+			renderJSON("{ \"failure\": \"true\", \"message\": \""+message+"\" }");
+		}
 	}
 
 }
