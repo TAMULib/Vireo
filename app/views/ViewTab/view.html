@@ -477,6 +477,13 @@ jQuery(document).ready(function(){
 							class="empty"><i class="icon-pencil"></i> none
 						#{/else}
 						</span></li>
+					<li class="edit"><label>Program Date:</label><span id="programDate"
+						#{if submission.getProgramMonth() && submission.getProgramYear()}
+							><i class="icon-pencil"></i> ${progMonth} ${submission.getProgramYear()}
+						#{/if}#{else}
+							class="empty"><i class="icon-pencil"></i> none
+						#{/else}
+						</span></li>
 					<li class="edit"><label>Defense Date:</label><span id="defenseDate"
 						#{if submission.getDefenseDate()}
 							class="date"><i class="icon-pencil"></i> ${submission.getDefenseDate()?.format('MM/dd/yyyy')}

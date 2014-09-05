@@ -182,6 +182,13 @@ public enum FieldConfig {
 			"submit_graduation_date_enabled",
 			"The date the submitter intends to graduate (month and year). The select months are available to choose from, and the year must be within 7 years plus or minus of the current year."),
 	
+	PROGRAM_DATE(
+			"Program Date",
+			"submit_program_date_label",
+			"submit_program_date_help",
+			"submit_program_date_enabled",
+			"This is the completion date of the program (month and year)."),
+
 	DEFENSE_DATE(
 			"Defense Date",
 			"submit_defense_date_label",
@@ -343,7 +350,7 @@ public enum FieldConfig {
 
 	public static final FieldConfig[] LICENSE_AGREEMENT_FIELDS = {LICENSE_AGREEMENT, UMI_RELEASE};
 	
-	public static final FieldConfig[] DOCUMENT_INFO_FIELDS = {DOCUMENT_TITLE, GRADUATION_DATE, DEFENSE_DATE, DOCUMENT_TYPE, DOCUMENT_ABSTRACT, DOCUMENT_KEYWORDS, DOCUMENT_SUBJECTS, DOCUMENT_LANGUAGE, COMMITTEE, COMMITTEE_CONTACT_EMAIL, PUBLISHED_MATERIAL, EMBARGO_TYPE};
+	public static final FieldConfig[] DOCUMENT_INFO_FIELDS = {DOCUMENT_TITLE, GRADUATION_DATE, PROGRAM_DATE, DEFENSE_DATE, DOCUMENT_TYPE, DOCUMENT_ABSTRACT, DOCUMENT_KEYWORDS, DOCUMENT_SUBJECTS, DOCUMENT_LANGUAGE, COMMITTEE, COMMITTEE_CONTACT_EMAIL, PUBLISHED_MATERIAL, EMBARGO_TYPE};
 
 	public static final FieldConfig[] UPLOAD_FILES_FIELDS = {PRIMARY_ATTACHMENT, SUPPLEMENTAL_ATTACHMENT, SOURCE_ATTACHMENT, ADMINISTRATIVE_ATTACHMENT};
 }

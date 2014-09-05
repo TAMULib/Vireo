@@ -136,6 +136,26 @@ jQuery(document).ready(function(){
 			</div>
 		</div>
 		#{/ifEnabled}
+		#{ifEnabled PROGRAM_DATE}
+		<div class="control-group #{errorClass 'programMonth'/} #{errorClass 'programYear'/} #{fieldClass PROGRAM_DATE /}">
+			<label class="control-label" for="programDate"><span class="required-star">*</span> #{fieldLabel PROGRAM_DATE /}:</label>
+			<div class="controls row">
+				<select class="span2" id="programMonth" name="programMonth">
+                    <option #{if null == programMonth }selected="true"#{/if} value="">...choose</option>
+				    #{list items:settingRepo.findAllProgramMonths(), as:'month'}
+				    <option #{if null != programMonth && String.valueOf(month.getMonth()).equals(degreeMonth) }selected="true"#{/if} value="${month.getMonth()}">${month.getMonthName()}</option>
+				    #{/list}
+				</select>
+				<select class="span2" id="programYear" name="programYear">
+                    <option #{if null == programYear }selected="true"#{/if} value="">...choose</option>
+				    #{list programYears, as:'year'}
+				    <option #{if null != programYear && String.valueOf(year).equals(programYear)}selected="true"#{/if} value="${year}">${year}</option>
+				    #{/list}
+				</select>
+				<a href="#" class="tooltip-icon" rel="tooltip" title="#{fieldHelp PROGRAM_DATE /}"><i class="icon-info-sign"></i></a>
+			</div>
+		</div>
+		#{/ifEnabled}
 		#{ifEnabled DEFENSE_DATE}
 		<div class="control-group #{errorClass 'defenseDate'/} #{fieldClass DEFENSE_DATE /}">
 			<label class="control-label" for="defenseDate"><span class="required-star">*</span> #{fieldLabel DEFENSE_DATE /}:</label>

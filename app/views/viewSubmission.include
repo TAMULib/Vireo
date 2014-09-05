@@ -179,6 +179,21 @@ Plus all the FieldConfig objects
     </div>
 </div>
 #{/ifEnabled}
+#{ifEnabled PROGRAM_DATE }
+<div class="control-group #{errorClass 'programMonth' /} #{errorClass 'programYear' /} ">
+    <label class="control-label">#{fieldLabel PROGRAM_DATE /}:</label>
+    <div class="controls">
+        #{if sub.getProgramMonth() != null && sub.getProgramYear() != null}
+        %{
+          def month = "unknown";
+          if (sub.getProgramMonth() >= 0 && sub.getProgramMonth() <= 11)
+              month = new java.text.DateFormatSymbols().getMonths()[sub.getProgramMonth()]
+        }% 
+            <p>${month} ${sub.getProgramYear()}</p>
+        #{/if}
+    </div>
+</div>
+#{/ifEnabled}
 #{ifEnabled DEFENSE_DATE }
 <div class="control-group #{errorClass 'defenseDate' /} ">
 	<label class="control-label">#{fieldLabel DEFENSE_DATE /}:</label>
