@@ -24,7 +24,7 @@ jQuery(document).ready(function() {
 	 * Add Comment Disable/Enable Events
 	 */
 	 jQuery(".emailOptions input[name='visibility']").live("click", toggleAddCommentEmailOptions());
-	 jQuery("input[name='email_student']").live("click", toggleCarbonCopyAdvisor());
+	 //jQuery("input[name='email_student']").live("click", toggleCarbonCopyAdvisor());
 	
 	// Batch Confirm links
 	jQuery('.batchConfirm').click(batchConfirmHandler(${results?.getTotal()}));
@@ -414,19 +414,7 @@ jQuery(document).ready(function() {
             			> Email the student</input><br />
             			</li>
             			<li>
-            				<input type="checkbox" name="cc_advisor" class="checkbox" 
-            				#{if currentUser.getPreference("notes_mark_comment_as_private_by_default") == null}
-            					#{if currentUser.getPreference("notes_email_student_by_default") != null}
-            						#{if currentUser.getPreference("notes_cc_student_advisor_by_default") != null}
-            		 					checked="true"
-            		 				#{/if}
-            		 			#{/if}#{else}
-            		 				disabled="true"
-            		 			#{/else}
-            				#{/if}#{else}
-            					disabled="true"
-            				#{/else}
-            				> CC student's advisor</input><br />
+            				<input type="checkbox" name="email_advisor" class="checkbox"> Email the student's advisor</input><br />
             			</li>
             		</ul>
             	</li>
