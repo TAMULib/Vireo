@@ -416,16 +416,11 @@ jQuery(document).ready(function() {
             			<li>
             				<input type="checkbox" name="email_advisor" class="checkbox"
                                 #{if currentUser.getPreference("notes_mark_comment_as_private_by_default") == null}
-                                    #{if currentUser.getPreference("notes_email_student_by_default") != null}
-                                        #{if currentUser.getPreference("notes_cc_student_advisor_by_default") != null}
-                                            checked="true"
-                                        #{/if}
-                                    #{/if}#{else}
-                                        disabled="true"
-                                    #{/else}
-                                #{/if}#{else}
-                                    disabled="true"
-                                #{/else}> Email the student's advisor</input><br />
+                                    #{if currentUser.getPreference("notes_cc_student_advisor_by_default") != null}
+                                        checked="true"
+                                    #{/if}
+                                #{/if}
+                            > Email the student's advisor</input><br />
             			</li>
             		</ul>
             	</li>

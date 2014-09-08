@@ -803,7 +803,7 @@ public class ViewTab extends AbstractVireoController {
 		String subject = params.get("subject");
 		String message = params.get("comment");
 		
-		if(params.get("email_student")!=null) {
+		if((params.get("email_student")!=null)||(params.get("email_advisor")!=null)) {
 			
 			if(subject == null || subject.isEmpty())
 				validation.addError("addActionLogSubject", "You must include a subject when sending an email.");
