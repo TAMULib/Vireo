@@ -828,7 +828,7 @@ public class ViewTab extends AbstractVireoController {
 		String subject = params.get("subject");
 		String message = params.get("comment");
 		
-		if(params.get("email_student")!=null) {
+		if((params.get("email_student")!=null)||(params.get("email_advisor")!=null)) {
 			
 			if(subject == null || subject.isEmpty())
 				validation.addError("addActionLogSubject", "You must include a subject when sending an email.");
@@ -851,17 +851,23 @@ public class ViewTab extends AbstractVireoController {
 			email.applyParameterSubstitution();
 			
 			//Create list of recipients
-			email.addTo(submission.getSubmitter());
+			if(params.get("email_student") != null) {
+				email.addTo(submission.getSubmitter());
+			}
 			
-			//Create list of carbon copies
-			if(params.get("cc_advisor") != null && submission.getCommitteeContactEmail() != null) {
-				email.addCc(submission.getCommitteeContactEmail());
+			// Create list of carbon copies
+			if(params.get("email_advisor") != null && submission.getCommitteeContactEmail() != null) {
+				if(params.get("email_student") != null) {
+					email.addCc(submission.getCommitteeContactEmail());
+				} else {
+					email.addTo(submission.getCommitteeContactEmail());
+				}
 			}
 			
 			email.setFrom(context.getPerson());
 			email.setReplyTo(context.getPerson());
 						
-			if(params.get("email_student") != null && "public".equals(params.get("visibility"))) {	
+			if(((params.get("email_student") != null)||(params.get("email_advisor") != null)) && "public".equals(params.get("visibility"))) {	
 				// Send the email and log it after completion
 				email.setLogOnCompletion(context.getPerson(), submission);
 				emailService.sendEmail(email,false);
@@ -957,7 +963,7 @@ public class ViewTab extends AbstractVireoController {
 		}
 		
 		VireoEmail email = null;
-		if(params.get("email_student") != null) {			
+		if((params.get("email_student") != null)||(params.get("email_advisor") != null)) {			
 						
 			String subject = params.get("subject");
 			String comment = params.get("comment");
@@ -971,13 +977,21 @@ public class ViewTab extends AbstractVireoController {
 			if(!validation.hasErrors()){
 				email = emailService.createEmail();
 				email.addParameters(sub);
-				email.addTo(sub.getSubmitter());
+				
+				if(params.get("email_student") != null) {
+					email.addTo(sub.getSubmitter());
+				}
+				
 				email.setFrom(context.getPerson());
 				email.setReplyTo(context.getPerson());
 				
-				//Create list of carbon copies
-				if(params.get("cc_advisor") != null && sub.getCommitteeContactEmail() != null) {
-					email.addCc(sub.getCommitteeContactEmail());
+				// Create list of carbon copies
+				if(params.get("email_advisor") != null && sub.getCommitteeContactEmail() != null) {
+					if(params.get("email_student") != null) {
+						email.addCc(sub.getCommitteeContactEmail());
+					} else {
+						email.addTo(sub.getCommitteeContactEmail());
+					}
 				}
 				
 				email.setSubject(subject);
