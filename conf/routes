@@ -191,7 +191,19 @@ POST    /admin/settings/gradMonths/edit         settings.ConfigurableSettingsTab
 POST    /admin/settings/gradMonths/remove       settings.ConfigurableSettingsTab.removeGraduationMonthJSON
 POST    /admin/settings/gradMonths/reorder      settings.ConfigurableSettingsTab.reorderGraduationMonthsJSON
 GET     /admin/settings/gradMonth/removeAll     settings.ConfigurableSettingsTab.removeAllGraduationMonths
-GET     /admin/settings/gradMonth/alphabetize    settings.ConfigurableSettingsTab.alphabetizeAllGraduationMonths
+GET     /admin/settings/gradMonth/alphabetize   settings.ConfigurableSettingsTab.alphabetizeAllGraduationMonths
+
+
+## Settings tab - Program Months
+GET     /admin/settings/gradProgram/alphabetize   settings.ConfigurableSettingsTab.alphabetizeAllProgramMonths
+
+
+POST    /admin/settings/programMonths/add          settings.ConfigurableSettingsTab.addProgramMonthJSON
+POST    /admin/settings/programMonths/edit         settings.ConfigurableSettingsTab.editProgramMonthJSON
+POST    /admin/settings/programMonths/remove       settings.ConfigurableSettingsTab.removeProgramMonthJSON
+POST    /admin/settings/programMonths/reorder      settings.ConfigurableSettingsTab.reorderProgramMonthsJSON
+GET     /admin/settings/programMonth/removeAll     settings.ConfigurableSettingsTab.removeAllProgramMonths
+GET     /admin/settings/programProgram/alphabetize settings.ConfigurableSettingsTab.alphabetizeAllProgramMonths
 
 ## Settings tab - Languages
 POST    /admin/settings/languages/add            settings.ConfigurableSettingsTab.addLanguageJSON
