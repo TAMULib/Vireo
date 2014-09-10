@@ -30,6 +30,7 @@ import org.tdl.vireo.model.Language;
 import org.tdl.vireo.model.Major;
 import org.tdl.vireo.model.NameFormat;
 import org.tdl.vireo.model.Program;
+import org.tdl.vireo.model.ProgramMonth;
 import org.tdl.vireo.model.RoleType;
 import org.tdl.vireo.proquest.ProquestDegree;
 import org.tdl.vireo.proquest.ProquestLanguage;
@@ -64,6 +65,7 @@ public class ConfigurableSettingsTab extends SettingsTab {
 		List<DocumentType> docTypes = settingRepo.findAllDocumentTypes();
 		List<CommitteeMemberRoleType> roleTypes = settingRepo.findAllCommitteeMemberRoleTypes();
 		List<GraduationMonth> gradMonths = settingRepo.findAllGraduationMonths();
+		List<ProgramMonth> programMonths = settingRepo.findAllProgramMonths();
 				
 		Locale locales[] = Locale.getAvailableLocales();
 		List<Locale> localeLanguages = new ArrayList<Locale>(Arrays.asList(locales));
@@ -87,7 +89,7 @@ public class ConfigurableSettingsTab extends SettingsTab {
 				embargos,
 				
 				// Sortable lists
-				colleges, programs, departments, majors, degrees, docTypes, roleTypes, gradMonths, languages,
+				colleges, programs, departments, majors, degrees, docTypes, roleTypes, gradMonths, programMonths, languages,
 				
 				// Locales
 				localeLanguages);
@@ -1606,6 +1608,51 @@ public class ConfigurableSettingsTab extends SettingsTab {
 			renderJSON("{ \"failure\": \"true\", \"message\": \"" + message + "\" }");
 		}
 	}
+	
+	// ////////////////////////////////////////////
+	// PROGRAM MONTH AJAX
+	// ////////////////////////////////////////////
+
+	/**
+	 * Create a new GraduationMonth. The id of the new month will be returned.
+	 * 
+	 * @param name
+	 *            The name of the new graduation month
+	 */
+	@Security(RoleType.MANAGER)
+	public static void addProgramMonthJSON(String name) {
+
+		try {
+			if (name == null || name.trim().length() == 0)
+				throw new IllegalArgumentException("Name is required");
+
+			int monthInt = monthNameToInt(name);
+			
+			// Add the new month to the end of the list.
+			List<ProgramMonth> months = settingRepo.findAllProgramMonths();
+
+			ProgramMonth month = settingRepo.createProgramMonth(monthInt);
+			months.add(month);
+
+			saveModelOrder(months);
+
+			name = escapeJavaScript(month.getMonthName());
+
+			renderJSON("{ \"success\": \"true\", \"id\": " + month.getId() + ", \"name\": \"" + name + "\" }");
+		} catch (IllegalArgumentException iae) {
+			String message = escapeJavaScript(iae.getMessage());			
+			renderJSON("{ \"failure\": \"true\", \"message\": \""+message+"\" }");
+			
+		} catch (PersistenceException pe) {
+			name = escapeJavaScript(name);
+			renderJSON("{ \"failure\": \"true\", \"message\": \"Another program month already exists with the name: '"+name+"'\" }");
+			
+		} catch (RuntimeException re) {
+			Logger.error(re,"Unable to add program month");
+			String message = escapeJavaScript(re.getMessage());
+			renderJSON("{ \"failure\": \"true\", \"message\": \"" + message + "\" }");
+		}
+	}
 
 	/**
 	 * Edit an existing month's name. Both the id and new name will be
@@ -1650,6 +1697,50 @@ public class ConfigurableSettingsTab extends SettingsTab {
 			renderJSON("{ \"failure\": \"true\", \"message\": \"" + message + "\" }");
 		}
 	}
+	
+	/**
+	 * Edit an existing month's name. Both the id and new name will be
+	 * returned.
+	 * 
+	 * @param programMonthId
+	 *            The id of the month to be edited, in the form "graduationMonth_id"
+	 * @param name
+	 *            The new name of the month
+	 */
+	@Security(RoleType.MANAGER)
+	public static void editProgramMonthJSON(String programMonthId, String name) {
+		try {
+			// Check input
+			if (name == null || name.trim().length() == 0)
+				throw new IllegalArgumentException("Month name is required");
+
+			int monthInt = monthNameToInt(name);
+			
+			// Save the new month
+			String[] parts = programMonthId.split("_");
+			Long id = Long.valueOf(parts[1]);
+			ProgramMonth month = settingRepo.findProgramMonth(id);
+			
+			month.setMonth(monthInt);
+			month.save();
+
+			name = escapeJavaScript(month.getMonthName());
+
+			renderJSON("{ \"success\": \"true\", \"id\": " + month.getId() + ", \"name\": \"" + name + "\" }");
+		} catch (IllegalArgumentException iae) {
+			String message = escapeJavaScript(iae.getMessage());			
+			renderJSON("{ \"failure\": \"true\", \"message\": \""+message+"\" }");
+			
+		} catch (PersistenceException pe) {
+			name = escapeJavaScript(name);
+			renderJSON("{ \"failure\": \"true\", \"message\": \"Another program month already exists with the name: '"+name+"'\" }");
+			
+		} catch (RuntimeException re) {
+			Logger.error(re,"Unable to edit program month");
+			String message = escapeJavaScript(re.getMessage());
+			renderJSON("{ \"failure\": \"true\", \"message\": \"" + message + "\" }");
+		}
+	}
 
 	/**
 	 * Remove an existing graduation month
@@ -1673,6 +1764,30 @@ public class ConfigurableSettingsTab extends SettingsTab {
 			renderJSON("{ \"failure\": \"true\", \"message\": \"" + message + "\" }");
 		}
 	}
+	
+	
+	/**
+	 * Remove an existing graduation month
+	 * 
+	 * @param programMonthId
+	 *            The id of the graduation month to be removed of the form "graduationMonth_id"
+	 */
+	@Security(RoleType.MANAGER)
+	public static void removeProgramMonthJSON(String programMonthId) {
+		try {
+			// Delete the old college
+			String[] parts = programMonthId.split("_");
+			Long id = Long.valueOf(parts[1]);
+			ProgramMonth month = settingRepo.findProgramMonth(id);
+			month.delete();
+
+			renderJSON("{ \"success\": \"true\" }");
+		} catch (RuntimeException re) {
+			Logger.error(re,"Unable to remove program month");
+			String message = escapeJavaScript(re.getMessage());
+			renderJSON("{ \"failure\": \"true\", \"message\": \"" + message + "\" }");
+		}
+	}
 
 	/**
 	 * Remove all existing graduation months
@@ -1686,6 +1801,21 @@ public class ConfigurableSettingsTab extends SettingsTab {
 		}
 
 		flash.put("open", "availableGraduationMonths");
+		configurableSettings();
+	}
+	
+	/**
+	 * Remove all existing graduation months
+	 * 
+	 */
+	@Security(RoleType.MANAGER)
+	public static void removeAllProgramMonths() {
+		List<ProgramMonth> months = settingRepo.findAllProgramMonths();
+		for (ProgramMonth month : months) {
+			month.delete();
+		}
+
+		flash.put("open", "availableProgramMonths");
 		configurableSettings();
 	}
 
@@ -1717,6 +1847,32 @@ public class ConfigurableSettingsTab extends SettingsTab {
 	}
 	
 	/**
+	 * Reorder a list of graduation months.
+	 * 
+	 * @param programMonthIds
+	 *            An ordered list of ids in the form:
+	 *            "graduationMonth_1,graduationMonth_3,graduationMonth_2"
+	 */
+	@Security(RoleType.MANAGER)
+	public static void reorderProgramMonthsJSON(String programMonthIds) {
+
+		try {
+
+			if (programMonthIds != null && programMonthIds.trim().length() > 0) {
+				// Save the new order
+				List<ProgramMonth> months = resolveIds(programMonthIds, ProgramMonth.class);
+				saveModelOrder(months);
+			}
+
+			renderJSON("{ \"success\": \"true\" }");
+		} catch (RuntimeException re) {
+			Logger.error(re,"Unable to reorder program month");
+			String message = escapeJavaScript(re.getMessage());
+			renderJSON("{ \"failure\": \"true\", \"message\": \"" + message + "\" }");
+		}
+	}
+	
+	/**
 	 * Alphabetize all graduation month.
 	 * 
 	 */
@@ -1729,6 +1885,22 @@ public class ConfigurableSettingsTab extends SettingsTab {
 		saveModelOrder(months);
 		
 		flash.put("open","availableGraduationMonths");
+		configurableSettings();
+	}
+	
+	/**
+	 * Alphabetize all program month.
+	 * 
+	 */
+	@Security(RoleType.MANAGER)
+	public static void alphabetizeAllProgramMonths() {
+
+		List<ProgramMonth> months = settingRepo.findAllProgramMonths();
+		Collections.sort(months, ascending(getModelCompator()));
+		
+		saveModelOrder(months);
+		
+		flash.put("open","availableProgramMonths");
 		configurableSettings();
 	}
 	
@@ -1964,6 +2136,14 @@ public class ConfigurableSettingsTab extends SettingsTab {
 				if (model instanceof GraduationMonth) {
 					
 					int month = ((GraduationMonth) model).getMonth();
+					if (month < 10)
+						return "0"+month;
+					else
+						return ""+month;
+				}
+				if (model instanceof ProgramMonth) {
+					
+					int month = ((ProgramMonth) model).getMonth();
 					if (month < 10)
 						return "0"+month;
 					else
