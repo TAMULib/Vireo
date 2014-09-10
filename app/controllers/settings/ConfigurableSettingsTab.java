@@ -65,6 +65,7 @@ public class ConfigurableSettingsTab extends SettingsTab {
 		List<DocumentType> docTypes = settingRepo.findAllDocumentTypes();
 		List<CommitteeMemberRoleType> roleTypes = settingRepo.findAllCommitteeMemberRoleTypes();
 		List<GraduationMonth> gradMonths = settingRepo.findAllGraduationMonths();
+		List<ProgramMonth> programMonths = settingRepo.findAllProgramMonths();
 				
 		Locale locales[] = Locale.getAvailableLocales();
 		List<Locale> localeLanguages = new ArrayList<Locale>(Arrays.asList(locales));
@@ -85,7 +86,7 @@ public class ConfigurableSettingsTab extends SettingsTab {
 				embargos,
 				
 				// Sortable lists
-				colleges, programs, departments, majors, degrees, docTypes, roleTypes, gradMonths, languages,
+				colleges, programs, departments, majors, degrees, docTypes, roleTypes, gradMonths, programMonths, languages,
 				
 				// Locales
 				localeLanguages);
@@ -1862,7 +1863,7 @@ public class ConfigurableSettingsTab extends SettingsTab {
 
 			renderJSON("{ \"success\": \"true\" }");
 		} catch (RuntimeException re) {
-			Logger.error(re,"Unable to reorder graduation month");
+			Logger.error(re,"Unable to reorder program month");
 			String message = escapeJavaScript(re.getMessage());
 			renderJSON("{ \"failure\": \"true\", \"message\": \"" + message + "\" }");
 		}
@@ -2132,6 +2133,14 @@ public class ConfigurableSettingsTab extends SettingsTab {
 				if (model instanceof GraduationMonth) {
 					
 					int month = ((GraduationMonth) model).getMonth();
+					if (month < 10)
+						return "0"+month;
+					else
+						return ""+month;
+				}
+				if (model instanceof ProgramMonth) {
+					
+					int month = ((ProgramMonth) model).getMonth();
 					if (month < 10)
 						return "0"+month;
 					else

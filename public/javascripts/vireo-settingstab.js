@@ -35,6 +35,7 @@ function displaySortableItem(type, editable, $element, id, name, level) {
 	    type == "department" ||
 	    type == "major" ||
 	    type == "graduationMonth" ||
+	    type == "programMonth" ||
 	    type == "language"
 	   ) {
 	

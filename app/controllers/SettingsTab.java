@@ -25,6 +25,7 @@ import org.tdl.vireo.model.NameFormat;
 import org.tdl.vireo.model.Person;
 import org.tdl.vireo.model.Preference;
 import org.tdl.vireo.model.Program;
+import org.tdl.vireo.model.ProgramMonth;
 import org.tdl.vireo.model.RoleType;
 
 import play.Logger;
@@ -199,6 +200,10 @@ public class SettingsTab extends AbstractVireoController {
 				
 			} else if (type.equals(GraduationMonth.class)) {
 				GraduationMonth month = settingRepo.findGraduationMonth(id);
+				models.add((T) month);
+				
+			} else if (type.equals(ProgramMonth.class)) {
+				ProgramMonth month = settingRepo.findProgramMonth(id);
 				models.add((T) month);
 				
 			} else if (type.equals(EmailTemplate.class)) {
