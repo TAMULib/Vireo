@@ -223,7 +223,18 @@ jQuery(document).ready(function(){
                     '@{settings.ConfigurableSettingsTab.removeGraduationMonthJSON()}'
                     )
      }).disableSelection().enableSelection();
-        
+
+     // Handlers for the sortable program months list
+     jQuery("#programMonth-list, #programMonth-remove").sortable({
+         connectWith: ".programMonth-sortable",
+         placeholder: "placeholder",
+         update: sortableUpdateHandler(
+                    'programMonth',
+                    '@{settings.ConfigurableSettingsTab.reorderProgramMonthsJSON()}',
+                    '@{settings.ConfigurableSettingsTab.removeProgramMonthJSON()}'
+                    )
+     }).disableSelection().enableSelection();
+
      jQuery("#graduationMonth-list .graduationMonth-editable").live("click",sortableStartEditHandler());
      jQuery("#graduationMonth-list .icon-remove").live("click",sortableCancelEditHandler());     
      jQuery("#graduationMonth-list .icon-ok").live("click",sortableSaveEditHandler('graduationMonth','@{settings.ConfigurableSettingsTab.editGraduationMonthJSON()}'));
@@ -232,6 +243,11 @@ jQuery(document).ready(function(){
      jQuery("#add-graduationMonth-save").click(saveAddActionHandler('graduationMonth','@{settings.ConfigurableSettingsTab.addGraduationMonthJSON()}'));
      jQuery("#add-graduationMonth-cancel").click(cancelAddActionHandler('graduationMonth'));
 
+
+     jQuery("#programMonth-list .programMonth-editable").live("click",sortableStartEditHandler());
+     jQuery("#programMonth-list .icon-remove").live("click",sortableCancelEditHandler());     
+     jQuery("#programMonth-list .icon-ok").live("click",sortableSaveEditHandler('programMonth','@{settings.ConfigurableSettingsTab.editProgramMonthJSON()}'));
+     jQuery("#programMonth-list input").live("keypress",sortableSaveEditHandler('programMonth','@{settings.ConfigurableSettingsTab.editProgramMonthJSON()}'));
      jQuery("#add-programMonth-link").click(slideToggleHandler("#add-programMonth-dialog"));
      jQuery("#add-programMonth-save").click(saveAddActionHandler('programMonth','@{settings.ConfigurableSettingsTab.addProgramMonthJSON()}'));
      jQuery("#add-programMonth-cancel").click(cancelAddActionHandler('programMonth'));
@@ -988,7 +1004,7 @@ jQuery(document).ready(function(){
                        <p class="info"><em class="icon-trash"></em> Remove items by dragging them to the trash can</p>
                     </ul>
                     <ol id="programMonth-list" class="programMonth-sortable settings-sortable-list">
-                        #{list items:gradMonths, as:'month'}
+                        #{list items:programMonths, as:'month'}
                            <li id="programMonth_${month.getId()}"><a class="programMonth-editable" href="javascript:void(0);"><em class="icon-pencil"></em> ${month.getMonthName()}</a></li>    
                         #{/list}
                     </ol>
