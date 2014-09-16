@@ -251,6 +251,7 @@ function toggleAddCommentEmailOptions(){
 	return function(){
 		if(jQuery(".emailOptions input[name='visibility']:checked").val()=="public"){
 			jQuery(".emailOptions input[name='email_student']").removeAttr("disabled");
+			jQuery(".emailOptions input[name='email_advisor']").removeAttr("disabled");
 		} else {
 			jQuery("#comment-email-options input").each(function(){
 				jQuery(this).attr("disabled","true");
@@ -261,7 +262,12 @@ function toggleAddCommentEmailOptions(){
 }
 
 /**
- * Function to toggle the ability to CC the advisor when Email the student is selected.
+ * cc_advisor has changed to email_advisor for batch comments, add comment and add file, and these
+ * three locations no longer need this functionality. If they are the only places that use this metthod,
+ * it should be depricated.  
+ *
+ *Function to toggle the ability to CC the advisor when Email the student is selected.
+ *
  */
 function toggleCarbonCopyAdvisor(){
 	return function(){

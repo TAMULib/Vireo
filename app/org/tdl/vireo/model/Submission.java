@@ -492,6 +492,30 @@ public interface Submission extends AbstractModel {
 
 	/**
 	 * 
+	 * @return The program year
+	 */
+	public Integer getProgramYear();
+
+	/**
+	 * 
+	 * @param year The new program year
+	 */
+	public void setProgramYear(Integer year);
+
+	/**
+	 * 
+	 * @return The program month
+	 */
+	public Integer getProgramMonth();
+
+	/**
+	 * 
+	 * @param month The new program month.
+	 */
+	public void setProgramMonth(Integer month);
+
+	/**
+	 * 
 	 * @return The current application's state
 	 */
 	public State getState();

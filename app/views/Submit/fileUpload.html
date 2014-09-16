@@ -1,6 +1,16 @@
 #{extends 'Submit/submitStep.html' /}
 #{set title:'File Upload' /}
 
+#{set 'moreScripts' }
+<script type="text/javascript">
+jQuery(document).ready(function(){
+    if(jQuery("#attachmentType").children().length <= 2) {
+        jQuery("#attachmentType").hide();
+    }
+}); // document ready
+</script>
+#{/set}
+
 <br />
 <div class="row pageHead">
 	<h3 class="span11">Upload Your Files</h3>
@@ -8,7 +18,7 @@
 <br/>
 <div class="row">
 <div class="span7">
-	<p>In this step you will upload your thesis or dissertation to the server. Optionally, you may upload additional supplementary files that will be available along with your document after publication.</p>
+	#{verbatim}${SUBMIT_UPLOAD_FILES_STEP_DESCRIPTION}#{/verbatim}
     <br/>
     #{ifErrors}
     <ul class="red">
@@ -52,7 +62,7 @@
 		
 		#{ifEnabled [SUPPLEMENTAL_ATTACHMENT,SOURCE_ATTACHMENT,ADMINISTRATIVE_ATTACHMENT]}
 		<fieldset id="additionalFileUpload">
-			<legend>Upload Additional Files</legend>            
+			<legend>${SUBMIT_ADDITIONAL_FILES_HEADING}</legend>            
 			<div class="control-group #{errorClass 'additionalDocument' /} #{fieldClass SUPPLEMENTAL_ATTACHMENT /} #{fieldClass SOURCE_ATTACHMENT /} #{fieldClass ADMINISTRATIVE_ATTACHMENT /}">
 			#{ifEnabled SUPPLEMENTAL_ATTACHMENT}
             <label class="control-label #{fieldClass SUPPLEMENTAL_ATTACHMENT /}"><span class="required-star">*</span> #{fieldLabel SUPPLEMENTAL_ATTACHMENT /}:</label>
@@ -66,7 +76,7 @@
             <label class="control-label #{fieldClass ADMINISTRATIVE_ATTACHMENT /}"><span class="required-star">*</span> #{fieldLabel ADMINISTRATIVE_ATTACHMENT /}:</label>
             <div class="controls"><p>#{fieldHelp ADMINISTRATIVE_ATTACHMENT /}</p></div>
             #{/ifEnabled}
-				<label class="control-label" for="additionalFile"><span class="required-star">*</span> Additional Documents:</label>
+				<label class="control-label" for="additionalFile"><span class="required-star">*</span> ${SUBMIT_ADDITIONAL_DOCUMENTS_LABELS}:</label>
 
                 <div class="controls">
                     <select id="attachmentType" class="input-select" name="attachmentType" style="margin-bottom:7px;">

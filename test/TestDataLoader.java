@@ -386,6 +386,10 @@ public class TestDataLoader extends Job {
 		4, 7, 11 // 0 = january, 11 = december
 	};
 	
+	private static final int[] PROG_MONTHS_DEFINITIONS = {
+		4, 7, 11 // 0 = january, 11 = december
+	};
+	
 	/**
 	 * Initial Embargo Types to create
 	 */
@@ -641,6 +645,11 @@ public class TestDataLoader extends Job {
 			settingRepo.createGraduationMonth(gradMonthDefinition).save();
 		}
 		
+		// Create all program months
+		for(int progMonthDefinition : PROG_MONTHS_DEFINITIONS) {
+			settingRepo.createProgramMonth(progMonthDefinition).save();
+		}
+		
 		// Create all embargo types
 		for(EmbargoArray embargoDefinition : EMBARGO_DEFINTITIONS) {
 			settingRepo.createEmbargoType(embargoDefinition.name, embargoDefinition.description, embargoDefinition.duration, embargoDefinition.active).save();
@@ -831,6 +840,11 @@ public class TestDataLoader extends Job {
 				if (random.nextInt(100) > 5) {
 					sub.setGraduationYear(random.nextInt(10)+2002);
 					sub.setGraduationMonth(GRAD_MONTHS_DEFINITIONS[random.nextInt(GRAD_MONTHS_DEFINITIONS.length-1)]);
+				}
+				
+				if (random.nextInt(100) > 5) {
+					sub.setProgramYear(random.nextInt(10)+2002);
+					sub.setProgramMonth(PROG_MONTHS_DEFINITIONS[random.nextInt(PROG_MONTHS_DEFINITIONS.length-1)]);
 				}
 				
 				if (random.nextInt(100) > 50)

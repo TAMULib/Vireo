@@ -10,6 +10,9 @@ import java.util.List;
 import org.tdl.vireo.constant.FieldConfig;
 
 import static org.tdl.vireo.constant.AppConfig.SUBMIT_UPLOAD_FILES_STICKIES;
+import static org.tdl.vireo.constant.AppConfig.SUBMIT_UPLOAD_FILES_STEP_DESCRIPTION;
+import static org.tdl.vireo.constant.AppConfig.SUBMIT_ADDITIONAL_FILES_HEADING;
+import static org.tdl.vireo.constant.AppConfig.SUBMIT_ADDITIONAL_DOCUMENTS_LABELS;
 import static org.tdl.vireo.constant.FieldConfig.*;
 
 import org.tdl.vireo.model.Attachment;
@@ -18,7 +21,6 @@ import org.tdl.vireo.model.RoleType;
 import org.tdl.vireo.model.Submission;
 
 import au.com.bytecode.opencsv.CSVReader;
-
 import controllers.Security;
 import controllers.Student;
 
@@ -43,6 +45,11 @@ public class FileUpload extends AbstractSubmitStep {
 	 */
 	@Security(RoleType.STUDENT)
 	public static void fileUpload(Long subId) {
+		
+		
+		renderArgs.put("SUBMIT_UPLOAD_FILES_STEP_DESCRIPTION", settingRepo.getConfigValue(SUBMIT_UPLOAD_FILES_STEP_DESCRIPTION));
+		renderArgs.put("SUBMIT_ADDITIONAL_FILES_HEADING", settingRepo.getConfigValue(SUBMIT_ADDITIONAL_FILES_HEADING));
+		renderArgs.put("SUBMIT_ADDITIONAL_DOCUMENTS_LABELS", settingRepo.getConfigValue(SUBMIT_ADDITIONAL_DOCUMENTS_LABELS));
 
 		// Locate the submission that this upload will be attached to
 		Submission sub = getSubmission();
@@ -105,7 +112,7 @@ public class FileUpload extends AbstractSubmitStep {
 		for(AttachmentType type : AttachmentType.values()){
 			attachmentTypes.add(type.toString());
 		}
-		
+				
 		renderTemplate("Submit/fileUpload.html",subId, primaryAttachment, additionalAttachments, attachmentTypes, stickies);
 	}
 	

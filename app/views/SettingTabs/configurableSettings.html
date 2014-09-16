@@ -3,7 +3,9 @@
 <script type="text/javascript">
 jQuery(document).ready(function(){
 
-	
+    // Settings toggle and input/textarea fields
+     jQuery(".vireo-ajax-toggle").click(applicationSettingsHandler('@{settings.ConfigurableSettingsTab.updateConfigurableSettingsJSON()}'));
+     jQuery(".vireo-ajax-text").change(applicationSettingsHandler('@{settings.ConfigurableSettingsTab.updateConfigurableSettingsJSON()}'));
 	
 	
 	 // Global handler for stray clicks to cancel editing.
@@ -221,7 +223,18 @@ jQuery(document).ready(function(){
                     '@{settings.ConfigurableSettingsTab.removeGraduationMonthJSON()}'
                     )
      }).disableSelection().enableSelection();
-        
+
+     // Handlers for the sortable program months list
+     jQuery("#programMonth-list, #programMonth-remove").sortable({
+         connectWith: ".programMonth-sortable",
+         placeholder: "placeholder",
+         update: sortableUpdateHandler(
+                    'programMonth',
+                    '@{settings.ConfigurableSettingsTab.reorderProgramMonthsJSON()}',
+                    '@{settings.ConfigurableSettingsTab.removeProgramMonthJSON()}'
+                    )
+     }).disableSelection().enableSelection();
+
      jQuery("#graduationMonth-list .graduationMonth-editable").live("click",sortableStartEditHandler());
      jQuery("#graduationMonth-list .icon-remove").live("click",sortableCancelEditHandler());     
      jQuery("#graduationMonth-list .icon-ok").live("click",sortableSaveEditHandler('graduationMonth','@{settings.ConfigurableSettingsTab.editGraduationMonthJSON()}'));
@@ -229,6 +242,15 @@ jQuery(document).ready(function(){
      jQuery("#add-graduationMonth-link").click(slideToggleHandler("#add-graduationMonth-dialog"));
      jQuery("#add-graduationMonth-save").click(saveAddActionHandler('graduationMonth','@{settings.ConfigurableSettingsTab.addGraduationMonthJSON()}'));
      jQuery("#add-graduationMonth-cancel").click(cancelAddActionHandler('graduationMonth'));
+
+
+     jQuery("#programMonth-list .programMonth-editable").live("click",sortableStartEditHandler());
+     jQuery("#programMonth-list .icon-remove").live("click",sortableCancelEditHandler());     
+     jQuery("#programMonth-list .icon-ok").live("click",sortableSaveEditHandler('programMonth','@{settings.ConfigurableSettingsTab.editProgramMonthJSON()}'));
+     jQuery("#programMonth-list input").live("keypress",sortableSaveEditHandler('programMonth','@{settings.ConfigurableSettingsTab.editProgramMonthJSON()}'));
+     jQuery("#add-programMonth-link").click(slideToggleHandler("#add-programMonth-dialog"));
+     jQuery("#add-programMonth-save").click(saveAddActionHandler('programMonth','@{settings.ConfigurableSettingsTab.addProgramMonthJSON()}'));
+     jQuery("#add-programMonth-cancel").click(cancelAddActionHandler('programMonth'));
      
  	 // Handlers for the sortable programs list
      jQuery("#language-list, #language-remove").sortable({
@@ -245,7 +267,8 @@ jQuery(document).ready(function(){
      jQuery("#add-language-save").click(saveAddActionHandler('language','@{settings.ConfigurableSettingsTab.addLanguageJSON()}'));
      jQuery("#add-language-cancel").click(cancelAddActionHandler('language'));
      
-     
+     // Tooltips
+     jQuery('.tooltip-icon').tooltip();     
 }) // document ready
 </script>
 #{/set}
@@ -778,7 +801,7 @@ jQuery(document).ready(function(){
 	
 	<div class="accordion-group">
 		<div class="accordion-heading">
-			<a class="accordion-toggle" data-toggle="collapse" href="#availableCommitteeMemberRoleTypes"><strong>Available Committee Member Role Types</strong></a>			
+			<a class="accordion-toggle" data-toggle="collapse" href="#availableCommitteeMemberRoleTypes"><strong>Committee Member Settings</strong></a>			
 		</div>
 		<div id="availableCommitteeMemberRoleTypes" class="accordion-body collapse ${ "availableCommitteeMemberRoleTypes".equals(flash.get("open")) ? "in" : "" }">
 			<div class="accordion-inner">
@@ -857,6 +880,37 @@ jQuery(document).ready(function(){
 				    </form>
 				</div>
 				<br/><br/>
+                <div id="committeeMemberadditionSettings">
+                    <h2>COMMITTEE MEMBER ADDITION</h2>
+                    
+                    <ul class="unstyled">
+                        <li>
+                            <label>Committee Member Count:</label>
+                            <span>
+                                 <input class="vireo-ajax-text monospace" name="${org.tdl.vireo.constant.AppConfig.COMMITTEE_MEMBER_DEFAULT_COUNT}" type="text" value="${COMMITTEE_MEMBER_DEFAULT_COUNT}" />
+                                 <a href="#" class="tooltip-icon" rel="tooltip" data-original-title="The initial number of committee member fields shown in the Document Info step of the submission process."><i class="icon-info-sign"></i></a>
+                            </span>
+                        </li>
+                        <li>
+                            <label>Committee Member Addition Count:</label>
+                            <span>
+                                 <input class="vireo-ajax-text monospace" name="${org.tdl.vireo.constant.AppConfig.COMMITTEE_MEMBER_DEFAULT_ADD_COUNT}" type="text" value="${COMMITTEE_MEMBER_DEFAULT_ADD_COUNT}" />
+                                 <a href="#" class="tooltip-icon" rel="tooltip" data-original-title="The number of committee member fields added when the 'Add Additional Members' button is clicked in the Document Info step of the submission process."><i class="icon-info-sign"></i></a>
+                            </span>
+                        </li>
+                        <li>
+                            <label>Committee Member Addition:</label>
+                            <span>
+				                <div class="btn-group" data-toggle="buttons-radio">
+				                    <button name="${org.tdl.vireo.constant.AppConfig.COMMITTEE_MEMBER_ADD_ENABLED}" class="btn vireo-ajax-toggle #{if !"false".equals(COMMITTEE_MEMBER_ADD_ENABLED)}active#{/if}" value="true">Yes</button>
+				                    <button name="${org.tdl.vireo.constant.AppConfig.COMMITTEE_MEMBER_ADD_ENABLED}" class="btn vireo-ajax-toggle #{if "false".equals(COMMITTEE_MEMBER_ADD_ENABLED)}active#{/if}" value="false">No</button>
+				                </div>
+                                <a href="#" class="tooltip-icon" rel="tooltip" data-original-title="Enable/disable the ability to add committee members on the Document Info step of the submission process."><i class="icon-info-sign"></i></a>
+                            </span>
+                        </li>
+                    </ul>
+                </div>
+                <br/><br/>
 			</div>
 		</div>
 	</div>
@@ -921,6 +975,66 @@ jQuery(document).ready(function(){
 			</div>
 		</div>
 	</div>
+
+    <div class="accordion-group">
+        <div class="accordion-heading">
+            <a class="accordion-toggle" data-toggle="collapse" href="#availableprogramMonths"><strong>Available Program Months</strong></a>           
+        </div>
+        <div id="availableprogramMonths" class="accordion-body collapse ${ "availableprogramMonths".equals(flash.get("open")) ? "in" : "" }">
+            <div class="accordion-inner">
+                <h2>AVAILABLE PROGRAM MONTHS</h2>
+                
+                <p>
+                    <a class="confirm" href="@{settings.ConfigurableSettingsTab.removeAllProgramMonths}" 
+                       data-confirm="<em class='icon-trash'></em> (Are you sure you want to <strong>remove all</strong> program months?)">
+                        <em class="icon-trash"></em>
+                        Remove all program months
+                    </a>
+                </p>
+                <p>
+                    <a class="confirm" href="@{settings.ConfigurableSettingsTab.alphabetizeAllProgramMonths}" 
+                       data-confirm="<em class='icon-refresh'></em> (Are you sure you want to sort all program months?)">
+                        <em class="icon-refresh"></em>
+                        Sort program months
+                    </a>
+                </p>
+                
+                <div class="wrap settings-sortable">
+                    <ul id="programMonth-remove" class="programMonth-sortable settings-sortable-remove" #{if gradMonths.size() == 0}style="display: none;"#{/if}>
+                       <p class="info"><em class="icon-trash"></em> Remove items by dragging them to the trash can</p>
+                    </ul>
+                    <ol id="programMonth-list" class="programMonth-sortable settings-sortable-list">
+                        #{list items:programMonths, as:'month'}
+                           <li id="programMonth_${month.getId()}"><a class="programMonth-editable" href="javascript:void(0);"><em class="icon-pencil"></em> ${month.getMonthName()}</a></li>    
+                        #{/list}
+                    </ol>
+                </div>
+                
+                <a id="add-programMonth-link" href="javascript:void(0);">[ADD NEW]</a>
+                
+                <div id="add-programMonth-dialog" style="display: none;">
+                    <form class="form-horizontal">
+                        <fieldset>
+                            <div class="control-group">
+                                <label class="control-label" for="add-programMonth-name">New Month</label>
+                                <div class="controls">
+                                    <input type="text" class="input-large" id="add-programMonth-name"/>
+                                    <p class="help-block">Name of the new month</p>
+                                </div>
+                            </div>
+                            <div class="control-group">
+                                <div class="controls">
+                                    <button id="add-programMonth-save" class="btn btn-primary">Add Month</button>
+                                    <button id="add-programMonth-cancel" class="btn">Cancel</button>
+                                </div>
+                            </div>
+                        </fieldset>
+                    </form>
+                </div>
+                <br/><br/>
+            </div>
+        </div>
+    </div>
 	
 	<div class="accordion-group">
 		<div class="accordion-heading">

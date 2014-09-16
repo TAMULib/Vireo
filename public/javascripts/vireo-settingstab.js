@@ -35,6 +35,7 @@ function displaySortableItem(type, editable, $element, id, name, level) {
 	    type == "department" ||
 	    type == "major" ||
 	    type == "graduationMonth" ||
+	    type == "programMonth" ||
 	    type == "language"
 	   ) {
 	
@@ -1254,6 +1255,59 @@ function emailSettingsHandler(jsonURL) {
 /**********************************************************
  * Configurable Settings Tab (Embargos)
  **********************************************************/
+
+/**
+ * Handler for the configurable settings field to save their state via ajax. This
+ * method supports all the toggleable fields on this page, as well as submision
+ * semester and submission instructions.
+ * 
+ * @param jsonURL The JSON url to submit updates too.
+ * @returns A Callback function
+ */
+function configurableSettingsHandler(jsonURL) {
+
+	return function () {
+		var $this = jQuery(this);
+		var field = $this.attr('name');
+		var value = $this.val();
+
+		$this.parent().addClass("waiting");
+
+		var successCallback = function(data) {
+			// Remove the ajax loading indicators & alerts
+			$this.parent().removeClass("waiting");
+			$this.removeClass("settings-error");
+			clearAlert("configurable-setting-"+field);
+		}
+
+		var failureCallback = function (message) {
+			$this.parent().removeClass("waiting");
+			$this.addClass("settings-error");
+			displayAlert("configurable-setting-"+field,"Unable to update setting",message);
+		}
+
+		jQuery.ajax({
+			url:jsonURL,
+			data:{
+				'field': field,
+				'value': value
+			},
+			dataType:'json',
+			type:'POST',
+			success:function(data){
+				if (data.success) {
+					successCallback(data);
+				} else {
+					failureCallback(data.message)
+				}
+			},
+			error:function(){
+				failureCallback("Unable to communicate with the server.");
+			}
+
+		});  
+	};
+}
 
 /**
  * Event handler to toggle the display of embargo type's duration between

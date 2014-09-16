@@ -15,6 +15,7 @@ import org.tdl.vireo.model.DocumentType;
 import org.tdl.vireo.model.EmailTemplate;
 import org.tdl.vireo.model.EmbargoType;
 import org.tdl.vireo.model.GraduationMonth;
+import org.tdl.vireo.model.ProgramMonth;
 import org.tdl.vireo.model.Language;
 import org.tdl.vireo.model.Major;
 import org.tdl.vireo.model.Program;
@@ -181,6 +182,25 @@ public class JpaSettingsRepositoryImpl implements SettingsRepository {
 	@Override
 	public List<GraduationMonth> findAllGraduationMonths() {
 		return (List) JpaGraduationMonthImpl.find("order by displayOrder").fetch();
+	}
+	
+	// ////////////////////////
+	// Program Month Model
+	// ////////////////////////
+	
+	@Override
+	public ProgramMonth createProgramMonth(int month) {
+		return new JpaProgramMonthImpl(month);
+	}
+	
+	@Override
+	public ProgramMonth findProgramMonth(Long id) {
+		return (ProgramMonth) JpaProgramMonthImpl.findById(id);
+	}
+
+	@Override
+	public List<ProgramMonth> findAllProgramMonths() {
+		return (List) JpaProgramMonthImpl.find("order by displayOrder").fetch();
 	}
 
 	// /////////////////////

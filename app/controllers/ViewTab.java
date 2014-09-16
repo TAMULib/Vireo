@@ -133,6 +133,10 @@ public class ViewTab extends AbstractVireoController {
 		if(submission.getGraduationMonth() != null)
 			gradMonth = new DateFormatSymbols().getMonths()[submission.getGraduationMonth()];
 		
+		String progMonth = null;		
+		if(submission.getProgramMonth() != null)
+			progMonth = new DateFormatSymbols().getMonths()[submission.getProgramMonth()];
+
 		List<ActionLog> actionLogs	= subRepo.findActionLog(submission);
 		
 		List<State> states = stateManager.getAllStates();
@@ -158,7 +162,8 @@ public class ViewTab extends AbstractVireoController {
 				submitter,
 				isManager,
 				advisorUrl,
-				gradMonth, 
+				gradMonth,
+				progMonth,
 				actionLogs, 
 				settingRepo, 
 				states,
@@ -415,6 +420,26 @@ public class ViewTab extends AbstractVireoController {
 				String gradMonth = new DateFormatSymbols().getMonths()[submission.getGraduationMonth()];
 
 				currentValue = gradMonth + " " + submission.getGraduationYear().toString();
+				//Program Date
+			} else if("programDate".equals(field)){
+
+				List<String> parsedProgramDate = parseProgramDate(value);
+
+				int month = monthNameToInt(parsedProgramDate.get(0));
+
+				Integer year = null;
+				try{
+					year = Integer.valueOf(parsedProgramDate.get(1));
+				} catch (NumberFormatException nfe) {
+					throw new RuntimeException("The program year is invalid.");
+				}
+
+				submission.setProgramMonth(month);
+				submission.setProgramYear(year);
+
+				String programMonth = new DateFormatSymbols().getMonths()[submission.getProgramMonth()];
+
+				currentValue = programMonth + " " + submission.getProgramYear().toString();
 
 				//Defense Date
 			} else if("defenseDate".equals(field)){
@@ -803,7 +828,7 @@ public class ViewTab extends AbstractVireoController {
 		String subject = params.get("subject");
 		String message = params.get("comment");
 		
-		if(params.get("email_student")!=null) {
+		if((params.get("email_student")!=null)||(params.get("email_advisor")!=null)) {
 			
 			if(subject == null || subject.isEmpty())
 				validation.addError("addActionLogSubject", "You must include a subject when sending an email.");
@@ -826,17 +851,23 @@ public class ViewTab extends AbstractVireoController {
 			email.applyParameterSubstitution();
 			
 			//Create list of recipients
-			email.addTo(submission.getSubmitter());
+			if(params.get("email_student") != null) {
+				email.addTo(submission.getSubmitter());
+			}
 			
-			//Create list of carbon copies
-			if(params.get("cc_advisor") != null && submission.getCommitteeContactEmail() != null) {
-				email.addCc(submission.getCommitteeContactEmail());
+			// Create list of carbon copies
+			if(params.get("email_advisor") != null && submission.getCommitteeContactEmail() != null) {
+				if(params.get("email_student") != null) {
+					email.addCc(submission.getCommitteeContactEmail());
+				} else {
+					email.addTo(submission.getCommitteeContactEmail());
+				}
 			}
 			
 			email.setFrom(context.getPerson());
 			email.setReplyTo(context.getPerson());
 						
-			if(params.get("email_student") != null && "public".equals(params.get("visibility"))) {	
+			if(((params.get("email_student") != null)||(params.get("email_advisor") != null)) && "public".equals(params.get("visibility"))) {	
 				// Send the email and log it after completion
 				email.setLogOnCompletion(context.getPerson(), submission);
 				emailService.sendEmail(email,false);
@@ -932,7 +963,7 @@ public class ViewTab extends AbstractVireoController {
 		}
 		
 		VireoEmail email = null;
-		if(params.get("email_student") != null) {			
+		if((params.get("email_student") != null)||(params.get("email_advisor") != null)) {			
 						
 			String subject = params.get("subject");
 			String comment = params.get("comment");
@@ -946,13 +977,21 @@ public class ViewTab extends AbstractVireoController {
 			if(!validation.hasErrors()){
 				email = emailService.createEmail();
 				email.addParameters(sub);
-				email.addTo(sub.getSubmitter());
+				
+				if(params.get("email_student") != null) {
+					email.addTo(sub.getSubmitter());
+				}
+				
 				email.setFrom(context.getPerson());
 				email.setReplyTo(context.getPerson());
 				
-				//Create list of carbon copies
-				if(params.get("cc_advisor") != null && sub.getCommitteeContactEmail() != null) {
-					email.addCc(sub.getCommitteeContactEmail());
+				// Create list of carbon copies
+				if(params.get("email_advisor") != null && sub.getCommitteeContactEmail() != null) {
+					if(params.get("email_student") != null) {
+						email.addCc(sub.getCommitteeContactEmail());
+					} else {
+						email.addTo(sub.getCommitteeContactEmail());
+					}
 				}
 				
 				email.setSubject(subject);
@@ -1184,6 +1223,35 @@ public class ViewTab extends AbstractVireoController {
 		}
 
 		return gradDate;
+	}
+	
+	/**
+	 * Internal method to parse the Month and Year from the input
+	 * 
+	 * @param programDate (The program date provided by the user. ie: "May 2013")
+	 * 
+	 * @return A list containing two strings. [0] = month, [1] = year
+	 */
+	protected static List<String> parseProgramDate(String rawProgramDate){
+
+		List<String> programDate = new ArrayList<String>();
+
+		if(rawProgramDate == null || rawProgramDate.trim().length() == 0)
+			throw new IllegalArgumentException("Program Date is required.");
+
+		rawProgramDate = rawProgramDate.trim();		
+
+		String[] strings = rawProgramDate.split(" ");
+
+		if(strings.length != 2 || strings[1].length() != 4)
+			throw new IllegalArgumentException("The program date "+rawProgramDate+" is invalid. The format must be 'May 2013'.");
+
+		for(int i = 0; i < strings.length; i++) {
+			String item = strings[i];
+			programDate.add(item);
+		}
+
+		return programDate;
 	}
 
 	/**
