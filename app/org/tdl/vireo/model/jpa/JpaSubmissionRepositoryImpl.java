@@ -113,6 +113,14 @@ public class JpaSubmissionRepositoryImpl implements SubmissionRepository {
 	}
 	
 	@Override
+	public List<Semester> findAllProgramDates() {
+		Query query = JPA.em().createQuery("SELECT DISTINCT new org.tdl.vireo.search.Semester(sub.programYear, sub.programMonth) FROM JpaSubmissionImpl AS sub WHERE sub.programYear IS NOT NULL AND sub.programMonth IS NOT NULL ORDER BY sub.programYear DESC, sub.programMonth DESC");
+		
+		List<Semester> results = query.getResultList();
+		return results;
+	}
+	
+	@Override
 	public List<Integer> findAllSubmissionYears() {
 		
 		CriteriaBuilder cb = JPA.em().getCriteriaBuilder();

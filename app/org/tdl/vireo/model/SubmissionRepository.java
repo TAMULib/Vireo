@@ -98,6 +98,12 @@ public interface SubmissionRepository {
 	public List<Semester> findAllGraduationSemesters();
 	
 	/**
+	 * @return A list of all program dates for which there are submissions
+	 *         recorded for.
+	 */
+	public List<Semester> findAllProgramDates();
+	
+	/**
 	 * @return A list of all years for which submissions occured during that year.
 	 */
 	public List<Integer> findAllSubmissionYears();
