@@ -605,12 +605,6 @@ public class LuceneSearcherImplTest extends UnitTest{
 			assertTrue(submissions.contains(sub1));
 			assertTrue(submissions.contains(sub2));
 			assertTrue(submissions.indexOf(sub1) < submissions.indexOf(sub2));
-
-			// Program Date
-			submissions = searcher.submissionSearch(filter, SearchOrder.PROGRAM_DATE, SearchDirection.DESCENDING, 0, 20).getResults();
-			assertTrue(submissions.contains(sub1));
-			assertTrue(submissions.contains(sub2));
-			assertTrue(submissions.indexOf(sub1) < submissions.indexOf(sub2));
 			
 			// License Agreement Date
 			submissions = searcher.submissionSearch(filter, SearchOrder.LICENSE_AGREEMENT_DATE, SearchDirection.DESCENDING, 0, 20).getResults();
@@ -847,9 +841,9 @@ public class LuceneSearcherImplTest extends UnitTest{
 			filter.delete();
 			
 			// Program Date Filter
-			filter = subRepo.createSearchFilter(person, "test-programDate1");
+			filter = subRepo.createSearchFilter(person, "test-programDate3");
 			filter.addAssignee(otherPerson);
-			filter.addProgramDate(2005,6);
+			filter.addProgramDate(2002,5);
 			filter.save();
 									
 			logs = searcher.actionLogSearch(filter, SearchOrder.ID, SearchDirection.DESCENDING, 0, 20).getResults();
@@ -867,18 +861,7 @@ public class LuceneSearcherImplTest extends UnitTest{
 			
 			assertEquals(sub1.getId(),logs.get(0).getSubmission().getId());
 			filter.delete();
-			
-			// Program Date Filter
-			filter = subRepo.createSearchFilter(person, "test-programDate3");
-			filter.addAssignee(otherPerson);
-			filter.addProgramDate(2002,05);
-			filter.save();
 						
-			logs = searcher.actionLogSearch(filter, SearchOrder.ID, SearchDirection.DESCENDING, 0, 20).getResults();
-						
-			assertEquals(sub1.getId(),logs.get(0).getSubmission().getId());
-			filter.delete();
-			
 			// Degree Filter
 			filter = subRepo.createSearchFilter(person, "test-degree");
 			filter.addAssignee(otherPerson);

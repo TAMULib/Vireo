@@ -65,6 +65,18 @@ public class StringVariableReplacement {
 			parameters.put("GRAD_SEMESTER", gradSemester);
 		}
 		
+		if (sub.getProgramYear() != null) {
+			String programDate = String.valueOf(sub.getProgramYear());
+			if (sub.getProgramMonth() != null) {
+				Integer monthInt = sub.getProgramMonth();
+				String monthName = new DateFormatSymbols().getMonths()[monthInt];
+				
+				programDate = monthName+", "+programDate;
+			}
+			
+			parameters.put("PROGRAM_DATE", programDate);
+		}
+		
 		if (sub.getAssignee() != null)
 			parameters.put("SUBMISSION_ASSIGNED_TO",sub.getAssignee().getFormattedName(NameFormat.FIRST_LAST));
 		else 

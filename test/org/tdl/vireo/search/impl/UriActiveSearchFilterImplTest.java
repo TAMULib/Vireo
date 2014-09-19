@@ -74,9 +74,7 @@ public class UriActiveSearchFilterImplTest extends UnitTest {
 		filter.addAssignee(MockPerson.getReviewer());
 		filter.addAssignee(null); // unassigned
 		filter.addEmbargoType(embargo1);
-		filter.addEmbargoType(embargo2);
-		filter.addProgramDate(2002,05);
-		filter.addProgramDate(2002,null);
+		filter.addEmbargoType(embargo2);		
 		filter.addGraduationSemester(2002,05);
 		filter.addGraduationSemester(2002,null);
 		filter.addProgramDate(2002,05);
@@ -182,9 +180,7 @@ public class UriActiveSearchFilterImplTest extends UnitTest {
 			filter.addAssignee(person2);
 			filter.addAssignee(null);
 			filter.addEmbargoType(embargo1);
-			filter.addEmbargoType(embargo2);
-			filter.addProgramDate(2002,05);
-			filter.addProgramDate(2002,null);
+			filter.addEmbargoType(embargo2);			
 			filter.addGraduationSemester(2002,05);
 			filter.addGraduationSemester(2002,null);
 			filter.addProgramDate(2002,05);
@@ -294,8 +290,7 @@ public class UriActiveSearchFilterImplTest extends UnitTest {
 		assertEquals(0,newFilter.getSearchText().size());
 		assertEquals(0,newFilter.getStates().size());
 		assertEquals(0,newFilter.getAssignees().size());
-		assertEquals(0,newFilter.getEmbargoTypes().size());
-		assertEquals(0,newFilter.getProgramDates().size());
+		assertEquals(0,newFilter.getEmbargoTypes().size());		
 		assertEquals(0,newFilter.getGraduationSemesters().size());
 		assertEquals(0,newFilter.getProgramDates().size());
 		assertEquals(0,newFilter.getDegrees().size());
@@ -346,9 +341,7 @@ public class UriActiveSearchFilterImplTest extends UnitTest {
 		filter.addAssignee(MockPerson.getReviewer());
 		filter.addAssignee(null);
 		filter.addEmbargoType(embargo1);
-		filter.addEmbargoType(embargo2);
-		filter.addProgramDate(2002,05);
-		filter.addProgramDate(2002,null);
+		filter.addEmbargoType(embargo2);		
 		filter.addGraduationSemester(2002,05);
 		filter.addGraduationSemester(2002,null);
 		filter.addProgramDate(2002,05);
@@ -452,9 +445,7 @@ public class UriActiveSearchFilterImplTest extends UnitTest {
 		filter.addAssignee(MockPerson.getReviewer());
 		filter.addAssignee(null);
 		filter.addEmbargoType(embargo1);
-		filter.addEmbargoType(embargo2);
-		filter.addProgramDate(2002,05);
-		filter.addProgramDate(2002,null);
+		filter.addEmbargoType(embargo2);		
 		filter.addGraduationSemester(2002,05);
 		filter.addGraduationSemester(2002,null);
 		filter.addProgramDate(2002,05);
@@ -557,7 +548,6 @@ public class UriActiveSearchFilterImplTest extends UnitTest {
 	public void testEncodeListAndDecodeList() {
 		
 		UriActiveSearchFilterImpl filter = Spring.getBeanOfType(UriActiveSearchFilterImpl.class);
-
 		
 		List<String> list = new ArrayList<String>();
 		list.add("one");

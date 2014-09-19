@@ -111,16 +111,7 @@ public class JpaNamedSearchFilterImpl extends JpaAbstractModel<JpaNamedSearchFil
 			name="search_filter_embargos",
 			joinColumns=@JoinColumn(name="search_filter_id"))
 	public List<Long> embargoIds;
-	
-	@ElementCollection
-	@CollectionTable(
-			name="search_filter_program_dates",
-			joinColumns=@JoinColumn(name="search_filter_id"))
-	public List<String> programDates;
-	
-	@Transient
-	public List<Semester> cachedProgramDates;
-	
+		
 	@ElementCollection
 	@CollectionTable(
 			name="search_filter_semesters",
@@ -257,7 +248,6 @@ public class JpaNamedSearchFilterImpl extends JpaAbstractModel<JpaNamedSearchFil
 			
 			semesters.add(value);
 		}
-
 		// 2) Program Date
 		programDates.clear();
 		for(Semester semester : cachedProgramDates) {
@@ -560,7 +550,7 @@ public class JpaNamedSearchFilterImpl extends JpaAbstractModel<JpaNamedSearchFil
 	}
 	
 	@Override
-	public List<Semester> getProgramDates() {
+	public List<Semester> getProgramDates() {		
 		return cachedProgramDates;
 	}
 	
@@ -613,33 +603,6 @@ public class JpaNamedSearchFilterImpl extends JpaAbstractModel<JpaNamedSearchFil
 		removeGraduationSemester(new Semester(year,month));
 	}
 	
-	@Override
-	public List<Semester> getProgramDates() {		
-		return cachedProgramDates;
-	}
-
-	@Override
-	public void addProgramDate(Semester semester) {
-		assertManagerOrOwner(creator);
-		cachedProgramDates.add(semester);
-	}
-	
-	@Override
-	public void removeProgramDate(Semester semester) {
-		assertManagerOrOwner(creator);
-		cachedProgramDates.remove(semester);
-	}
-	
-	@Override
-	public void addProgramDate(Integer year, Integer month) {
-		addProgramDate(new Semester(year,month));
-	}
-	
-	@Override
-	public void removeProgramDate(Integer year, Integer month) {
-		removeProgramDate(new Semester(year,month));
-	}
-
 	@Override
 	public List<String> getDegrees() {
 		return degrees;

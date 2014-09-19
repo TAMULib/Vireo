@@ -251,6 +251,45 @@ public class JpaSubmissionImplTests extends UnitTest {
 	}
 	
 	/**
+	 * Test find all distinct program dates.
+	 */
+	@Test
+	public void testFindAllProgramDates() {
+		
+		Submission sub2002 = subRepo.createSubmission(person);
+		Submission sub2003 = subRepo.createSubmission(person);
+		Submission sub2005 = subRepo.createSubmission(person);
+		Submission subNull = subRepo.createSubmission(person);
+		
+		sub2002.setProgramYear(2002);
+		sub2002.setProgramMonth(05);
+		sub2003.setProgramYear(2003);
+		sub2003.setProgramMonth(11);
+		sub2005.setProgramYear(2005);
+		sub2005.setProgramMonth(05);
+		
+		sub2002.save();
+		sub2003.save();
+		sub2005.save();
+		subNull.save();
+		
+		
+		List<Semester> semesters = subRepo.findAllProgramDates();
+		
+		sub2002.delete();
+		sub2003.delete();
+		sub2005.delete();
+		subNull.delete();
+		
+		// Remember there may be other submissions causing other data points.
+		assertNotNull(semesters);
+		assertTrue(semesters.contains(new Semester(2002,05)));
+		assertTrue(semesters.contains(new Semester(2003,11)));
+		assertTrue(semesters.contains(new Semester(2005,05)));
+		assertTrue(semesters.size() >= 3);
+	}
+	
+	/**
 	 * Test find all distinct submission years
 	 */
 	@Test

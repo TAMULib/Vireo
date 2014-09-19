@@ -317,8 +317,6 @@ public class JpaNamedSearchFilterImplTest extends UnitTest {
 		filter.addAssignee(otherPerson);
 		filter.addEmbargoType(embargo1);
 		filter.addEmbargoType(embargo2);
-		filter.addProgramDate(2002,05);
-		filter.addProgramDate(2002,null);
 		filter.addGraduationSemester(2002,05);
 		filter.addGraduationSemester(2002,null);
 		filter.addProgramDate(2002,05);
@@ -378,7 +376,7 @@ public class JpaNamedSearchFilterImplTest extends UnitTest {
 		}
 		assertTrue(foundSemester1);
 		assertTrue(foundSemester2);
-		
+				
 		assertTrue(retrieved.getProgramDates().size() == 2);
 		boolean foundProgramDate1 = false;
 		boolean foundProgramDate2 = false;

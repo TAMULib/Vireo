@@ -128,10 +128,14 @@ public class JpaSubmissionImpl extends JpaAbstractModel<JpaSubmissionImpl> imple
 	@Column(length=255)
 	public String documentType;
 
+	@Column(length=255)
 	public Integer graduationYear;
+	@Column(length=255)
 	public Integer graduationMonth;
 	
+	@Column(length=255)
 	public Integer programYear;
+	@Column(length=255)
 	public Integer programMonth;
 
 	public String stateName;
@@ -1236,8 +1240,7 @@ public class JpaSubmissionImpl extends JpaAbstractModel<JpaSubmissionImpl> imple
 			primary.save();
 		}
 	}
-	
-	
+		
 	/**
 	 * Return true if the two objects are equals, accounting for nulls.
 	 * 
@@ -1256,6 +1259,4 @@ public class JpaSubmissionImpl extends JpaAbstractModel<JpaSubmissionImpl> imple
 			return a.equals(b);
 		}	
 	}
-	
-
 }

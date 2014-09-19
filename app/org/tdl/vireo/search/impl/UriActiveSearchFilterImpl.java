@@ -45,8 +45,7 @@ public class UriActiveSearchFilterImpl implements ActiveSearchFilter {
 	public List<String> searchText = new ArrayList<String>();
 	public List<String> states = new ArrayList<String>();
 	public List<Person> assignees = new ArrayList<Person>();
-	public List<EmbargoType> embargos = new ArrayList<EmbargoType>();
-	public List<Semester> programDates = new ArrayList<Semester>();
+	public List<EmbargoType> embargos = new ArrayList<EmbargoType>();	
 	public List<Semester> semesters = new ArrayList<Semester>();
 	public List<Semester> programDates = new ArrayList<Semester>();
 	public List<String> degrees = new ArrayList<String>();
@@ -405,8 +404,7 @@ public class UriActiveSearchFilterImpl implements ActiveSearchFilter {
 		encodeList(result,searchText);
 		encodeList(result,states);
 		encodeList(result,assignees);
-		encodeList(result,embargos);
-		encodeList(result,programDates);
+		encodeList(result,embargos);		
 		encodeList(result,semesters);
 		encodeList(result,programDates);
 		encodeList(result,degrees);
@@ -452,8 +450,7 @@ public class UriActiveSearchFilterImpl implements ActiveSearchFilter {
 			searchText = decodeList(split[i++],String.class);
 			states = decodeList(split[i++],String.class);
 			assignees = decodeList(split[i++],Person.class);
-			embargos = decodeList(split[i++],EmbargoType.class);
-			programDates = decodeList(split[i++],Semester.class);
+			embargos = decodeList(split[i++],EmbargoType.class);			
 			semesters = decodeList(split[i++],Semester.class);
 			programDates = decodeList(split[i++],Semester.class);
 			degrees = decodeList(split[i++],String.class);
@@ -536,9 +533,6 @@ public class UriActiveSearchFilterImpl implements ActiveSearchFilter {
 		other.getEmbargoTypes().clear();
 		other.getEmbargoTypes().addAll(this.embargos);
 		
-		other.getProgramDates().clear();
-		other.getProgramDates().addAll(this.programDates);
-		
 		other.getGraduationSemesters().clear();
 		other.getGraduationSemesters().addAll(this.semesters);
 		
@@ -578,8 +572,7 @@ public class UriActiveSearchFilterImpl implements ActiveSearchFilter {
 		this.searchText = new ArrayList<String>(other.getSearchText());
 		this.states = new ArrayList<String>(other.getStates());
 		this.assignees = new ArrayList<Person>(other.getAssignees());
-		this.embargos = new ArrayList<EmbargoType>(other.getEmbargoTypes());
-		this.programDates = new ArrayList<Semester>(other.getProgramDates());
+		this.embargos = new ArrayList<EmbargoType>(other.getEmbargoTypes());		
 		this.semesters = new ArrayList<Semester>(other.getGraduationSemesters());
 		this.programDates = new ArrayList<Semester>(other.getProgramDates());
 		this.degrees = new ArrayList<String>(other.getDegrees());

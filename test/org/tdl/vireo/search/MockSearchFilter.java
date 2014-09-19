@@ -23,8 +23,7 @@ public class MockSearchFilter implements SearchFilter {
 	public List<String> searchText = new ArrayList<String>();
 	public List<String> states = new ArrayList<String>();
 	public List<Person> assignees = new ArrayList<Person>();
-	public List<EmbargoType> embargos = new ArrayList<EmbargoType>();
-	public List<Semester> programDates = new ArrayList<Semester>();
+	public List<EmbargoType> embargos = new ArrayList<EmbargoType>();	
 	public List<Semester> semesters = new ArrayList<Semester>();
 	public List<Semester> programDates = new ArrayList<Semester>();
 	public List<String> degrees = new ArrayList<String>();
@@ -157,31 +156,6 @@ public class MockSearchFilter implements SearchFilter {
 		embargos.remove(type);
 	}
 	
-	@Override
-	public List<Semester> getProgramDates() {
-		return programDates;
-	}
-
-	@Override
-	public void addProgramDate(Semester semester) {
-		programDates.add(semester);
-	}
-
-	@Override
-	public void removeProgramDate(Semester semester) {
-		programDates.remove(semester);
-	}
-
-	@Override
-	public void addProgramDate(Integer year, Integer month) {
-		addProgramDate(new Semester(year,month));
-	}
-
-	@Override
-	public void removeProgramDate(Integer year, Integer month) {
-		removeProgramDate(new Semester(year,month));
-	}
-
 	@Override
 	public List<Semester> getGraduationSemesters() {
 		return semesters;
