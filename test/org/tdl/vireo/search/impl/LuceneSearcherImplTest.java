@@ -817,17 +817,6 @@ public class LuceneSearcherImplTest extends UnitTest{
 			assertEquals("Assignee changed to 'first last'", logs.get(0).getEntry());
 			filter.delete();
 			
-			// Program Date Filter
-			filter = subRepo.createSearchFilter(person, "test-programDate1");
-			filter.addAssignee(otherPerson);
-			filter.addProgramDate(2005,6);
-			filter.save();
-									
-			logs = searcher.actionLogSearch(filter, SearchOrder.ID, SearchDirection.DESCENDING, 0, 20).getResults();
-								
-			assertEquals(sub1.getId(),logs.get(0).getSubmission().getId());
-			filter.delete();
-						
 			// Graduation Semester Filter
 			filter = subRepo.createSearchFilter(person, "test-semester1");
 			filter.addAssignee(otherPerson);
@@ -836,6 +825,17 @@ public class LuceneSearcherImplTest extends UnitTest{
 			
 			logs = searcher.actionLogSearch(filter, SearchOrder.ID, SearchDirection.DESCENDING, 0, 20).getResults();
 			
+			assertEquals(sub1.getId(),logs.get(0).getSubmission().getId());
+			filter.delete();
+			
+			// Program Date Filter
+			filter = subRepo.createSearchFilter(person, "test-programDate3");
+			filter.addAssignee(otherPerson);
+			filter.addProgramDate(2002,05);
+			filter.save();
+						
+			logs = searcher.actionLogSearch(filter, SearchOrder.ID, SearchDirection.DESCENDING, 0, 20).getResults();
+						
 			assertEquals(sub1.getId(),logs.get(0).getSubmission().getId());
 			filter.delete();
 			
