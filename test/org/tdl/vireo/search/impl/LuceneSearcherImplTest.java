@@ -155,7 +155,7 @@ public class LuceneSearcherImplTest extends UnitTest{
 		Submission sub1 = subRepo.createSubmission(person);
 		createSubmission(sub1, "B Title", "This is really important work", "One; Two; Three;", 
 				"committee@email.com", "degree", "department", "program", "college", "major",
-				"documentType", 2002, 5, true, 2005, 5);
+				"documentType", 2002, 5, true, 2005, 6);
 		sub1.setAssignee(otherPerson);
 		sub1.setSubmissionDate(new Date(2012,5,1));
 		sub1.setEmbargoType(embargo2);
@@ -253,17 +253,35 @@ public class LuceneSearcherImplTest extends UnitTest{
 			assertTrue(submissions.contains(sub2));
 			filter.delete();
 			
+			// Program Date Filter
+			filter = subRepo.createSearchFilter(person, "test-programDate1");
+			filter.addProgramDate(2005,6);
+			filter.save();
+				
+			submissions = searcher.submissionSearch(filter, SearchOrder.ID, SearchDirection.ASCENDING, 0, 20).getResults();
+						
+			assertTrue(submissions.contains(sub1));
+			assertFalse(submissions.contains(sub2));
+			filter.delete();
+						
+			// Program Date without month Filter
+			filter = subRepo.createSearchFilter(person, "test-programDate2");
+			filter.addProgramDate(2003,5);
+			filter.save();
+				
+			submissions = searcher.submissionSearch(filter, SearchOrder.ID, SearchDirection.ASCENDING, 0, 20).getResults();
+						
+			assertFalse(submissions.contains(sub1));
+			assertTrue(submissions.contains(sub2));
+			filter.delete();
+			
 			// Graduation Semester Filter
 			filter = subRepo.createSearchFilter(person, "test-gradSemester1");
 			filter.addGraduationSemester(2002,5);
 			filter.save();
-			
-			Logger.info(filter + " ***** ");
-						
+									
 			submissions = searcher.submissionSearch(filter, SearchOrder.ID, SearchDirection.ASCENDING, 0, 20).getResults();
-			
-			Logger.info(submissions + " ***** ");
-			
+						
 			assertTrue(submissions.contains(sub1));
 			assertFalse(submissions.contains(sub2));
 			filter.delete();
@@ -271,28 +289,6 @@ public class LuceneSearcherImplTest extends UnitTest{
 			// Graduation Semester without month Filter
 			filter = subRepo.createSearchFilter(person, "test-gradSemester2");
 			filter.addGraduationSemester(2003,6);
-			filter.save();
-	
-			submissions = searcher.submissionSearch(filter, SearchOrder.ID, SearchDirection.ASCENDING, 0, 20).getResults();
-			
-			assertFalse(submissions.contains(sub1));
-			assertTrue(submissions.contains(sub2));
-			filter.delete();
-			
-			// Program Date Filter
-			filter = subRepo.createSearchFilter(person, "test-programDate1");
-			filter.addProgramDate(2005,5);
-			filter.save();
-			
-			submissions = searcher.submissionSearch(filter, SearchOrder.ID, SearchDirection.ASCENDING, 0, 20).getResults();
-			
-			assertTrue(submissions.contains(sub1));
-			assertFalse(submissions.contains(sub2));
-			filter.delete();
-			
-			// Program Date without month Filter
-			filter = subRepo.createSearchFilter(person, "test-programDate2");
-			filter.addProgramDate(2003,5);
 			filter.save();
 	
 			submissions = searcher.submissionSearch(filter, SearchOrder.ID, SearchDirection.ASCENDING, 0, 20).getResults();
@@ -427,7 +423,7 @@ public class LuceneSearcherImplTest extends UnitTest{
 		Submission sub1 = subRepo.createSubmission(person);
 		createSubmission(sub1, "B Title", "This is really important work", "One; Two; Three;", 
 				"committee@email.com", "degree", "department", "program", "college", "major",
-				"documentType", 2012, 5, true, 2005, 5);
+				"documentType", 2012, 5, true, 2005, 6);
 		sub1.setAssignee(otherPerson);
 
 		sub1.setDocumentLanguage("ak");
@@ -724,7 +720,7 @@ public class LuceneSearcherImplTest extends UnitTest{
 		Submission sub1 = subRepo.createSubmission(person);
 		createSubmission(sub1, "B UniqueTitle B", "This is really important work", "One; Two; Three;", 
 				"committee@email.com", "degree", "department", "program", "college", "major",
-				"documentType", 2002, 5, true, 2005, 5);
+				"documentType", 2002, 5, true, 2005, 6);
 		sub1.setAssignee(otherPerson);
 		sub1.setSubmissionDate(new Date(2012,5,1));
 		sub1.setEmbargoType(embargo2);
@@ -821,6 +817,17 @@ public class LuceneSearcherImplTest extends UnitTest{
 			assertEquals("Assignee changed to 'first last'", logs.get(0).getEntry());
 			filter.delete();
 			
+			// Program Date Filter
+			filter = subRepo.createSearchFilter(person, "test-programDate1");
+			filter.addAssignee(otherPerson);
+			filter.addProgramDate(2005,6);
+			filter.save();
+									
+			logs = searcher.actionLogSearch(filter, SearchOrder.ID, SearchDirection.DESCENDING, 0, 20).getResults();
+								
+			assertEquals(sub1.getId(),logs.get(0).getSubmission().getId());
+			filter.delete();
+						
 			// Graduation Semester Filter
 			filter = subRepo.createSearchFilter(person, "test-semester1");
 			filter.addAssignee(otherPerson);
@@ -829,17 +836,6 @@ public class LuceneSearcherImplTest extends UnitTest{
 			
 			logs = searcher.actionLogSearch(filter, SearchOrder.ID, SearchDirection.DESCENDING, 0, 20).getResults();
 			
-			assertEquals(sub1.getId(),logs.get(0).getSubmission().getId());
-			filter.delete();
-			
-			// Program Date Filter
-			filter = subRepo.createSearchFilter(person, "test-programDate");
-			filter.addAssignee(otherPerson);
-			filter.addProgramDate(2005,5);
-			filter.save();
-						
-			logs = searcher.actionLogSearch(filter, SearchOrder.ID, SearchDirection.DESCENDING, 0, 20).getResults();
-					
 			assertEquals(sub1.getId(),logs.get(0).getSubmission().getId());
 			filter.delete();
 			

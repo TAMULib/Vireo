@@ -125,7 +125,7 @@ public class JpaNamedSearchFilterImpl extends JpaAbstractModel<JpaNamedSearchFil
 	@CollectionTable(
 			name="search_filter_semesters",
 			joinColumns=@JoinColumn(name="search_filter_id"))
-	public List<String> semesters;	
+	public List<String> semesters;
 	
 	@Transient
 	public List<Semester> cachedSemesters;
@@ -294,7 +294,7 @@ public class JpaNamedSearchFilterImpl extends JpaAbstractModel<JpaNamedSearchFil
 		}
 		// 2) ProgramDates
 		cachedProgramDates = new ArrayList<Semester>();
-		for(String semesterString : semesters) {
+		for(String semesterString : programDates) {
 					
 			String[] split = semesterString.split("/");
 				
@@ -603,7 +603,7 @@ public class JpaNamedSearchFilterImpl extends JpaAbstractModel<JpaNamedSearchFil
 	public void removeGraduationSemester(Integer year, Integer month) {
 		removeGraduationSemester(new Semester(year,month));
 	}
-	
+
 	@Override
 	public List<String> getDegrees() {
 		return degrees;

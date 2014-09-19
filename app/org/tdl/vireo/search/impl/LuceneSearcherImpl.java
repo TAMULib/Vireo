@@ -3,7 +3,6 @@ package org.tdl.vireo.search.impl;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
