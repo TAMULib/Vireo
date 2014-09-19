@@ -141,8 +141,7 @@ public class JpaNamedSearchFilterImplTest extends UnitTest {
 		
 		assertEquals(1,filter1.getAssignees().size());
 		assertEquals(1,filter2.getAssignees().size());
-		
-		
+				
 		filter1.delete();
 		filter2.delete();
 		otherPerson.delete();
@@ -201,12 +200,14 @@ public class JpaNamedSearchFilterImplTest extends UnitTest {
 	public void testFindByCreatorOrPublic() {
 		
 		Person otherPerson = personRepo.createPerson("other", "other@email.com", "first", "last", RoleType.NONE).save();
+	
 		
 		NamedSearchFilter filter1 = subRepo.createSearchFilter(otherPerson, "public other person").save();
 		filter1.setPublic(true);
 		filter1.save();
 		NamedSearchFilter filter2 = subRepo.createSearchFilter(otherPerson, "private other person").save();
 		NamedSearchFilter filter3 = subRepo.createSearchFilter(person, "person").save();
+			
 				
 		List<NamedSearchFilter> filters = subRepo.findSearchFiltersByCreatorOrPublic(person);
 		
@@ -230,6 +231,7 @@ public class JpaNamedSearchFilterImplTest extends UnitTest {
 
 		NamedSearchFilter filter1 = subRepo.createSearchFilter(person, "filter").save();
 		NamedSearchFilter filter2 = subRepo.createSearchFilter(otherPerson, "filter").save();
+
 				
 		NamedSearchFilter retrieved1 = subRepo.findSearchFilterByCreatorAndName(person, "filter");
 		NamedSearchFilter retrieved2 = subRepo.findSearchFilterByCreatorAndName(otherPerson, "filter");
@@ -318,10 +320,10 @@ public class JpaNamedSearchFilterImplTest extends UnitTest {
 		filter.addAssignee(otherPerson);
 		filter.addEmbargoType(embargo1);
 		filter.addEmbargoType(embargo2);
-		filter.addProgramDate(2002,05);
-		filter.addProgramDate(2002,null);
 		filter.addGraduationSemester(2002,05);
 		filter.addGraduationSemester(2002,null);
+		filter.addProgramDate(2002,05);
+		filter.addProgramDate(2002,null);
 		filter.addDegree("degree1");
 		filter.addDegree("degree2");
 		filter.addDepartment("dept1");

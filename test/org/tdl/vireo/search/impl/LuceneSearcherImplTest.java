@@ -36,7 +36,6 @@ import org.tdl.vireo.state.StateManager;
 import play.db.jpa.JPA;
 import play.modules.spring.Spring;
 import play.test.UnitTest;
-import play.Logger;
 
 /**
  * Test the lucene searcher for both submissions and action logs.
@@ -123,6 +122,7 @@ public class LuceneSearcherImplTest extends UnitTest{
 	 */
 	@Test
 	public void testActionLogIDSearch() {
+
 		
 		SearchFilter filter = Spring.getBeanOfType(UriActiveSearchFilterImpl.class);
 		
@@ -155,7 +155,7 @@ public class LuceneSearcherImplTest extends UnitTest{
 		Submission sub1 = subRepo.createSubmission(person);
 		createSubmission(sub1, "B Title", "This is really important work", "One; Two; Three;", 
 				"committee@email.com", "degree", "department", "program", "college", "major",
-				"documentType", 2002, 5, true, 2005, 6);
+				"documentType", 2002, 5, true, 2002, 5);
 		sub1.setAssignee(otherPerson);
 		sub1.setSubmissionDate(new Date(2012,5,1));
 		sub1.setEmbargoType(embargo2);
@@ -165,7 +165,7 @@ public class LuceneSearcherImplTest extends UnitTest{
 		Submission sub2 = subRepo.createSubmission(person);
 		createSubmission(sub2, "A Title", "I really like this work", "One; Four; Five;", 
 				"anotherCommittee@email.com", "another", "another", "another", "another", "another",
-				"another", 2003, 6, null, 2003, 5);
+				"another", 2003, 6, null, 2003, 6);
 		sub2.setSubmissionDate(new Date(2005,5,1));
 		sub2.setEmbargoType(embargo1);
 		sub2.save();
@@ -296,7 +296,7 @@ public class LuceneSearcherImplTest extends UnitTest{
 			assertFalse(submissions.contains(sub1));
 			assertTrue(submissions.contains(sub2));
 			filter.delete();
-						
+			
 			// Degree Filter
 			filter = subRepo.createSearchFilter(person, "test-degree");
 			filter.addDegree("degree");
@@ -423,7 +423,7 @@ public class LuceneSearcherImplTest extends UnitTest{
 		Submission sub1 = subRepo.createSubmission(person);
 		createSubmission(sub1, "B Title", "This is really important work", "One; Two; Three;", 
 				"committee@email.com", "degree", "department", "program", "college", "major",
-				"documentType", 2012, 5, true, 2005, 6);
+				"documentType", 2012, 5, true, 2012, 5);
 		sub1.setAssignee(otherPerson);
 
 		sub1.setDocumentLanguage("ak");
@@ -450,7 +450,7 @@ public class LuceneSearcherImplTest extends UnitTest{
 		Submission sub2 = subRepo.createSubmission(otherPerson);
 		createSubmission(sub2, "A Title", "I really like this work", "One; Four; Five;", 
 				"anotherCommittee@email.com", "another", "another", "another", "another", "another",
-				"another", 2005, 4, null, 2003, 5);
+				"another", 2005, 4, null, 2005, 4);
 		
 		sub2.setDocumentLanguage("aa");
 		sub2.addDocumentSubject("AAA");
@@ -582,12 +582,6 @@ public class LuceneSearcherImplTest extends UnitTest{
 			assertTrue(submissions.contains(sub2));
 			assertTrue(submissions.indexOf(sub1) < submissions.indexOf(sub2));
 
-			// Program Date
-			submissions = searcher.submissionSearch(filter, SearchOrder.PROGRAM_DATE, SearchDirection.DESCENDING, 0, 20).getResults();
-			assertTrue(submissions.contains(sub1));
-			assertTrue(submissions.contains(sub2));
-			assertTrue(submissions.indexOf(sub1) < submissions.indexOf(sub2));
-			
 			// License Agreement Date
 			submissions = searcher.submissionSearch(filter, SearchOrder.LICENSE_AGREEMENT_DATE, SearchDirection.DESCENDING, 0, 20).getResults();
 			assertTrue(submissions.contains(sub1));
@@ -632,6 +626,12 @@ public class LuceneSearcherImplTest extends UnitTest{
 			
 			// Graduation Date
 			submissions = searcher.submissionSearch(filter, SearchOrder.GRADUATION_DATE, SearchDirection.DESCENDING, 0, 20).getResults();
+			assertTrue(submissions.contains(sub1));
+			assertTrue(submissions.contains(sub2));
+			assertTrue(submissions.indexOf(sub1) < submissions.indexOf(sub2));
+			
+			// Program Date
+			submissions = searcher.submissionSearch(filter, SearchOrder.PROGRAM_DATE, SearchDirection.DESCENDING, 0, 20).getResults();
 			assertTrue(submissions.contains(sub1));
 			assertTrue(submissions.contains(sub2));
 			assertTrue(submissions.indexOf(sub1) < submissions.indexOf(sub2));
@@ -720,7 +720,7 @@ public class LuceneSearcherImplTest extends UnitTest{
 		Submission sub1 = subRepo.createSubmission(person);
 		createSubmission(sub1, "B UniqueTitle B", "This is really important work", "One; Two; Three;", 
 				"committee@email.com", "degree", "department", "program", "college", "major",
-				"documentType", 2002, 5, true, 2005, 6);
+				"documentType", 2002, 5, true, 2002, 5);
 		sub1.setAssignee(otherPerson);
 		sub1.setSubmissionDate(new Date(2012,5,1));
 		sub1.setEmbargoType(embargo2);
@@ -729,7 +729,7 @@ public class LuceneSearcherImplTest extends UnitTest{
 		Submission sub2 = subRepo.createSubmission(person);
 		createSubmission(sub2, "A UniqueTitle A", "I really like this work", "One; Four; Five;", 
 				"anotherCommittee@email.com", "another", "another", "another", "another", "another",
-				"another", 2003, 6, null, 2003, 5);
+				"another", 2003, 6, null, 2003, 6);
 		sub2.setSubmissionDate(new Date(2005,5,1));
 		sub2.setEmbargoType(embargo1);
 		sub2.setAssignee(otherPerson);
@@ -955,7 +955,7 @@ public class LuceneSearcherImplTest extends UnitTest{
 			String keywords, String committeeEmail,
 			String degree, String department, String program,
 			String college, String major, String documentType,
-			Integer gradYear, Integer gradMonth, Boolean UMIRelease, 
+			Integer gradYear, Integer gradMonth, Boolean UMIRelease,
 			Integer programYear, Integer programMonth) {
 	
 		sub.setDocumentTitle(title);

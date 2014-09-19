@@ -46,8 +46,8 @@ public class UriActiveSearchFilterImpl implements ActiveSearchFilter {
 	public List<String> states = new ArrayList<String>();
 	public List<Person> assignees = new ArrayList<Person>();
 	public List<EmbargoType> embargos = new ArrayList<EmbargoType>();
-	public List<Semester> programDates = new ArrayList<Semester>();
 	public List<Semester> semesters = new ArrayList<Semester>();
+	public List<Semester> programDates = new ArrayList<Semester>();
 	public List<String> degrees = new ArrayList<String>();
 	public List<String> departments = new ArrayList<String>();
 	public List<String> programs = new ArrayList<String>();
@@ -251,12 +251,12 @@ public class UriActiveSearchFilterImpl implements ActiveSearchFilter {
 	
 	@Override
 	public void addProgramDate(Integer year, Integer month) {
-		addProgramDate(new Semester(year,month));
+		addGraduationSemester(new Semester(year,month));
 	}
 	
 	@Override
 	public void removeProgramDate(Integer year, Integer month) {
-		removeProgramDate(new Semester(year,month));
+		removeGraduationSemester(new Semester(year,month));
 	}
 	
 	@Override
@@ -405,8 +405,8 @@ public class UriActiveSearchFilterImpl implements ActiveSearchFilter {
 		encodeList(result,states);
 		encodeList(result,assignees);
 		encodeList(result,embargos);
-		encodeList(result,programDates);
 		encodeList(result,semesters);
+		encodeList(result,programDates);
 		encodeList(result,degrees);
 		encodeList(result,departments);
 		encodeList(result,colleges);
@@ -437,8 +437,8 @@ public class UriActiveSearchFilterImpl implements ActiveSearchFilter {
 	public void decode(String encoded) {
 		try {
 			String[] split = encoded.split(":",-1);
-			if (split.length != 21)
-				throw new IllegalArgumentException("Unable to decode active search filter because it does not have the 21 expected number of components instead it has "+split.length+" "+encoded);
+			if (split.length != 20)
+				throw new IllegalArgumentException("Unable to decode active search filter because it does not have the 20 expected number of components instead it has "+split.length);
 
 			// Decode all the lists
 			int i = 1;
@@ -450,8 +450,8 @@ public class UriActiveSearchFilterImpl implements ActiveSearchFilter {
 			states = decodeList(split[i++],String.class);
 			assignees = decodeList(split[i++],Person.class);
 			embargos = decodeList(split[i++],EmbargoType.class);
-			programDates = decodeList(split[i++],Semester.class);
 			semesters = decodeList(split[i++],Semester.class);
+			programDates = decodeList(split[i++],Semester.class);
 			degrees = decodeList(split[i++],String.class);
 			departments = decodeList(split[i++],String.class);
 			colleges = decodeList(split[i++],String.class);
@@ -532,11 +532,11 @@ public class UriActiveSearchFilterImpl implements ActiveSearchFilter {
 		other.getEmbargoTypes().clear();
 		other.getEmbargoTypes().addAll(this.embargos);
 		
-		other.getProgramDates().clear();
-		other.getProgramDates().addAll(this.programDates);
-		
 		other.getGraduationSemesters().clear();
 		other.getGraduationSemesters().addAll(this.semesters);
+		
+		other.getProgramDates().clear();
+		other.getProgramDates().addAll(this.programDates);
 		
 		other.getDegrees().clear();
 		other.getDegrees().addAll(this.degrees);
@@ -572,8 +572,8 @@ public class UriActiveSearchFilterImpl implements ActiveSearchFilter {
 		this.states = new ArrayList<String>(other.getStates());
 		this.assignees = new ArrayList<Person>(other.getAssignees());
 		this.embargos = new ArrayList<EmbargoType>(other.getEmbargoTypes());
-		this.programDates = new ArrayList<Semester>(other.getProgramDates());
 		this.semesters = new ArrayList<Semester>(other.getGraduationSemesters());
+		this.programDates = new ArrayList<Semester>(other.getProgramDates());
 		this.degrees = new ArrayList<String>(other.getDegrees());
 		this.departments = new ArrayList<String>(other.getDepartments());
 		this.colleges = new ArrayList<String>(other.getColleges());

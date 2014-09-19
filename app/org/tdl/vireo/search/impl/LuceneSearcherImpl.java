@@ -92,15 +92,18 @@ public class LuceneSearcherImpl implements Searcher {
 		SORT_SUB_FIELDS[SearchOrder.REVIEWER_NOTES.ordinal()] = "reviewerNotes";
 		SORT_SUB_FIELDS[SearchOrder.LAST_EVENT_ENTRY.ordinal()] = "lastEventEntry";
 		SORT_SUB_FIELDS[SearchOrder.LAST_EVENT_TIME.ordinal()] = "lastEventTime";
+		SORT_SUB_FIELDS[SearchOrder.PROGRAM_DATE.ordinal()] = "programDate";
 		
 		// Sort fields for action logs
 		for (int i=0; i < SearchOrder.values().length; i++) 
 			SORT_LOG_FIELDS[i] = SORT_SUB_FIELDS[i];
+		
 		SORT_LOG_FIELDS[SearchOrder.ID.ordinal()] = "logId";
 
 		// Sort types for both submissions and action logs
 		for (int i=0; i < SearchOrder.values().length; i++) 
 			SORT_TYPES[i] = SortField.STRING;
+		
 		SORT_TYPES[SearchOrder.ID.ordinal()] = SortField.LONG;
 		SORT_TYPES[SearchOrder.PROGRAM_DATE.ordinal()] = SortField.LONG;
 		SORT_TYPES[SearchOrder.GRADUATION_DATE.ordinal()] = SortField.LONG;
@@ -112,6 +115,7 @@ public class LuceneSearcherImpl implements Searcher {
 		SORT_TYPES[SearchOrder.COMMITTEE_EMBARGO_APPROVAL_DATE.ordinal()] = SortField.LONG;
 		SORT_TYPES[SearchOrder.CUSTOM_ACTIONS.ordinal()] = SortField.INT;
 		SORT_TYPES[SearchOrder.LAST_EVENT_TIME.ordinal()] = SortField.LONG;
+		SORT_TYPES[SearchOrder.PROGRAM_DATE.ordinal()] = SortField.LONG;
 	}
 	
 	// Spring dependencies
@@ -325,11 +329,6 @@ public class LuceneSearcherImpl implements Searcher {
 		return null;
 	}
 
-	
-	
-	
-	
-	
 	/**
 	 * This method produces the common part of the query handle the filter search clauses. 
 	 * 
@@ -452,6 +451,26 @@ public class LuceneSearcherImpl implements Searcher {
 					cal.set(Calendar.MONTH,semester.month);
 				}
 				orQuery.add(new TermQuery(new Term("graduationSemester", NumericUtils.longToPrefixCoded(cal.getTimeInMillis()))), Occur.SHOULD);
+			}
+			andQuery.add(orQuery,Occur.MUST);
+		}
+		
+		// Program Date Filter
+		if (filter.getProgramDates().size() > 0) {
+			BooleanQuery orQuery = new BooleanQuery();
+			for(Semester semester : filter.getProgramDates()) {
+				
+				// We can't index it if it dosn't have a date.
+				if (semester.year == null)
+					continue;
+				
+				Calendar cal = Calendar.getInstance();
+				cal.clear();
+				cal.set(Calendar.YEAR, semester.year);
+				if (semester.month != null) {
+					cal.set(Calendar.MONTH,semester.month);
+				}
+				orQuery.add(new TermQuery(new Term("programDate", NumericUtils.longToPrefixCoded(cal.getTimeInMillis()))), Occur.SHOULD);
 			}
 			andQuery.add(orQuery,Occur.MUST);
 		}
@@ -588,8 +607,7 @@ public class LuceneSearcherImpl implements Searcher {
 			this.results = results;
 			this.total = total;
 		}
-		
-		
+				
 		@Override
 		public SearchFilter getFilter() {
 			return filter;
@@ -687,12 +705,8 @@ public class LuceneSearcherImpl implements Searcher {
 			if (sortedIds.indexOf(aId) < sortedIds.indexOf(bId))
 				return -1;
 			return 1;
-		}
-		
+		}		
 	}
-	
-	
-	
 }
 
 

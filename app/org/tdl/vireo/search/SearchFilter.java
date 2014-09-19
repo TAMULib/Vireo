@@ -205,18 +205,18 @@ public interface SearchFilter {
 
 	/**
 	 * @param program
-	 *            The program semester to add to the filter.
+	 *            The program date to add to the filter.
 	 */
 	public void addProgramDate(Semester semester);
 
 	/**
 	 * @param program
-	 *            The program semester to remove from the filter.
+	 *            The program date to remove from the filter.
 	 */
 	public void removeProgramDate(Semester semester);
 
 	/**
-	 * Add a program semester with the provided year and month.
+	 * Add a program date with the provided year and month.
 	 * 
 	 * @param year
 	 *            The program year.
@@ -226,7 +226,7 @@ public interface SearchFilter {
 	public void addProgramDate(Integer year, Integer month);
 
 	/**
-	 * Remove a program semester with the provided year and month.
+	 * Remove a program date with the provided year and month.
 	 * 
 	 * @param year
 	 *            The program year.

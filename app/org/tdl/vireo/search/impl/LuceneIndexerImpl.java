@@ -87,6 +87,7 @@ import play.Play;
  * submissionDate: The submission date for the submission as a numeric date
  * stored as milliseconds.
  * 
+ * programDate: The program year & month converted into a date object and
  * 
  * 
  * ONLY USED FOR SORTING:
