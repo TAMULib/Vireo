@@ -112,6 +112,8 @@ import play.Play;
  * 
  * primaryDocument: The name of the primary document for sorting.
  * 
+ * programDate: The date the program was approved for sorting.
+ * 
  * licenseAgreementDate: The date the license was agreed too for sorting.
  * 
  * approvalDate: The date the submission was approved for sorting.
