@@ -248,6 +248,7 @@ public class JpaNamedSearchFilterImpl extends JpaAbstractModel<JpaNamedSearchFil
 			
 			semesters.add(value);
 		}
+
 		// 2) Program Date
 		programDates.clear();
 		for(Semester semester : cachedProgramDates) {
@@ -258,9 +259,9 @@ public class JpaNamedSearchFilterImpl extends JpaAbstractModel<JpaNamedSearchFil
 				value = "null";
 			else
 				value = String.valueOf(semester.year);
-					
+			
 			value += "/";
-					
+			
 			if (semester.month == null)
 				value += "null";
 			else
@@ -303,7 +304,7 @@ public class JpaNamedSearchFilterImpl extends JpaAbstractModel<JpaNamedSearchFil
 				semester.year = Integer.valueOf(split[0]);
 			if (!"null".equals(split[1]))
 				semester.month = Integer.valueOf(split[1]);
-					
+			
 			cachedProgramDates.add(semester);
 		}
 	}

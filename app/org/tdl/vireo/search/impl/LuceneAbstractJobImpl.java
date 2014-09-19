@@ -429,9 +429,6 @@ public abstract class LuceneAbstractJobImpl extends Job {
 		if (primaryDocument != null)
 		doc.add(new Field("primaryDocument",primaryDocument, Field.Store.NO,Index.NOT_ANALYZED));
 		
-		if (programDate != null)
-		doc.add(new NumericField("programDate",Field.Store.NO,true).setLongValue(programDate.getTime()));
-		
 		if (licenseAgreementDate != null)
 		doc.add(new NumericField("licenseAgreementDate",Field.Store.NO,true).setLongValue(licenseAgreementDate.getTime()));
 		
@@ -569,9 +566,6 @@ public abstract class LuceneAbstractJobImpl extends Job {
 			
 			if (primaryDocument != null)
 			doc.add(new Field("primaryDocument",primaryDocument, Field.Store.NO,Index.NOT_ANALYZED));
-			
-			if (programDate != null)
-			doc.add(new NumericField("programDate",Field.Store.NO,true).setLongValue(programDate.getTime()));
 			
 			if (licenseAgreementDate != null)
 			doc.add(new NumericField("licenseAgreementDate",Field.Store.NO,true).setLongValue(licenseAgreementDate.getTime()));

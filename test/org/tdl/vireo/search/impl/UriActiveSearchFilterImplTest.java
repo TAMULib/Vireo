@@ -75,6 +75,8 @@ public class UriActiveSearchFilterImplTest extends UnitTest {
 		filter.addAssignee(null); // unassigned
 		filter.addEmbargoType(embargo1);
 		filter.addEmbargoType(embargo2);
+		filter.addProgramDate(2002,05);
+		filter.addProgramDate(2002,null);
 		filter.addGraduationSemester(2002,05);
 		filter.addGraduationSemester(2002,null);
 		filter.addProgramDate(2002,05);
@@ -111,14 +113,17 @@ public class UriActiveSearchFilterImplTest extends UnitTest {
 		assertEquals(null,filter.getAssignees().get(2));
 		assertEquals(embargo1, filter.getEmbargoTypes().get(0));
 		assertEquals(embargo2, filter.getEmbargoTypes().get(1));
+		
 		assertEquals(Integer.valueOf(2002),filter.getGraduationSemesters().get(0).year);
 		assertEquals(Integer.valueOf(05),filter.getGraduationSemesters().get(0).month);
 		assertEquals(Integer.valueOf(2002),filter.getGraduationSemesters().get(1).year);
 		assertNull(filter.getGraduationSemesters().get(1).month);
+
 		assertEquals(Integer.valueOf(2002),filter.getProgramDates().get(0).year);
 		assertEquals(Integer.valueOf(05),filter.getProgramDates().get(0).month);
 		assertEquals(Integer.valueOf(2002),filter.getProgramDates().get(1).year);
 		assertNull(filter.getProgramDates().get(1).month);
+
 		assertEquals("degree1",filter.getDegrees().get(0));
 		assertEquals("degree2",filter.getDegrees().get(1));
 		assertEquals("dept1",filter.getDepartments().get(0));
@@ -178,6 +183,8 @@ public class UriActiveSearchFilterImplTest extends UnitTest {
 			filter.addAssignee(null);
 			filter.addEmbargoType(embargo1);
 			filter.addEmbargoType(embargo2);
+			filter.addProgramDate(2002,05);
+			filter.addProgramDate(2002,null);
 			filter.addGraduationSemester(2002,05);
 			filter.addGraduationSemester(2002,null);
 			filter.addProgramDate(2002,05);
@@ -233,10 +240,12 @@ public class UriActiveSearchFilterImplTest extends UnitTest {
 			assertEquals(Integer.valueOf(05),filter.getGraduationSemesters().get(0).month);
 			assertEquals(Integer.valueOf(2002),filter.getGraduationSemesters().get(1).year);
 			assertNull(filter.getGraduationSemesters().get(1).month);
+
 			assertEquals(Integer.valueOf(2002),filter.getProgramDates().get(0).year);
 			assertEquals(Integer.valueOf(05),filter.getProgramDates().get(0).month);
 			assertEquals(Integer.valueOf(2002),filter.getProgramDates().get(1).year);
 			assertNull(filter.getProgramDates().get(1).month);
+
 			assertEquals("degree1",newFilter.getDegrees().get(0));
 			assertEquals("degree2",newFilter.getDegrees().get(1));
 			assertEquals("dept1",newFilter.getDepartments().get(0));
@@ -285,6 +294,7 @@ public class UriActiveSearchFilterImplTest extends UnitTest {
 		assertEquals(0,newFilter.getStates().size());
 		assertEquals(0,newFilter.getAssignees().size());
 		assertEquals(0,newFilter.getEmbargoTypes().size());
+		assertEquals(0,newFilter.getProgramDates().size());
 		assertEquals(0,newFilter.getGraduationSemesters().size());
 		assertEquals(0,newFilter.getProgramDates().size());
 		assertEquals(0,newFilter.getDegrees().size());
@@ -336,6 +346,8 @@ public class UriActiveSearchFilterImplTest extends UnitTest {
 		filter.addAssignee(null);
 		filter.addEmbargoType(embargo1);
 		filter.addEmbargoType(embargo2);
+		filter.addProgramDate(2002,05);
+		filter.addProgramDate(2002,null);
 		filter.addGraduationSemester(2002,05);
 		filter.addGraduationSemester(2002,null);
 		filter.addProgramDate(2002,05);
@@ -375,14 +387,17 @@ public class UriActiveSearchFilterImplTest extends UnitTest {
 		assertEquals(null,newFilter.getAssignees().get(2));
 		assertEquals(embargo1,newFilter.getEmbargoTypes().get(0));
 		assertEquals(embargo2,newFilter.getEmbargoTypes().get(1));
+				
 		assertEquals(Integer.valueOf(2002),filter.getGraduationSemesters().get(0).year);
 		assertEquals(Integer.valueOf(05),filter.getGraduationSemesters().get(0).month);
 		assertEquals(Integer.valueOf(2002),filter.getGraduationSemesters().get(1).year);
 		assertNull(filter.getGraduationSemesters().get(1).month);
+
 		assertEquals(Integer.valueOf(2002),filter.getProgramDates().get(0).year);
 		assertEquals(Integer.valueOf(05),filter.getProgramDates().get(0).month);
 		assertEquals(Integer.valueOf(2002),filter.getProgramDates().get(1).year);
 		assertNull(filter.getProgramDates().get(1).month);
+
 		assertEquals("degree1",newFilter.getDegrees().get(0));
 		assertEquals("degree2",newFilter.getDegrees().get(1));
 		assertEquals("dept1",newFilter.getDepartments().get(0));
@@ -437,6 +452,8 @@ public class UriActiveSearchFilterImplTest extends UnitTest {
 		filter.addAssignee(null);
 		filter.addEmbargoType(embargo1);
 		filter.addEmbargoType(embargo2);
+		filter.addProgramDate(2002,05);
+		filter.addProgramDate(2002,null);
 		filter.addGraduationSemester(2002,05);
 		filter.addGraduationSemester(2002,null);
 		filter.addProgramDate(2002,05);
@@ -476,14 +493,17 @@ public class UriActiveSearchFilterImplTest extends UnitTest {
 		assertEquals(null,newFilter.getAssignees().get(2));
 		assertEquals(embargo1, newFilter.getEmbargoTypes().get(0));
 		assertEquals(embargo2, newFilter.getEmbargoTypes().get(1));
+				
 		assertEquals(Integer.valueOf(2002),filter.getGraduationSemesters().get(0).year);
 		assertEquals(Integer.valueOf(05),filter.getGraduationSemesters().get(0).month);
 		assertEquals(Integer.valueOf(2002),filter.getGraduationSemesters().get(1).year);
 		assertNull(filter.getGraduationSemesters().get(1).month);
+
 		assertEquals(Integer.valueOf(2002),filter.getProgramDates().get(0).year);
 		assertEquals(Integer.valueOf(05),filter.getProgramDates().get(0).month);
 		assertEquals(Integer.valueOf(2002),filter.getProgramDates().get(1).year);
 		assertNull(filter.getProgramDates().get(1).month);
+
 		assertEquals("degree1",newFilter.getDegrees().get(0));
 		assertEquals("degree2",newFilter.getDegrees().get(1));
 		assertEquals("dept1",newFilter.getDepartments().get(0));
@@ -519,8 +539,7 @@ public class UriActiveSearchFilterImplTest extends UnitTest {
 		assertEquals("one\\,two",filter.unescape(filter.escape("one\\,two")));
 		assertEquals("one%,two",filter.unescape(filter.escape("one%,two")));
 		assertEquals("one%2C,two",filter.unescape(filter.escape("one%2C,two")));
-		
-		
+				
 		// Check that comas and colons do not come through.
 		assertFalse(filter.escape("one,two").contains(","));
 		assertFalse(filter.escape("one:two").contains(":"));
@@ -552,8 +571,6 @@ public class UriActiveSearchFilterImplTest extends UnitTest {
 		List<String> result = filter.decodeList("one,two", String.class);
 		assertEquals("one",result.get(0));
 		assertEquals("two",result.get(1));
-		assertEquals(2,result.size());
-		
-	}
-	
+		assertEquals(2,result.size());		
+	}	
 }
