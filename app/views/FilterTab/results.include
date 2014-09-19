@@ -282,6 +282,15 @@ in results.
                              out.print(sub.getLastLogDate().format("MM/dd/yyyy hh:mm:ss a"));
                      }
                      break;
+                 case PROGRAM_DATE:
+                     String monthName = null;
+                     if (sub.getProgramMonth() != null && sub.getProgramMonth() >= 0 && sub.getProgramMonth() <= 11)
+                        monthName = new java.text.DateFormatSymbols().getMonths()[sub.getProgramMonth()]; 
+                     if (sub.getProgramYear() != null)
+                        out.print(sub.getProgramYear());
+                     if (monthName != null)
+                        out.print(" "+monthName);
+                     break;
 
                      
              } // switch (column)

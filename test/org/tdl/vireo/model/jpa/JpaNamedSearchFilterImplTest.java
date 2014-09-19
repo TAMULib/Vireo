@@ -141,8 +141,7 @@ public class JpaNamedSearchFilterImplTest extends UnitTest {
 		
 		assertEquals(1,filter1.getAssignees().size());
 		assertEquals(1,filter2.getAssignees().size());
-		
-		
+				
 		filter1.delete();
 		filter2.delete();
 		otherPerson.delete();
@@ -323,6 +322,8 @@ public class JpaNamedSearchFilterImplTest extends UnitTest {
 		filter.addEmbargoType(embargo2);
 		filter.addGraduationSemester(2002,05);
 		filter.addGraduationSemester(2002,null);
+		filter.addProgramDate(2002,05);
+		filter.addProgramDate(2002,null);
 		filter.addDegree("degree1");
 		filter.addDegree("degree2");
 		filter.addDepartment("dept1");
@@ -378,6 +379,19 @@ public class JpaNamedSearchFilterImplTest extends UnitTest {
 		}
 		assertTrue(foundSemester1);
 		assertTrue(foundSemester2);
+		
+		assertTrue(retrieved.getProgramDates().size() == 2);
+		boolean foundProgramDate1 = false;
+		boolean foundProgramDate2 = false;
+		for (Semester semester : retrieved.getProgramDates()) {
+			if (semester.year == 2002 && semester.month == null)
+				foundProgramDate2 = true;
+			else if (semester.year == 2002 && semester.month == 5)
+				foundProgramDate1 = true;
+		}
+		assertTrue(foundProgramDate1);
+		assertTrue(foundProgramDate2);
+		
 		assertTrue(retrieved.getDegrees().contains("degree1"));
 		assertTrue(retrieved.getDegrees().contains("degree2"));
 		assertFalse(retrieved.getDegrees().contains("degree3"));

@@ -26,7 +26,7 @@ public enum SearchOrder {
 	
 	PRIMARY_DOCUMENT(13),
 	
-	GRADUATION_DATE(14),
+	GRADUATION_DATE(14),	
 	DEFENSE_DATE(15),
 	SUBMISSION_DATE(16),
 	LICENSE_AGREEMENT_DATE(17),
@@ -57,7 +57,9 @@ public enum SearchOrder {
 	REVIEWER_NOTES(34),
 	
 	LAST_EVENT_ENTRY(35),
-	LAST_EVENT_TIME(36);
+	LAST_EVENT_TIME(36),
+	
+	PROGRAM_DATE(37);
 	
 	
 	// The id for this search order.
