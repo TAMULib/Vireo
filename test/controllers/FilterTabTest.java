@@ -116,9 +116,9 @@ public class FilterTabTest extends AbstractVireoFunctionalTest {
 			GET(FILTER_URL+"?action=add&type=assignee&value="+reviewer.getId());
 						
 			// Add GRADUATION SEMESTER: 2010 May && PROGRAM DATE: 2010 May
-			//GET(FILTER_URL+"?action=add&type=semester&year=2010&month=4");
+			GET(FILTER_URL+"?action=add&type=semester&year=2010&month=4");
 			// Add GRADUATION SEMESTER: 2011 August && PROGRAM DATE: 2011 August 
-			//GET(FILTER_URL+"?action=add&type=semester&year=2011&month=7");
+			GET(FILTER_URL+"?action=add&type=semester&year=2011&month=7");
 						
 			// Add DEPARTMENT: Agricultural Leadership, Education and Communications
 			GET(FILTER_URL+"?action=add&type=department&value=Agricultural+Leadership%2C+Education%2C+and+Communications");
@@ -166,10 +166,10 @@ public class FilterTabTest extends AbstractVireoFunctionalTest {
 			assertTrue(getContent(response).contains("filter?action=remove&type=assignee&value="+reviewer.getId()));
 			assertFalse(getContent(response).contains("filter?action=add&type=assignee&value="+reviewer.getId()));
 			
-			//assertTrue(getContent(response).contains("filter?action=remove&type=semester&year=2010&month=4"));
-			//assertFalse(getContent(response).contains("filter?action=add&type=semester&year=2010&month=4"));
-			//assertTrue(getContent(response).contains("filter?action=remove&type=semester&year=2011&month=7"));
-			//assertFalse(getContent(response).contains("filter?action=add&type=semester&year=2011&month=7"));
+			assertTrue(getContent(response).contains("filter?action=remove&type=semester&year=2010&month=4"));
+			assertFalse(getContent(response).contains("filter?action=add&type=semester&year=2010&month=4"));
+			assertTrue(getContent(response).contains("filter?action=remove&type=semester&year=2011&month=7"));
+			assertFalse(getContent(response).contains("filter?action=add&type=semester&year=2011&month=7"));
 			
 			assertTrue(getContent(response).contains("filter?action=remove&type=department&value=Agricultural+Leadership%2C+Education%2C+and+Communications"));
 			assertFalse(getContent(response).contains("filter?action=add&type=department&value=Agricultural+Leadership%2C+Education%2C+and+Communications"));
@@ -217,9 +217,9 @@ public class FilterTabTest extends AbstractVireoFunctionalTest {
 			GET(FILTER_URL+"?action=remove&type=assignee&value="+reviewer.getId());
 			
 			// Remove GRADUATION SEMESTER: 2010 May && PROGRAM DATE: 2010 May
-			//GET(FILTER_URL+"?action=remove&type=semester&year=2010&month=4");
+			GET(FILTER_URL+"?action=remove&type=semester&year=2010&month=4");
 			// Remove GRADUATION SEMESTER: 2011 August && PROGRAM_DATE: 2011 August
-			//GET(FILTER_URL+"?action=remove&type=semester&year=2011&month=7");
+			GET(FILTER_URL+"?action=remove&type=semester&year=2011&month=7");
 
 			// Remove DEPARTMENT: Agricultural Leadership, Education and Communications
 			GET(FILTER_URL+"?action=remove&type=department&value=Agricultural+Leadership%2C+Education%2C+and+Communications");
@@ -249,11 +249,9 @@ public class FilterTabTest extends AbstractVireoFunctionalTest {
 			GET(FILTER_URL+"?action=remove&type=docType&value=Dissertation");
 			// Remove UMI RELEASE: true
 			GET(FILTER_URL+"?action=remove&type=umi&value=true");
-
 			
 			// Finally, check that there are no filters left
 			response = GET(LIST_URL);
-			
 			
 			//Logger.info("<<<<<<<<<<<<<<<<<>>>>>> " + response + " <<<<<>>>>>>>>>>>>>>>");
 			
