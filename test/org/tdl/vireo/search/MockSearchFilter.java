@@ -172,13 +172,13 @@ public class MockSearchFilter implements SearchFilter {
 	}
 
 	@Override
-	public void addGraduationSemester(Integer year, Integer month) {
-		addGraduationSemester(new Semester(year,month));
+	public void addGraduationSemester(Integer year, Integer month, Semester.Type type) {
+		addGraduationSemester(new Semester(year,month,type));
 	}
 
 	@Override
-	public void removeGraduationSemester(Integer year, Integer month) {
-		removeGraduationSemester(new Semester(year,month));
+	public void removeGraduationSemester(Integer year, Integer month, Semester.Type type) {
+		removeGraduationSemester(new Semester(year,month,type));
 	}
 	
 	@Override
@@ -197,13 +197,13 @@ public class MockSearchFilter implements SearchFilter {
 	}
 
 	@Override
-	public void addProgramDate(Integer year, Integer month) {
-		addProgramDate(new Semester(year,month));
+	public void addProgramDate(Integer year, Integer month, Semester.Type type) {
+		addProgramDate(new Semester(year,month,type));
 	}
 
 	@Override
-	public void removeProgramDate(Integer year, Integer month) {
-		removeProgramDate(new Semester(year,month));
+	public void removeProgramDate(Integer year, Integer month, Semester.Type type) {
+		removeProgramDate(new Semester(year,month,type));
 	}
 
 	@Override

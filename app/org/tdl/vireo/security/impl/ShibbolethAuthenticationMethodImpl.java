@@ -68,6 +68,8 @@ public class ShibbolethAuthenticationMethodImpl extends
 	public String headerCurrentMajor = "SHIB_major";
 	public String headerCurrentGraduationYear = "SHIB_gradYear";
 	public String headerCurrentGraduationMonth = "SHIB_gradMonth";
+	public String headerCurrentProgramYear = "SHIB_progYear";
+	public String headerCurrentProgramMonth = "SHIB_progMonth";
 	
 	// Map of mock shibboleth attributes
 	public Map<String,String> mockAttributes = new HashMap<String,String>();
@@ -181,7 +183,7 @@ public class ShibbolethAuthenticationMethodImpl extends
 	 * currentPhoneNumber, currentPostalAddress, currentEmailAddress,
 	 * permanentPhoneNumber, permanentPostalAddress, permanentEmailAddress,
 	 * currentDepartment, currentCollege, currentMajor, currentGraduationYear,
-	 * currentGraduationMonth.
+	 * currentGraduationMonth, currentProgramYear, currentProgramMonth.
 	 * 
 	 * netId is only required if useNetIdAsIdentifier is turned on.
 	 * 
@@ -216,8 +218,9 @@ public class ShibbolethAuthenticationMethodImpl extends
 		headerCurrentMajor = attributeMap.get("currentMajor");
 		headerCurrentGraduationYear = attributeMap.get("currentGraduationYear");
 		headerCurrentGraduationMonth = attributeMap.get("currentGraduationMonth");
+		headerCurrentProgramYear = attributeMap.get("currentProgramYear");
+		headerCurrentProgramMonth = attributeMap.get("currentProgramMonth");
 	}
-
 	
 	@Override
 	public String startAuthentication(Request request, ActionDefinition returnAction) {
@@ -402,6 +405,30 @@ public class ShibbolethAuthenticationMethodImpl extends
 						Logger.warn("Shib: Unable to interpret current graduation month attribute '"+headerCurrentGraduationMonth+"'='"+currentGraduationMonthString+"' as an integer.");
 					} catch (IllegalArgumentException iae) {
 						Logger.warn("Shib: Illegal value for current graduation month attribute '"+headerCurrentGraduationMonth+"'='"+currentGraduationMonthString+"', 0=January, 11=Dember. Any values outside this range are illegal.");
+					}
+				}
+			}
+			if (headerCurrentProgramYear != null) {
+				String currentProgramYearString = getSingleAttribute(request, headerCurrentProgramYear);
+				if (!isEmpty(currentProgramYearString) && person.getCurrentProgramYear() == null) {
+					try {
+						Integer currentProgramYear = Integer.valueOf(currentProgramYearString);
+						person.setCurrentProgramYear(currentProgramYear);
+					} catch (NumberFormatException nfe) {
+						Logger.warn("Shib: Unable to interpret current program year attribute '"+headerCurrentProgramYear+"'='"+currentProgramYearString+"' as an integer.");
+					}
+				}
+			}
+			if (headerCurrentProgramMonth != null) {
+				String currentProgramMonthString = getSingleAttribute(request, headerCurrentProgramMonth);
+				if (!isEmpty(currentProgramMonthString) && person.getCurrentProgramMonth() == null) {
+					try {
+						Integer currentProgramMonth = Integer.valueOf(currentProgramMonthString);
+						person.setCurrentProgramMonth(currentProgramMonth);
+					} catch (NumberFormatException nfe) {
+						Logger.warn("Shib: Unable to interpret current program month attribute '"+headerCurrentProgramMonth+"'='"+currentProgramMonthString+"' as an integer.");
+					} catch (IllegalArgumentException iae) {
+						Logger.warn("Shib: Illegal value for current program month attribute '"+headerCurrentProgramMonth+"'='"+currentProgramMonthString+"', 0=January, 11=Dember. Any values outside this range are illegal.");
 					}
 				}
 			}

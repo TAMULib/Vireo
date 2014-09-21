@@ -65,7 +65,7 @@ public class ConfigurableSettingsTab extends SettingsTab {
 		List<DocumentType> docTypes = settingRepo.findAllDocumentTypes();
 		List<CommitteeMemberRoleType> roleTypes = settingRepo.findAllCommitteeMemberRoleTypes();
 		List<GraduationMonth> gradMonths = settingRepo.findAllGraduationMonths();
-		List<ProgramMonth> programMonths = settingRepo.findAllProgramMonths();
+		List<ProgramMonth> proMonths = settingRepo.findAllProgramMonths();
 				
 		Locale locales[] = Locale.getAvailableLocales();
 		List<Locale> localeLanguages = new ArrayList<Locale>(Arrays.asList(locales));
@@ -86,7 +86,7 @@ public class ConfigurableSettingsTab extends SettingsTab {
 				embargos,
 				
 				// Sortable lists
-				colleges, programs, departments, majors, degrees, docTypes, roleTypes, gradMonths, programMonths, languages,
+				colleges, programs, departments, majors, degrees, docTypes, roleTypes, gradMonths, proMonths, languages,
 				
 				// Locales
 				localeLanguages);
@@ -179,7 +179,6 @@ public class ConfigurableSettingsTab extends SettingsTab {
 			
 		}
 		saveModelOrder(models);
-
 			
 		// Redirect back the configurable setting tab.
 		if ("college".equals(modelType)) {
@@ -1611,10 +1610,10 @@ public class ConfigurableSettingsTab extends SettingsTab {
 	// ////////////////////////////////////////////
 
 	/**
-	 * Create a new GraduationMonth. The id of the new month will be returned.
+	 * Create a new ProgramMonth. The id of the new month will be returned.
 	 * 
 	 * @param name
-	 *            The name of the new graduation month
+	 *            The name of the new program month
 	 */
 	@Security(RoleType.MANAGER)
 	public static void addProgramMonthJSON(String name) {
@@ -1700,7 +1699,7 @@ public class ConfigurableSettingsTab extends SettingsTab {
 	 * returned.
 	 * 
 	 * @param programMonthId
-	 *            The id of the month to be edited, in the form "graduationMonth_id"
+	 *            The id of the month to be edited, in the form "programMonth_id"
 	 * @param name
 	 *            The new name of the month
 	 */
@@ -1764,10 +1763,10 @@ public class ConfigurableSettingsTab extends SettingsTab {
 	
 	
 	/**
-	 * Remove an existing graduation month
+	 * Remove an existing program month
 	 * 
 	 * @param programMonthId
-	 *            The id of the graduation month to be removed of the form "graduationMonth_id"
+	 *            The id of the program month to be removed of the form "programMonth_id"
 	 */
 	@Security(RoleType.MANAGER)
 	public static void removeProgramMonthJSON(String programMonthId) {
@@ -1802,7 +1801,7 @@ public class ConfigurableSettingsTab extends SettingsTab {
 	}
 	
 	/**
-	 * Remove all existing graduation months
+	 * Remove all existing program months
 	 * 
 	 */
 	@Security(RoleType.MANAGER)
@@ -1844,11 +1843,11 @@ public class ConfigurableSettingsTab extends SettingsTab {
 	}
 	
 	/**
-	 * Reorder a list of graduation months.
+	 * Reorder a list of program months.
 	 * 
 	 * @param programMonthIds
 	 *            An ordered list of ids in the form:
-	 *            "graduationMonth_1,graduationMonth_3,graduationMonth_2"
+	 *            "programMonth_1,programMonth_3,programMonth_2"
 	 */
 	@Security(RoleType.MANAGER)
 	public static void reorderProgramMonthsJSON(String programMonthIds) {

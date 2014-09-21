@@ -144,6 +144,13 @@ create table graduation_month (
     primary key (id)
 );
 
+create table program_month (
+    id int8 not null,
+    displayOrder int4 not null,
+    month int4 not null unique,
+    primary key (id)
+);
+
 create table language (
     id int8 not null,
     displayOrder int4 not null,
@@ -167,6 +174,8 @@ create table person (
     currentEmailAddress varchar(255),
     currentGraduationMonth int4,
     currentGraduationYear int4,
+    currentProgramMonth int4,
+    currentProgramYear int4,
     currentMajor varchar(255),
     currentPhoneNumber varchar(255),
     currentPostalAddress varchar(255),
@@ -315,6 +324,8 @@ create table submission (
     documentType varchar(255),
     graduationMonth int4,
     graduationYear int4,
+    programMonth int4,
+    programYear int4,
     lastActionLogDate timestamp,
     lastActionLogEntry varchar(326768),
     licenseAgreementDate timestamp,
@@ -525,6 +536,8 @@ create sequence seq_email_template;
 create sequence seq_embargo_type;
 
 create sequence seq_graduation_month;
+
+create sequence seq_program_month;
 
 create sequence seq_language;
 

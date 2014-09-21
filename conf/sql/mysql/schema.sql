@@ -403,6 +403,22 @@ CREATE TABLE `graduation_month` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `program_month`
+--
+
+DROP TABLE IF EXISTS `program_month`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `program_month` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `displayOrder` int(11) NOT NULL,
+  `month` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `month` (`month`)
+) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `major`
 --
 
@@ -434,6 +450,8 @@ CREATE TABLE `person` (
   `currentEmailAddress` varchar(255) DEFAULT NULL,
   `currentGraduationMonth` int(11) DEFAULT NULL,
   `currentGraduationYear` int(11) DEFAULT NULL,
+  `currentProgramMonth` int(11) DEFAULT NULL,
+  `currentProgramYear` int(11) DEFAULT NULL,
   `currentMajor` varchar(255) DEFAULT NULL,
   `currentPhoneNumber` varchar(255) DEFAULT NULL,
   `currentPostalAddress` varchar(255) DEFAULT NULL,
@@ -711,6 +729,8 @@ CREATE TABLE `submission` (
   `documentType` varchar(255) DEFAULT NULL,
   `graduationMonth` int(11) DEFAULT NULL,
   `graduationYear` int(11) DEFAULT NULL,
+  `programMonth` int(11) DEFAULT NULL,
+  `programYear` int(11) DEFAULT NULL,
   `lastActionLogDate` datetime DEFAULT NULL,
   `lastActionLogEntry` longtext,
   `licenseAgreementDate` datetime DEFAULT NULL,
