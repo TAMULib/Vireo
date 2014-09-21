@@ -418,6 +418,9 @@ public class LuceneSearcherImpl implements Searcher {
 			BooleanQuery orQuery = new BooleanQuery();
 			for(Semester semester : filter.getGraduationSemesters()) {
 				
+				
+				Logger.info(" >>>>>>>>>>>>>>>>>>>>>>>>>>>>>> " + semester.type);
+				
 				// We can't index it if it doesn't have a date.
 				if (semester.year == null)
 					continue;
@@ -438,7 +441,10 @@ public class LuceneSearcherImpl implements Searcher {
 			BooleanQuery orQuery = new BooleanQuery();
 			for(Semester semester : filter.getProgramDates()) {
 				
-				// We can't index it if it dosn't have a date.
+				
+				Logger.info(" >>>>>>>>>>>>>>>>>>>>>>>>>>>>>> " + semester.type);
+				
+				// We can't index it if it doesn't have a date.
 				if (semester.year == null)
 					continue;
 				
@@ -686,10 +692,6 @@ public class LuceneSearcherImpl implements Searcher {
 		}		
 	}
 }
-
-
-
-
 
 
 

@@ -3,6 +3,7 @@ package org.tdl.vireo.model.jpa;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+//import java.util.function.Predicate; // Java ver 1.8
 
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
@@ -123,15 +124,6 @@ public class JpaNamedSearchFilterImpl extends JpaAbstractModel<JpaNamedSearchFil
 	
 	@ElementCollection
 	@CollectionTable(
-			name="search_filter_program_dates",
-			joinColumns=@JoinColumn(name="search_filter_id"))
-	public List<String> programDates;
-	
-	@Transient
-	public List<Semester> cachedProgramDates;
-	
-	@ElementCollection
-	@CollectionTable(
 			name="search_filter_degrees",
 			joinColumns=@JoinColumn(name="search_filter_id"))
 	public List<String> degrees;
@@ -203,8 +195,6 @@ public class JpaNamedSearchFilterImpl extends JpaAbstractModel<JpaNamedSearchFil
 		this.embargoIds = new ArrayList<Long>();
 		this.semesters = new ArrayList<String>();
 		this.cachedSemesters = new ArrayList<Semester>();
-		this.programDates = new ArrayList<String>();
-		this.cachedProgramDates = new ArrayList<Semester>();
 		this.degrees = new ArrayList<String>();
 		this.departments = new ArrayList<String>();
 		this.programs = new ArrayList<String>();
@@ -231,8 +221,7 @@ public class JpaNamedSearchFilterImpl extends JpaAbstractModel<JpaNamedSearchFil
 		// 1) Semester
 		semesters.clear();
 		for(Semester semester : cachedSemesters) {
-			// Format: year/month
-			
+			// Format: year/month/type
 			String value;
 			if (semester.year == null)
 				value = "null";
@@ -245,28 +234,15 @@ public class JpaNamedSearchFilterImpl extends JpaAbstractModel<JpaNamedSearchFil
 				value += "null";
 			else
 				value += String.valueOf(semester.month);
+			
+			value += "/";
+			
+			if (semester.type == null)
+				value += "null";
+			else
+				value += semester.toString(semester.type);
 			
 			semesters.add(value);
-		}
-		// 2) Program Date
-		programDates.clear();
-		for(Semester semester : cachedProgramDates) {
-			// Format: year/month
-			
-			String value;
-			if (semester.year == null)
-				value = "null";
-			else
-				value = String.valueOf(semester.year);
-			
-			value += "/";
-			
-			if (semester.month == null)
-				value += "null";
-			else
-				value += String.valueOf(semester.month);
-			
-			programDates.add(value);
 		}
 	}
 
@@ -277,11 +253,10 @@ public class JpaNamedSearchFilterImpl extends JpaAbstractModel<JpaNamedSearchFil
 	@PostPersist
 	@PostLoad
 	@PostUpdate
-	public void onLoad() {
+	public void onLoad() {		
 		// 1) Semesters
 		cachedSemesters = new ArrayList<Semester>();
 		for(String semesterString : semesters) {
-			
 			String[] split = semesterString.split("/");
 			
 			Semester semester = new Semester();
@@ -289,22 +264,11 @@ public class JpaNamedSearchFilterImpl extends JpaAbstractModel<JpaNamedSearchFil
 				semester.year = Integer.valueOf(split[0]);
 			if (!"null".equals(split[1]))
 				semester.month = Integer.valueOf(split[1]);
+			if (!"null".equals(split[2])) {
+				semester.type = semester.getType(split[2]);
+			}
 			
 			cachedSemesters.add(semester);
-		}
-		// 2) Program Dates
-		cachedProgramDates = new ArrayList<Semester>();
-		for(String semesterString : programDates) {
-					
-			String[] split = semesterString.split("/");
-			
-			Semester semester = new Semester();
-			if (!"null".equals(split[0]))
-				semester.year = Integer.valueOf(split[0]);
-			if (!"null".equals(split[1]))
-				semester.month = Integer.valueOf(split[1]);
-			
-			cachedProgramDates.add(semester);
 		}
 	}
 	
@@ -534,7 +498,6 @@ public class JpaNamedSearchFilterImpl extends JpaAbstractModel<JpaNamedSearchFil
 		}
 		
 		return result;
-
 	}
 	
 	@Override
@@ -549,36 +512,69 @@ public class JpaNamedSearchFilterImpl extends JpaAbstractModel<JpaNamedSearchFil
 		embargoIds.remove(type.getId());
 	}
 	
+	
+	/////////////////////////////////////////////////////////////////
+	//
+	// 	Additional iteration sorting type of Semester
+	//
 	@Override
-	public List<Semester> getProgramDates() {		
-		return cachedProgramDates;
+	public List<Semester> getProgramDates() {
+		//Predicate<Semester> isProgramDate = 
+		//		Predicates.compose(Predicates.equalTo(Semester.Type.GRADUATION),Semester.Type);
+		//Iterable<Semester> programDate = Iterables.filter(cachedSemesters, isProgramDate);
+		//
+		//return Lists.newArrayList(programDate);
+		
+		List<Semester> tempSemesterCache = new ArrayList<Semester>();
+		for(Semester ce : cachedSemesters) { // Cached Element
+			if(ce.type == Semester.Type.PROGRAM) {
+				tempSemesterCache.add(ce);
+			}
+		}
+		return tempSemesterCache;
 	}
 	
 	@Override
 	public void addProgramDate(Semester semester) {
 		assertManagerOrOwner(creator);
-		cachedProgramDates.add(semester);
+		cachedSemesters.add(semester);
 	}
 	
 	@Override
 	public void removeProgramDate(Semester semester) {
 		assertManagerOrOwner(creator);
-		cachedProgramDates.remove(semester);
+		cachedSemesters.remove(semester);
 	}
 	
 	@Override
-	public void addProgramDate(Integer year, Integer month) {
-		addProgramDate(new Semester(year,month));
+	public void addProgramDate(Integer year, Integer month, Semester.Type type) {
+		addProgramDate(new Semester(year,month,type));
 	}
 	
 	@Override
-	public void removeProgramDate(Integer year, Integer month) {
-		removeProgramDate(new Semester(year,month));
+	public void removeProgramDate(Integer year, Integer month, Semester.Type type) {
+		removeProgramDate(new Semester(year,month,type));
 	}	
-
+	
+	///////////////////////////////////////////////////////////////
+	//
+	// 	Additional iteration sorting type of Semester
+	//
 	@Override
-	public List<Semester> getGraduationSemesters() {		
-		return cachedSemesters;
+	public List<Semester> getGraduationSemesters() {
+		//Predicate<Semester> isGraduationSemester = 
+		//		Predicates.compose(Predicates.equalTo(Semester.Type.GRADUATION),Semester.Type);
+		//Iterable<Semester> graduationSemester = Iterables.filter(cachedSemesters, isGraduationSemester);
+		//
+		//return Lists.newArrayList(graduationSemester);
+		
+		List<Semester> tempSemesterCache = new ArrayList<Semester>();
+		for(Semester ce : cachedSemesters) { // Cached Element
+			if(ce.type == Semester.Type.GRADUATION) {
+				tempSemesterCache.add(ce);
+			}
+		}
+		return tempSemesterCache;
 	}
 
 	@Override
@@ -594,13 +590,13 @@ public class JpaNamedSearchFilterImpl extends JpaAbstractModel<JpaNamedSearchFil
 	}
 	
 	@Override
-	public void addGraduationSemester(Integer year, Integer month) {
-		addGraduationSemester(new Semester(year,month));
+	public void addGraduationSemester(Integer year, Integer month, Semester.Type type) {
+		addGraduationSemester(new Semester(year,month,type));
 	}
 	
 	@Override
-	public void removeGraduationSemester(Integer year, Integer month) {
-		removeGraduationSemester(new Semester(year,month));
+	public void removeGraduationSemester(Integer year, Integer month, Semester.Type type) {
+		removeGraduationSemester(new Semester(year,month,type));
 	}
 	
 	@Override

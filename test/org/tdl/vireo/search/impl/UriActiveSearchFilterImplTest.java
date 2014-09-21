@@ -19,9 +19,11 @@ import org.tdl.vireo.model.Submission;
 import org.tdl.vireo.model.SubmissionRepository;
 import org.tdl.vireo.search.ActiveSearchFilter;
 import org.tdl.vireo.security.SecurityContext;
+import org.tdl.vireo.search.Semester;
 
 import play.modules.spring.Spring;
 import play.test.UnitTest;
+import play.Logger;
 
 /**
  * Test the UriActiveSearchfilterImpl
@@ -75,10 +77,10 @@ public class UriActiveSearchFilterImplTest extends UnitTest {
 		filter.addAssignee(null); // unassigned
 		filter.addEmbargoType(embargo1);
 		filter.addEmbargoType(embargo2);		
-		filter.addGraduationSemester(2002,05);
-		filter.addGraduationSemester(2002,null);
-		filter.addProgramDate(2002,05);
-		filter.addProgramDate(2002,null);
+		filter.addGraduationSemester(2002,05,Semester.Type.GRADUATION);
+		filter.addGraduationSemester(2002,null,Semester.Type.GRADUATION);
+		filter.addProgramDate(2002,05,Semester.Type.PROGRAM);
+		filter.addProgramDate(2002,null,Semester.Type.PROGRAM);
 		filter.addDegree("degree1");
 		filter.addDegree("degree2");
 		filter.addDepartment("dept1");
@@ -180,11 +182,14 @@ public class UriActiveSearchFilterImplTest extends UnitTest {
 			filter.addAssignee(person2);
 			filter.addAssignee(null);
 			filter.addEmbargoType(embargo1);
-			filter.addEmbargoType(embargo2);			
-			filter.addGraduationSemester(2002,05);
-			filter.addGraduationSemester(2002,null);
-			filter.addProgramDate(2002,05);
-			filter.addProgramDate(2002,null);
+			filter.addEmbargoType(embargo2);		
+			
+			Logger.info(" *********************************** " + Semester.Type.GRADUATION);
+			
+			filter.addGraduationSemester(2002,05,Semester.Type.GRADUATION);
+			filter.addGraduationSemester(2002,null,Semester.Type.GRADUATION);
+			filter.addProgramDate(2002,05,Semester.Type.PROGRAM);
+			filter.addProgramDate(2002,null,Semester.Type.PROGRAM);
 			filter.addDegree("degree1");
 			filter.addDegree("degree2");
 			filter.addDepartment("dept1");
@@ -342,10 +347,10 @@ public class UriActiveSearchFilterImplTest extends UnitTest {
 		filter.addAssignee(null);
 		filter.addEmbargoType(embargo1);
 		filter.addEmbargoType(embargo2);		
-		filter.addGraduationSemester(2002,05);
-		filter.addGraduationSemester(2002,null);
-		filter.addProgramDate(2002,05);
-		filter.addProgramDate(2002,null);
+		filter.addGraduationSemester(2002,05,Semester.Type.GRADUATION);
+		filter.addGraduationSemester(2002,null,Semester.Type.GRADUATION);
+		filter.addProgramDate(2002,05,Semester.Type.PROGRAM);
+		filter.addProgramDate(2002,null,Semester.Type.PROGRAM);
 		filter.addDegree("degree1");
 		filter.addDegree("degree2");
 		filter.addDepartment("dept1");
@@ -446,10 +451,10 @@ public class UriActiveSearchFilterImplTest extends UnitTest {
 		filter.addAssignee(null);
 		filter.addEmbargoType(embargo1);
 		filter.addEmbargoType(embargo2);		
-		filter.addGraduationSemester(2002,05);
-		filter.addGraduationSemester(2002,null);
-		filter.addProgramDate(2002,05);
-		filter.addProgramDate(2002,null);
+		filter.addGraduationSemester(2002,05,Semester.Type.GRADUATION);
+		filter.addGraduationSemester(2002,null,Semester.Type.GRADUATION);
+		filter.addProgramDate(2002,05,Semester.Type.PROGRAM);
+		filter.addProgramDate(2002,null,Semester.Type.PROGRAM);
 		filter.addDegree("degree1");
 		filter.addDegree("degree2");
 		filter.addDepartment("dept1");

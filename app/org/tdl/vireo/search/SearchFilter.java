@@ -186,7 +186,7 @@ public interface SearchFilter {
 	 * @param month
 	 *            The graduation month.
 	 */
-	public void addGraduationSemester(Integer year, Integer month);
+	public void addGraduationSemester(Integer year, Integer month, Semester.Type type);
 
 	/**
 	 * Remove a graduation semester with the provided year and month.
@@ -196,7 +196,7 @@ public interface SearchFilter {
 	 * @param month
 	 *            The graduation month.
 	 */
-	public void removeGraduationSemester(Integer year, Integer month);
+	public void removeGraduationSemester(Integer year, Integer month, Semester.Type type);
 	
 	/**
 	 * @return The program dates
@@ -223,7 +223,7 @@ public interface SearchFilter {
 	 * @param month
 	 *            The program month.
 	 */
-	public void addProgramDate(Integer year, Integer month);
+	public void addProgramDate(Integer year, Integer month, Semester.Type type);
 
 	/**
 	 * Remove a program date with the provided year and month.
@@ -233,7 +233,7 @@ public interface SearchFilter {
 	 * @param month
 	 *            The program month.
 	 */
-	public void removeProgramDate(Integer year, Integer month);
+	public void removeProgramDate(Integer year, Integer month, Semester.Type type);
 
 	/**
 	 * @return The list of degrees
