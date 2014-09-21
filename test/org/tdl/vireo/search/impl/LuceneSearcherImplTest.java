@@ -256,26 +256,26 @@ public class LuceneSearcherImplTest extends UnitTest{
 			filter.delete();
 			
 			// Program Date Filter
-			//filter = subRepo.createSearchFilter(person, "test-programDate1");
-			//filter.addProgramDate(2005,6);
-			//filter.save();
-			//	
-			//submissions = searcher.submissionSearch(filter, SearchOrder.ID, SearchDirection.ASCENDING, 0, 21).getResults();
-			//			
-			//assertTrue(submissions.contains(sub1));
-			//assertFalse(submissions.contains(sub2));
-			//filter.delete();
+			filter = subRepo.createSearchFilter(person, "test-programDate1");
+			filter.addProgramDate(2002,5, Semester.Type.PROGRAM);
+			filter.save();
+				
+			submissions = searcher.submissionSearch(filter, SearchOrder.ID, SearchDirection.ASCENDING, 0, 21).getResults();
+						
+			assertTrue(submissions.contains(sub1));
+			assertFalse(submissions.contains(sub2));
+			filter.delete();
 						
 			// Program Date without month Filter
-			//filter = subRepo.createSearchFilter(person, "test-programDate2");
-			//filter.addProgramDate(2003,5);
-			//filter.save();
+			filter = subRepo.createSearchFilter(person, "test-programDate2");
+			filter.addProgramDate(2003,6, Semester.Type.PROGRAM);
+			filter.save();
 				
-			//submissions = searcher.submissionSearch(filter, SearchOrder.ID, SearchDirection.ASCENDING, 0, 21).getResults();
+			submissions = searcher.submissionSearch(filter, SearchOrder.ID, SearchDirection.ASCENDING, 0, 21).getResults();
 						
-			//assertFalse(submissions.contains(sub1));
-			//assertTrue(submissions.contains(sub2));
-			//filter.delete();
+			assertFalse(submissions.contains(sub1));
+			assertTrue(submissions.contains(sub2));
+			filter.delete();
 			
 			// Graduation Semester Filter
 			filter = subRepo.createSearchFilter(person, "test-gradSemester1");
@@ -300,26 +300,26 @@ public class LuceneSearcherImplTest extends UnitTest{
 			filter.delete();
 			
 			// Program Date Filter
-			//filter = subRepo.createSearchFilter(person, "test-programDate1");
-			//filter.addProgramDate(2002,05,Semester.Type.PROGRAM);
-			//filter.save();
-			//			
-			//submissions = searcher.submissionSearch(filter, SearchOrder.ID, SearchDirection.ASCENDING, 0, 21).getResults();
-			//	
-			//assertTrue(submissions.contains(sub1));
-			//assertFalse(submissions.contains(sub2));
-			//filter.delete();
+			filter = subRepo.createSearchFilter(person, "test-programDate1");
+			filter.addProgramDate(2002,05,Semester.Type.PROGRAM);
+			filter.save();
+						
+			submissions = searcher.submissionSearch(filter, SearchOrder.ID, SearchDirection.ASCENDING, 0, 21).getResults();
+				
+			assertTrue(submissions.contains(sub1));
+			assertFalse(submissions.contains(sub2));
+			filter.delete();
 						
 			// Program Date without month Filter
-			//filter = subRepo.createSearchFilter(person, "test-programDate2");
-			//filter.addProgramDate(2003,6,Semester.Type.PROGRAM);
-			//filter.save();
-			//
-			//submissions = searcher.submissionSearch(filter, SearchOrder.ID, SearchDirection.ASCENDING, 0, 21).getResults();
-			//	
-			//assertFalse(submissions.contains(sub1));
-			//assertTrue(submissions.contains(sub2));
-			//filter.delete();
+			filter = subRepo.createSearchFilter(person, "test-programDate2");
+			filter.addProgramDate(2003,6,Semester.Type.PROGRAM);
+			filter.save();
+			
+			submissions = searcher.submissionSearch(filter, SearchOrder.ID, SearchDirection.ASCENDING, 0, 21).getResults();
+				
+			assertFalse(submissions.contains(sub1));
+			assertTrue(submissions.contains(sub2));
+			filter.delete();
 						
 			// Degree Filter
 			filter = subRepo.createSearchFilter(person, "test-degree");
