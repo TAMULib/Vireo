@@ -64,16 +64,13 @@ public class FilterTabTest extends AbstractVireoFunctionalTest {
 		// Login as an administrator
 		LOGIN();
 		
-		
 		Person reviewer = personRepo.findPersonsByRole(RoleType.REVIEWER).get(0);
 		EmbargoType embargo1 = settingRepo.findAllEmbargoTypes().get(0);
 		EmbargoType embargo2 = settingRepo.findAllEmbargoTypes().get(1);
-		
 	
 		// Run for both the list and log tabs
 		String[] possibleNavs = {"list","log"};
 		for (String nav : possibleNavs) {
-			
 			
 			// Get our URLS
 			Map<String,Object> routeArgs = new HashMap<String,Object>();
@@ -95,7 +92,6 @@ public class FilterTabTest extends AbstractVireoFunctionalTest {
 			params.put("submit_save","Save");
 			POST(CUSTOMIZE_FILTERS_URL,params);
 			
-			
 			Response response = GET(LIST_URL);
 			// Check that there are no filters.
 			assertContentMatch("<div class=\"main-heading\">Now filtering By:<\\/div>\\s*<\\/div>\\s*<div class=\"box-body\">\\s*<\\/div>", response);
@@ -113,13 +109,15 @@ public class FilterTabTest extends AbstractVireoFunctionalTest {
 			// Add ASSGINEE: unassigned
 			GET(FILTER_URL+"?action=add&type=assignee&value=null");
 			// Add ASSGINEE: Billy
-			GET(FILTER_URL+"?action=add&type=assignee&value="+reviewer.getId());
-						
-			// Add GRADUATION SEMESTER: 2010 May && PROGRAM DATE: 2010 May
-			GET(FILTER_URL+"?action=add&type=semester&year=2010&month=4");
-			// Add GRADUATION SEMESTER: 2011 August && PROGRAM DATE: 2011 August 
-			GET(FILTER_URL+"?action=add&type=semester&year=2011&month=7");
-						
+			GET(FILTER_URL+"?action=add&type=assignee&value="+reviewer.getId());						
+			// Add GRADUATION SEMESTER: 2010 May
+			GET(FILTER_URL+"?action=add&type=graduationSemester&year=2010&month=4");
+			// Add GRADUATION SEMESTER: 2011 August 
+			GET(FILTER_URL+"?action=add&type=graduationSemester&year=2011&month=7");			
+			// Add PROGRAM DATE: 2010 May
+			GET(FILTER_URL+"?action=add&type=programDate&year=2010&month=4");
+			// Add PROGRAM DATE: 2011 August 
+			GET(FILTER_URL+"?action=add&type=programDate&year=2011&month=7");						
 			// Add DEPARTMENT: Agricultural Leadership, Education and Communications
 			GET(FILTER_URL+"?action=add&type=department&value=Agricultural+Leadership%2C+Education%2C+and+Communications");
 			// Add DEPARTMENT: Visualization
@@ -148,7 +146,6 @@ public class FilterTabTest extends AbstractVireoFunctionalTest {
 			GET(FILTER_URL+"?action=add&type=docType&value=Dissertation");
 			// Add UMI RELEASE: True
 			GET(FILTER_URL+"?action=add&type=umi&value=true");
-
 			
 			// Now that we are at the apex, check that everything is still there.
 			response = GET(LIST_URL);
@@ -164,13 +161,15 @@ public class FilterTabTest extends AbstractVireoFunctionalTest {
 			assertTrue(getContent(response).contains("filter?action=remove&type=assignee&value=null"));
 			assertFalse(getContent(response).contains("filter?action=add&type=assignee&value=null"));
 			assertTrue(getContent(response).contains("filter?action=remove&type=assignee&value="+reviewer.getId()));
-			assertFalse(getContent(response).contains("filter?action=add&type=assignee&value="+reviewer.getId()));
-			
-			assertTrue(getContent(response).contains("filter?action=remove&type=semester&year=2010&month=4"));
-			assertFalse(getContent(response).contains("filter?action=add&type=semester&year=2010&month=4"));
-			assertTrue(getContent(response).contains("filter?action=remove&type=semester&year=2011&month=7"));
-			assertFalse(getContent(response).contains("filter?action=add&type=semester&year=2011&month=7"));
-			
+			assertFalse(getContent(response).contains("filter?action=add&type=assignee&value="+reviewer.getId()));			
+			assertTrue(getContent(response).contains("filter?action=remove&type=graduationSemester&year=2010&month=4"));
+			assertFalse(getContent(response).contains("filter?action=add&type=graduationSemester&year=2010&month=4"));
+			assertTrue(getContent(response).contains("filter?action=remove&type=graduationSemester&year=2011&month=7"));
+			assertFalse(getContent(response).contains("filter?action=add&type=graduationSemester&year=2011&month=7"));
+			assertTrue(getContent(response).contains("filter?action=remove&type=programDate&year=2010&month=4"));
+			assertFalse(getContent(response).contains("filter?action=add&type=programDate&year=2010&month=4"));
+			assertTrue(getContent(response).contains("filter?action=remove&type=programDate&year=2011&month=7"));
+			assertFalse(getContent(response).contains("filter?action=add&type=programDate&year=2011&month=7"));			
 			assertTrue(getContent(response).contains("filter?action=remove&type=department&value=Agricultural+Leadership%2C+Education%2C+and+Communications"));
 			assertFalse(getContent(response).contains("filter?action=add&type=department&value=Agricultural+Leadership%2C+Education%2C+and+Communications"));
 			assertTrue(getContent(response).contains("filter?action=remove&type=department&value=Visualization"));
@@ -200,7 +199,6 @@ public class FilterTabTest extends AbstractVireoFunctionalTest {
 			assertTrue(getContent(response).contains("filter?action=remove&type=umi&value=true"));
 			assertFalse(getContent(response).contains("filter?action=add&type=umi&value=true"));
 			
-
 			// Remove include submission
 			GET(FILTER_URL+"?action=remove&type=include_sub&value=1");
 			// Remove exclude submission
@@ -214,13 +212,15 @@ public class FilterTabTest extends AbstractVireoFunctionalTest {
 			// Remove ASSGINEE: unassigned
 			GET(FILTER_URL+"?action=remove&type=assignee&value=null");
 			// Remove ASSGINEE: Billy
-			GET(FILTER_URL+"?action=remove&type=assignee&value="+reviewer.getId());
-			
-			// Remove GRADUATION SEMESTER: 2010 May && PROGRAM DATE: 2010 May
-			GET(FILTER_URL+"?action=remove&type=semester&year=2010&month=4");
-			// Remove GRADUATION SEMESTER: 2011 August && PROGRAM_DATE: 2011 August
-			GET(FILTER_URL+"?action=remove&type=semester&year=2011&month=7");
-
+			GET(FILTER_URL+"?action=remove&type=assignee&value="+reviewer.getId());			
+			// Remove GRADUATION SEMESTER: 2010 May
+			GET(FILTER_URL+"?action=remove&type=graduationSemester&year=2010&month=4");
+			// Remove GRADUATION SEMESTER: 2011 August
+			GET(FILTER_URL+"?action=remove&type=graduationSemester&year=2011&month=7");
+			// Remove PROGRAM DATE: 2010 May
+			GET(FILTER_URL+"?action=remove&type=programDate&year=2010&month=4");
+			// Remove PROGRAM_DATE: 2011 August
+			GET(FILTER_URL+"?action=remove&type=programDate&year=2011&month=7");
 			// Remove DEPARTMENT: Agricultural Leadership, Education and Communications
 			GET(FILTER_URL+"?action=remove&type=department&value=Agricultural+Leadership%2C+Education%2C+and+Communications");
 			// Remove DEPARTMENT: Visualization
@@ -252,8 +252,6 @@ public class FilterTabTest extends AbstractVireoFunctionalTest {
 			
 			// Finally, check that there are no filters left
 			response = GET(LIST_URL);
-			
-			//Logger.info("<<<<<<<<<<<<<<<<<>>>>>> " + response + " <<<<<>>>>>>>>>>>>>>>");
 			
 			assertContentMatch("<div class=\"main-heading\">Now filtering By:<\\/div>\\s*<\\/div>\\s*<div class=\"box-body\">\\s*<\\/div>", response);
 		}
@@ -319,7 +317,6 @@ public class FilterTabTest extends AbstractVireoFunctionalTest {
 			assertTrue(getContent(response).contains("filter?action=add&type=rangeChoose&year=2011&month=4&days=11\""));
 			assertTrue(getContent(response).contains("filter?action=add&type=rangeChoose&year=2011&month=4&days=21\""));
 			
-			
 			// Narrow the field to days 11-20
 			GET(FILTER_URL+"?action=add&type=rangeChoose&year=2011&month=4&days=11");
 			response = GET(LIST_URL);
@@ -347,7 +344,6 @@ public class FilterTabTest extends AbstractVireoFunctionalTest {
 			assertFalse(getContent(response).contains("filter?action=add&type=rangeChoose&year=2011&month=4&days=11\""));
 			assertFalse(getContent(response).contains("filter?action=add&type=rangeChoose&year=2011&month=4&days=21\""));
 			
-			
 			// Remove the end date
 			GET(FILTER_URL+"?action=remove&type=rangeEnd");
 			response = GET(LIST_URL);
@@ -362,7 +358,6 @@ public class FilterTabTest extends AbstractVireoFunctionalTest {
 			assertFalse(getContent(response).contains("filter?action=add&type=rangeChoose&year=2011&month=4&days=1\""));
 			assertFalse(getContent(response).contains("filter?action=add&type=rangeChoose&year=2011&month=4&days=11\""));
 			assertFalse(getContent(response).contains("filter?action=add&type=rangeChoose&year=2011&month=4&days=21\""));
-			
 			
 			// Add a manual start date
 			params.clear();
@@ -516,7 +511,6 @@ public class FilterTabTest extends AbstractVireoFunctionalTest {
 			//for(SearchOrder order : SearchOrder.values()) {
 				SearchOrder order = SearchOrder.ID;
 			
-			
 				// Test each column as ascending and decending
 				GET(SEARCH_URL+"?orderby="+order.getId());
 				
@@ -613,7 +607,6 @@ public class FilterTabTest extends AbstractVireoFunctionalTest {
 			assertContentMatch("<li id=\"facet_"+SearchFacet.STATE.getId()+"\" class=\"originally-shown\"", response);
 			assertContentMatch("<li id=\"facet_"+SearchFacet.ASSIGNEE.getId()+"\" class=\"originally-shown\"", response);
 			
-			
 			// Change the facets
 			String facetsString = "facet_"+SearchFacet.TEXT.getId()+",facet_"+SearchFacet.DEGREE.getId()+",facet_"+SearchFacet.DATE_RANGE.getId();
 			
@@ -675,7 +668,6 @@ public class FilterTabTest extends AbstractVireoFunctionalTest {
 		for (String major : majors) {
 			assertContentMatch("action=add\\&type=major\\&value=[^\"]*\">"+major.replaceAll("&", "\\&")+"<",response);
 		}
-
 	}
 	
 	/**
@@ -687,7 +679,6 @@ public class FilterTabTest extends AbstractVireoFunctionalTest {
 
 		// Login as an administrator
 		LOGIN();
-
 
 		// Run for both the list and log tabs
 		// Get our URLS
@@ -748,7 +739,6 @@ public class FilterTabTest extends AbstractVireoFunctionalTest {
 		for (State state : stateManager.getAllStates())
 			if (state.isDepositable())
 				publishState = state;
-		
 		
 		JPA.em().getTransaction().commit();
 		JPA.em().clear();
@@ -817,7 +807,6 @@ public class FilterTabTest extends AbstractVireoFunctionalTest {
 			if (state.isDeletable())
 				deleteState = state;
 		
-		
 		JPA.em().getTransaction().commit();
 		JPA.em().clear();
 		JPA.em().getTransaction().begin();
@@ -867,7 +856,6 @@ public class FilterTabTest extends AbstractVireoFunctionalTest {
 		// Login as an administrator
 		LOGIN();
 
-
 		// Get our URLS
 		Map<String,Object> routeArgs = new HashMap<String,Object>();
 		routeArgs.put("nav", "list");
@@ -902,7 +890,6 @@ public class FilterTabTest extends AbstractVireoFunctionalTest {
 		// Login as an administrator
 		LOGIN();
 
-
 		// Run for both the list and log tabs
 		String[] possibleNavs = {"list","log"};
 		for (String nav : possibleNavs) {
@@ -915,7 +902,6 @@ public class FilterTabTest extends AbstractVireoFunctionalTest {
 			final String FILTER_URL = Router.reverse("FilterTab.modifyFilters",routeArgs).url;
 			final String MODIFY_SEARCH_URL = Router.reverse("FilterTab.modifySearch",routeArgs).url;
 			final String CUSTOMIZE_SEARCH_URL = Router.reverse("FilterTab.customizeSearch",routeArgs).url;
-
 			
 			// Change the number of results per page.
 			String columnsString = "column_"+SearchOrder.ID.getId()+",column_"+SearchOrder.DOCUMENT_TITLE.getId()+",column_"+SearchOrder.STATE.getId();
@@ -933,17 +919,13 @@ public class FilterTabTest extends AbstractVireoFunctionalTest {
 			// Check that we have at least some submissions
 			assertContentMatch("<a href=\"/admin/view\\?subId=\\d+\">\\d+</a>",response);
 			
-			
 			// Change the filter status
 			GET(FILTER_URL+"?action=add&type=state&value=InReview");
-			
 			
 			response = GET(LIST_URL);
 			// Check that our pagination was switched so that we show at least some records.
 			assertContentMatch("<a href=\"/admin/view\\?subId=\\d+\">\\d+</a>",response);
 			
 		}
-
 	}
-
 }

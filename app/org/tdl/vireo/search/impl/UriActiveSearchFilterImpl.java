@@ -656,7 +656,7 @@ public class UriActiveSearchFilterImpl implements ActiveSearchFilter {
 					result.add((T) embargo);
 					
 				} else if (type == Semester.class) {
-					// List type is graduation semestens: year/month
+					// List type is graduation semestens: year/month/type
 					String[] semesterSplit = raw.split("/");
 
 					Semester semester = new Semester();
@@ -664,6 +664,8 @@ public class UriActiveSearchFilterImpl implements ActiveSearchFilter {
 						semester.year = Integer.valueOf(semesterSplit[0]);
 					if (!"null".equals(semesterSplit[1]))
 						semester.month = Integer.valueOf(semesterSplit[1]);
+					if (!"null".equals(semesterSplit[2]))
+						semester.type = semester.getType(semesterSplit[2]);
 
 					result.add((T) semester);
 					
@@ -735,7 +737,7 @@ public class UriActiveSearchFilterImpl implements ActiveSearchFilter {
 				result.append(String.valueOf(embargoId));
 				
 			} else if (value instanceof Semester) {
-				// Graduation semester: year/month
+				// Graduation semester: year/month/type
 				
 				Semester semester = (Semester) value;
 				if (semester.year == null)
@@ -749,6 +751,13 @@ public class UriActiveSearchFilterImpl implements ActiveSearchFilter {
 					result.append("null");
 				else
 					result.append(String.valueOf(semester.month));
+				
+				result.append("/");
+				
+				if (semester.type == null)
+					result.append("null");
+				else
+					result.append(semester.toString(semester.type));
 				
 			} else {
 				throw new IllegalArgumentException("Unable to encode unexpected object type: "+value.getClass().getName());

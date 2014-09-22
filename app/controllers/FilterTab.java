@@ -919,7 +919,7 @@ public class FilterTab extends AbstractVireoController {
 			EmbargoType embargo = settingRepo.findEmbargoType(embargoId);
 			activeFilter.addEmbargoType(embargo);
 			
-		} else if ("semester".equals(type)) {
+		} else if ("graduationSemester".equals(type)) {
 			Integer year = params.get("year",Integer.class);
 			Integer month = params.get("month",Integer.class);
 			activeFilter.addGraduationSemester(year, month, Semester.Type.GRADUATION);
@@ -1105,7 +1105,7 @@ public class FilterTab extends AbstractVireoController {
 			EmbargoType embargo = settingRepo.findEmbargoType(embargoId);
 			activeFilter.removeEmbargoType(embargo);
 			
-		} else if ("semester".equals(type)) {
+		} else if ("graduationSemester".equals(type)) {
 			Integer year = params.get("year",Integer.class);
 			Integer month = params.get("month",Integer.class);
 			activeFilter.removeGraduationSemester(year, month, Semester.Type.GRADUATION);

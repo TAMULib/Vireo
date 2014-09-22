@@ -46,6 +46,8 @@ import org.tdl.vireo.services.Utilities;
 import org.tdl.vireo.state.State;
 import org.tdl.vireo.state.StateManager;
 
+import org.tdl.vireo.search.Semester;
+
 import play.modules.spring.Spring;
 
 /**
@@ -133,7 +135,7 @@ public class JpaSubmissionImpl extends JpaAbstractModel<JpaSubmissionImpl> imple
 	
 	public Integer programYear;
 	public Integer programMonth;
-
+	
 	public String stateName;
 
 	@OneToOne(targetEntity = JpaPersonImpl.class)

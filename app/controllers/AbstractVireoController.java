@@ -85,8 +85,6 @@ public abstract class AbstractVireoController extends Controller {
 		errorLog.logError(throwable, request);
 	}
 	
-	
-	
 	/**
 	 * Return true if the string is either null or only consists of whitespace.
 	 * 

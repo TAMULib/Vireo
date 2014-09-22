@@ -21,8 +21,8 @@ public class SemesterTests extends UnitTest {
 	@Test
 	public void testEquals() {
 		
-		Semester semester1 = new Semester(2002,05);
-		Semester semester2 = new Semester(2002,05);
+		Semester semester1 = new Semester(2002,05,Semester.Type.GRADUATION);
+		Semester semester2 = new Semester(2002,05,Semester.Type.GRADUATION);
 		
 		assertTrue(semester1.equals(semester2));
 	}
@@ -33,8 +33,8 @@ public class SemesterTests extends UnitTest {
 	@Test
 	public void testNotEqualsByMonth() {
 		
-		Semester semester1 = new Semester(2002,05);
-		Semester semester2 = new Semester(2002,06);
+		Semester semester1 = new Semester(2002,05,Semester.Type.GRADUATION);
+		Semester semester2 = new Semester(2002,06,Semester.Type.GRADUATION);
 		
 		assertFalse(semester1.equals(semester2));
 	}
@@ -45,8 +45,8 @@ public class SemesterTests extends UnitTest {
 	@Test
 	public void testNotEqualsByYear() {
 		
-		Semester semester1 = new Semester(2002,05);
-		Semester semester2 = new Semester(2003,05);
+		Semester semester1 = new Semester(2002,05,Semester.Type.GRADUATION);
+		Semester semester2 = new Semester(2003,05,Semester.Type.GRADUATION);
 		
 		assertFalse(semester1.equals(semester2));
 	}
@@ -57,8 +57,8 @@ public class SemesterTests extends UnitTest {
 	@Test
 	public void testEqualsWithNullMonth() {
 		
-		Semester semester1 = new Semester(2002,null);
-		Semester semester2 = new Semester(2002,null);
+		Semester semester1 = new Semester(2002,null,Semester.Type.GRADUATION);
+		Semester semester2 = new Semester(2002,null,Semester.Type.GRADUATION);
 		
 		assertTrue(semester1.equals(semester2));
 	}
@@ -69,8 +69,8 @@ public class SemesterTests extends UnitTest {
 	@Test
 	public void testEqualsWithNullYear() {
 		
-		Semester semester1 = new Semester(null,05);
-		Semester semester2 = new Semester(null,05);
+		Semester semester1 = new Semester(null,05,Semester.Type.GRADUATION);
+		Semester semester2 = new Semester(null,05,Semester.Type.GRADUATION);
 		
 		assertTrue(semester1.equals(semester2));
 	}
@@ -81,8 +81,8 @@ public class SemesterTests extends UnitTest {
 	@Test
 	public void testNotEqualsEqualsWithNullMonth() {
 		
-		Semester semester1 = new Semester(2002,null);
-		Semester semester2 = new Semester(2003,null);
+		Semester semester1 = new Semester(2002,null,Semester.Type.GRADUATION);
+		Semester semester2 = new Semester(2003,null,Semester.Type.GRADUATION);
 		
 		assertFalse(semester1.equals(semester2));
 	}
@@ -93,8 +93,8 @@ public class SemesterTests extends UnitTest {
 	@Test
 	public void testNotEqualsEqualsWithNullYear() {
 		
-		Semester semester1 = new Semester(null,06);
-		Semester semester2 = new Semester(null,05);
+		Semester semester1 = new Semester(null,06,Semester.Type.GRADUATION);
+		Semester semester2 = new Semester(null,05,Semester.Type.GRADUATION);
 		
 		assertFalse(semester1.equals(semester2));
 	}
@@ -105,8 +105,8 @@ public class SemesterTests extends UnitTest {
 	@Test
 	public void testNotEqualsEqualsWithMixedMonth() {
 		
-		Semester semester1 = new Semester(2002,05);
-		Semester semester2 = new Semester(2003,null);
+		Semester semester1 = new Semester(2002,05,Semester.Type.GRADUATION);
+		Semester semester2 = new Semester(2003,null,Semester.Type.GRADUATION);
 		
 		assertFalse(semester1.equals(semester2));
 	}
@@ -117,8 +117,8 @@ public class SemesterTests extends UnitTest {
 	@Test
 	public void testNotEqualsEqualsWithMixedYear() {
 		
-		Semester semester1 = new Semester(null,05);
-		Semester semester2 = new Semester(2003,05);
+		Semester semester1 = new Semester(null,05,Semester.Type.GRADUATION);
+		Semester semester2 = new Semester(2003,05,Semester.Type.GRADUATION);
 		
 		assertFalse(semester1.equals(semester2));
 	}
