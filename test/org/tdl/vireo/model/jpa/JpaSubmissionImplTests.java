@@ -244,9 +244,9 @@ public class JpaSubmissionImplTests extends UnitTest {
 		
 		// Remember there may be other submissions causing other data points.
 		assertNotNull(semesters);
-		assertTrue(semesters.contains(new Semester(2002,05)));
-		assertTrue(semesters.contains(new Semester(2003,11)));
-		assertTrue(semesters.contains(new Semester(2005,05)));
+		assertTrue(semesters.contains(new Semester(2002,05,Semester.Type.GRADUATION)));
+		assertTrue(semesters.contains(new Semester(2003,11,Semester.Type.GRADUATION)));
+		assertTrue(semesters.contains(new Semester(2005,05,Semester.Type.GRADUATION)));
 		assertTrue(semesters.size() >= 3);
 	}
 	
@@ -283,9 +283,9 @@ public class JpaSubmissionImplTests extends UnitTest {
 		
 		// Remember there may be other submissions causing other data points.
 		assertNotNull(semesters);
-		assertTrue(semesters.contains(new Semester(2002,05)));
-		assertTrue(semesters.contains(new Semester(2003,11)));
-		assertTrue(semesters.contains(new Semester(2005,05)));
+		assertTrue(semesters.contains(new Semester(2002,05,Semester.Type.PROGRAM)));
+		assertTrue(semesters.contains(new Semester(2003,11,Semester.Type.PROGRAM)));
+		assertTrue(semesters.contains(new Semester(2005,05,Semester.Type.PROGRAM)));
 		assertTrue(semesters.size() >= 3);
 	}
 	

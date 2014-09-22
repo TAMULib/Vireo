@@ -107,16 +107,26 @@ public class JpaSubmissionRepositoryImpl implements SubmissionRepository {
 	@Override
 	public List<Semester> findAllGraduationSemesters() {
 		Query query = JPA.em().createQuery("SELECT DISTINCT new org.tdl.vireo.search.Semester(sub.graduationYear, sub.graduationMonth) FROM JpaSubmissionImpl AS sub WHERE sub.graduationYear IS NOT NULL AND sub.graduationMonth IS NOT NULL ORDER BY sub.graduationYear DESC, sub.graduationMonth DESC");
-		// are results only GraduationSemesters?
-		List<Semester> results = query.getResultList();
+
+		List<Semester> results = new ArrayList<Semester>();
+		List<Semester> tempResults = query.getResultList();
+		for(Semester res : tempResults) {
+			res.type = Semester.Type.GRADUATION;
+			results.add(res);
+		}
 		return results;
 	}
 	
 	@Override
 	public List<Semester> findAllProgramDates() {
 		Query query = JPA.em().createQuery("SELECT DISTINCT new org.tdl.vireo.search.Semester(sub.programYear, sub.programMonth) FROM JpaSubmissionImpl AS sub WHERE sub.programYear IS NOT NULL AND sub.programMonth IS NOT NULL ORDER BY sub.programYear DESC, sub.programMonth DESC");
-		// are results only ProgramDates?
-		List<Semester> results = query.getResultList();
+
+		List<Semester> results = new ArrayList<Semester>();
+		List<Semester> tempResults = query.getResultList();
+		for(Semester res : tempResults) {
+			res.type = Semester.Type.PROGRAM;
+			results.add(res);
+		}
 		return results;
 	}
 	
