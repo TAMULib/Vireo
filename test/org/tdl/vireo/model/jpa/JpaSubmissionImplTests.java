@@ -244,9 +244,9 @@ public class JpaSubmissionImplTests extends UnitTest {
 		
 		// Remember there may be other submissions causing other data points.
 		assertNotNull(semesters);
-		assertTrue(semesters.contains(new Semester(2002,05,Semester.Type.GRADUATION)));
-		assertTrue(semesters.contains(new Semester(2003,11,Semester.Type.GRADUATION)));
-		assertTrue(semesters.contains(new Semester(2005,05,Semester.Type.GRADUATION)));
+		assertTrue(semesters.contains(new Semester(2002,05)));
+		assertTrue(semesters.contains(new Semester(2003,11)));
+		assertTrue(semesters.contains(new Semester(2005,05)));
 		assertTrue(semesters.size() >= 3);
 	}
 	
@@ -271,8 +271,7 @@ public class JpaSubmissionImplTests extends UnitTest {
 		sub2002.save();
 		sub2003.save();
 		sub2005.save();
-		subNull.save();
-		
+		subNull.save();		
 		
 		List<Semester> semesters = subRepo.findAllProgramDates();
 		
@@ -283,9 +282,9 @@ public class JpaSubmissionImplTests extends UnitTest {
 		
 		// Remember there may be other submissions causing other data points.
 		assertNotNull(semesters);
-		assertTrue(semesters.contains(new Semester(2002,05,Semester.Type.PROGRAM)));
-		assertTrue(semesters.contains(new Semester(2003,11,Semester.Type.PROGRAM)));
-		assertTrue(semesters.contains(new Semester(2005,05,Semester.Type.PROGRAM)));
+		assertTrue(semesters.contains(new Semester(2002,05)));
+		assertTrue(semesters.contains(new Semester(2003,11)));
+		assertTrue(semesters.contains(new Semester(2005,05)));
 		assertTrue(semesters.size() >= 3);
 	}
 	
@@ -688,8 +687,7 @@ public class JpaSubmissionImplTests extends UnitTest {
 		State nextState = initialState.getTransitions(sub).get(0);
 		
 		sub.setState(nextState);
-		sub.save();
-		
+		sub.save();		
 		
 		// Okay, we should start generating action log messages now.
 		sub.setStudentFirstName("first");
@@ -996,8 +994,7 @@ public class JpaSubmissionImplTests extends UnitTest {
 		sub.setDepositDate(now);
 		sub.setReviewerNotes("notes");
 		sub.save();
-		
-		
+				
 		// Commit and reopen a new transaction.
 		JPA.em().getTransaction().commit();
 		JPA.em().getTransaction().begin();
@@ -1080,7 +1077,6 @@ public class JpaSubmissionImplTests extends UnitTest {
 		Submission sub = subRepo.createSubmission(person).save();
 		sub.setDocumentTitle("changed");
 		sub.save();
-
 		
 		// Test that a reviewer can edit a submission
 		context.login(MockPerson.getReviewer());

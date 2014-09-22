@@ -11,7 +11,6 @@ package org.tdl.vireo.search;
 public class Semester {
 	public Integer year = null;
 	public Integer month = null;
-	public Type type = null;
 
 	/**
 	 * Construct a new graduation semester with null values.
@@ -33,41 +32,6 @@ public class Semester {
 	}
 	
 	/**
-	 * Construct a new semester
-	 * 
-	 * @param year
-	 *            The year
-	 * @param month
-	 *            The month
-	 * @param type
-	 * 			  The type            
-	 */
-	public Semester(Integer year, Integer month, Type type) {
-		this.year = year;
-		this.month = month;
-		this.type = type;
-	}
-	
-	/**
-	 * Construct a new semester
-	 * 
-	 * @param year
-	 *            The year
-	 * @param month
-	 *            The month
-	 * @param type
-	 * 			  The type as integer 1 - GRADUATION, 2 - PROGRAM             
-	 */
-	public Semester(Integer year, Integer month, Integer type) {
-		this.year = year;
-		this.month = month;
-		if(type == 1)
-			this.type = Type.GRADUATION;
-		else if(type == 2)
-			this.type = Type.PROGRAM;
-	}
-
-	/**
 	 * @return true if the two objects are equal, otherwise false.
 	 */
 	public boolean equals(Object otherObject) {
@@ -87,38 +51,6 @@ public class Semester {
 
 		if (this.month != null && !this.month.equals(other.month))
 			return false;
-		
-		if (this.type == null && other.type != null)
-			return false;
-
-		if (this.type != null && !this.type.equals(other.type))
-			return false;
-
-		return true;
-	}
-	
-	public Type getType(String stringType)
-	{
-		if(stringType.contains("GRADUATION"))
-			return Type.GRADUATION;
-		else if(stringType.contains("PROGRAM"))
-			return Type.PROGRAM;
-		else
-			return Type.UNKNOWN;
-	}
-	
-	public String toString(Type type) 
-	{
-		if(type == Type.GRADUATION)
-			return "GRADUATION";
-		else if(type == Type.PROGRAM)
-			return "PROGRAM";
-		else
-			return "UNKNOWN";
-	}
-	
-	public enum Type
-	{
-		GRADUATION, PROGRAM, UNKNOWN
-	}
+			return true;
+	}	
 }

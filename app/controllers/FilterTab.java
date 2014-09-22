@@ -922,12 +922,12 @@ public class FilterTab extends AbstractVireoController {
 		} else if ("graduationSemester".equals(type)) {
 			Integer year = params.get("year",Integer.class);
 			Integer month = params.get("month",Integer.class);
-			activeFilter.addGraduationSemester(year, month, Semester.Type.GRADUATION);
+			activeFilter.addGraduationSemester(year, month);
 			
 		} else if ("programDate".equals(type)) {
 			Integer year = params.get("year",Integer.class);
 			Integer month = params.get("month",Integer.class);
-			activeFilter.addProgramDate(year, month, Semester.Type.PROGRAM);
+			activeFilter.addProgramDate(year, month);
 
 		} else if ("degree".equals(type)) {
 			activeFilter.addDegree(value);
@@ -1108,12 +1108,12 @@ public class FilterTab extends AbstractVireoController {
 		} else if ("graduationSemester".equals(type)) {
 			Integer year = params.get("year",Integer.class);
 			Integer month = params.get("month",Integer.class);
-			activeFilter.removeGraduationSemester(year, month, Semester.Type.GRADUATION);
+			activeFilter.removeGraduationSemester(year, month);
 			
 		} else if ("programDate".equals(type)) {
 			Integer year = params.get("year",Integer.class);
 			Integer month = params.get("month",Integer.class);
-			activeFilter.removeProgramDate(year, month, Semester.Type.PROGRAM);
+			activeFilter.removeProgramDate(year, month);
 
 		} else if ("degree".equals(type)) {
 			activeFilter.removeDegree(value);

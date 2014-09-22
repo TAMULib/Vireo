@@ -225,13 +225,13 @@ public class UriActiveSearchFilterImpl implements ActiveSearchFilter {
 	}
 	
 	@Override
-	public void addGraduationSemester(Integer year, Integer month, Semester.Type type) {
-		addGraduationSemester(new Semester(year,month,type));
+	public void addGraduationSemester(Integer year, Integer month) {
+		addGraduationSemester(new Semester(year,month));
 	}
 	
 	@Override
-	public void removeGraduationSemester(Integer year, Integer month, Semester.Type type) {
-		removeGraduationSemester(new Semester(year,month,type));
+	public void removeGraduationSemester(Integer year, Integer month) {
+		removeGraduationSemester(new Semester(year,month));
 	}
 	
 	@Override
@@ -250,13 +250,13 @@ public class UriActiveSearchFilterImpl implements ActiveSearchFilter {
 	}
 	
 	@Override
-	public void addProgramDate(Integer year, Integer month, Semester.Type type) {
-		addProgramDate(new Semester(year,month,type));
+	public void addProgramDate(Integer year, Integer month) {
+		addProgramDate(new Semester(year,month));
 	}
 	
 	@Override
-	public void removeProgramDate(Integer year, Integer month, Semester.Type type) {
-		removeProgramDate(new Semester(year,month,type));
+	public void removeProgramDate(Integer year, Integer month) {
+		removeProgramDate(new Semester(year,month));
 	}
 	
 	@Override
@@ -657,9 +657,7 @@ public class UriActiveSearchFilterImpl implements ActiveSearchFilter {
 						semester.year = Integer.valueOf(semesterSplit[0]);
 					if (!"null".equals(semesterSplit[1]))
 						semester.month = Integer.valueOf(semesterSplit[1]);
-					if (!"null".equals(semesterSplit[2]))
-						semester.type = semester.getType(semesterSplit[2]);
-
+					
 					result.add((T) semester);
 					
 				} 
@@ -744,13 +742,6 @@ public class UriActiveSearchFilterImpl implements ActiveSearchFilter {
 					result.append("null");
 				else
 					result.append(String.valueOf(semester.month));
-				
-				result.append("/");
-				
-				if (semester.type == null)
-					result.append("null");
-				else
-					result.append(semester.toString(semester.type));
 				
 			} else {
 				throw new IllegalArgumentException("Unable to encode unexpected object type: "+value.getClass().getName());

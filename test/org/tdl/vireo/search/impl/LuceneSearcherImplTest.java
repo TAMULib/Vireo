@@ -257,7 +257,7 @@ public class LuceneSearcherImplTest extends UnitTest{
 			
 			// Program Date Filter
 			filter = subRepo.createSearchFilter(person, "test-programDate1");
-			filter.addProgramDate(2002,5, Semester.Type.PROGRAM);
+			filter.addProgramDate(2002,5);
 			filter.save();
 				
 			submissions = searcher.submissionSearch(filter, SearchOrder.ID, SearchDirection.ASCENDING, 0, 21).getResults();
@@ -268,7 +268,7 @@ public class LuceneSearcherImplTest extends UnitTest{
 						
 			// Program Date without month Filter
 			filter = subRepo.createSearchFilter(person, "test-programDate2");
-			filter.addProgramDate(2003,6, Semester.Type.PROGRAM);
+			filter.addProgramDate(2003,6);
 			filter.save();
 				
 			submissions = searcher.submissionSearch(filter, SearchOrder.ID, SearchDirection.ASCENDING, 0, 21).getResults();
@@ -279,7 +279,7 @@ public class LuceneSearcherImplTest extends UnitTest{
 			
 			// Graduation Semester Filter
 			filter = subRepo.createSearchFilter(person, "test-gradSemester1");
-			filter.addGraduationSemester(2002,5,Semester.Type.GRADUATION);
+			filter.addGraduationSemester(2002,5);
 			filter.save();
 									
 			submissions = searcher.submissionSearch(filter, SearchOrder.ID, SearchDirection.ASCENDING, 0, 21).getResults();
@@ -290,7 +290,7 @@ public class LuceneSearcherImplTest extends UnitTest{
 			
 			// Graduation Semester without month Filter
 			filter = subRepo.createSearchFilter(person, "test-gradSemester2");
-			filter.addGraduationSemester(2003,6,Semester.Type.GRADUATION);
+			filter.addGraduationSemester(2003,6);
 			filter.save();
 	
 			submissions = searcher.submissionSearch(filter, SearchOrder.ID, SearchDirection.ASCENDING, 0, 21).getResults();
@@ -301,7 +301,7 @@ public class LuceneSearcherImplTest extends UnitTest{
 			
 			// Program Date Filter
 			filter = subRepo.createSearchFilter(person, "test-programDate1");
-			filter.addProgramDate(2002,05,Semester.Type.PROGRAM);
+			filter.addProgramDate(2002,05);
 			filter.save();
 						
 			submissions = searcher.submissionSearch(filter, SearchOrder.ID, SearchDirection.ASCENDING, 0, 21).getResults();
@@ -312,7 +312,7 @@ public class LuceneSearcherImplTest extends UnitTest{
 						
 			// Program Date without month Filter
 			filter = subRepo.createSearchFilter(person, "test-programDate2");
-			filter.addProgramDate(2003,6,Semester.Type.PROGRAM);
+			filter.addProgramDate(2003,6);
 			filter.save();
 			
 			submissions = searcher.submissionSearch(filter, SearchOrder.ID, SearchDirection.ASCENDING, 0, 21).getResults();
@@ -842,20 +842,20 @@ public class LuceneSearcherImplTest extends UnitTest{
 			filter.delete();
 			
 			// Program Date Filter
-			//filter = subRepo.createSearchFilter(person, "test-programDate3");
-			//filter.addAssignee(otherPerson);
-			//filter.addProgramDate(2002,5,Semester.Type.PROGRAM);
-			//filter.save();
+			filter = subRepo.createSearchFilter(person, "test-programDate3");
+			filter.addAssignee(otherPerson);
+			filter.addProgramDate(2002,5);
+			filter.save();
 									
-			//logs = searcher.actionLogSearch(filter, SearchOrder.ID, SearchDirection.DESCENDING, 0, 21).getResults();
+			logs = searcher.actionLogSearch(filter, SearchOrder.ID, SearchDirection.DESCENDING, 0, 21).getResults();
 								
-			//assertEquals(sub1.getId(),logs.get(0).getSubmission().getId());
-			//filter.delete();
+			assertEquals(sub1.getId(),logs.get(0).getSubmission().getId());
+			filter.delete();
 						
 			// Graduation Semester Filter
 			filter = subRepo.createSearchFilter(person, "test-semester1");
 			filter.addAssignee(otherPerson);
-			filter.addGraduationSemester(2002,5,Semester.Type.GRADUATION);
+			filter.addGraduationSemester(2002,5);
 			filter.save();
 			
 			logs = searcher.actionLogSearch(filter, SearchOrder.ID, SearchDirection.DESCENDING, 0, 21).getResults();
