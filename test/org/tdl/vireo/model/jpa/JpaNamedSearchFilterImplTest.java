@@ -317,10 +317,10 @@ public class JpaNamedSearchFilterImplTest extends UnitTest {
 		filter.addAssignee(otherPerson);
 		filter.addEmbargoType(embargo1);
 		filter.addEmbargoType(embargo2);
-		filter.addGraduationSemester(2002,05,Semester.Type.GRADUATION);
-		filter.addGraduationSemester(2002,null,Semester.Type.GRADUATION);
-		filter.addProgramDate(2002,05,Semester.Type.PROGRAM);
-		filter.addProgramDate(2002,null,Semester.Type.PROGRAM);
+		filter.addGraduationSemester(2002,05);
+		filter.addGraduationSemester(2002,null);
+		filter.addProgramDate(2002,05);
+		filter.addProgramDate(2002,null);
 		filter.addDegree("degree1");
 		filter.addDegree("degree2");
 		filter.addDepartment("dept1");
