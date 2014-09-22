@@ -47,6 +47,25 @@ public class Semester {
 		this.month = month;
 		this.type = type;
 	}
+	
+	/**
+	 * Construct a new semester
+	 * 
+	 * @param year
+	 *            The year
+	 * @param month
+	 *            The month
+	 * @param type
+	 * 			  The type as integer 1 - GRADUATION, 2 - PROGRAM             
+	 */
+	public Semester(Integer year, Integer month, Integer type) {
+		this.year = year;
+		this.month = month;
+		if(type == 1)
+			this.type = Type.GRADUATION;
+		else if(type == 2)
+			this.type = Type.PROGRAM;
+	}
 
 	/**
 	 * @return true if the two objects are equal, otherwise false.
