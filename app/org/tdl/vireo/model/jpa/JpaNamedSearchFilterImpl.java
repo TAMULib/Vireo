@@ -3,7 +3,6 @@ package org.tdl.vireo.model.jpa;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-//import java.util.function.Predicate; // Java ver 1.8
 
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
