@@ -156,6 +156,11 @@ public class MockSearcher implements Searcher {
 		public long findSubmissionsTotal() {
 			return 0;
 		}
+		
+		@Override
+		public List<Semester> findAllProgramDates() {
+			return null;
+		}
 
 		@Override
 		public List<Semester> findAllGraduationSemesters() {

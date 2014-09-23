@@ -109,9 +109,19 @@ managing and modifying filters.
         #{if facet == FACET_GRADUATION_SEMESTER && activeFilter.getGraduationSemesters().size() > 0 }
         <div class="sub-heading">&{nav.toUpperCase()+'_FACET_'+facet.name()}</div>
         <ul class="unstyled editable">
-            #{list items:activeFilter.getGraduationSemesters(), as:'semester'}
-            %{ String monthName = new java.text.DateFormatSymbols().getMonths()[semester.month]; }%
-            <li><a class="removable" href="@{FilterTab.ModifyFilters(nav)}?action=remove&type=semester&year=${semester.year}&month=${semester.month}">${semester.year} ${monthName}</a></li>
+            #{list items:activeFilter.getGraduationSemesters(), as:'graduationSemester'}
+            %{ String monthName = new java.text.DateFormatSymbols().getMonths()[graduationSemester.month]; }%
+            <li><a class="removable" href="@{FilterTab.ModifyFilters(nav)}?action=remove&type=graduationSemester&year=${graduationSemester.year}&month=${graduationSemester.month}">${graduationSemester.year} ${monthName}</a></li>
+            #{/list}
+        </ul>
+        #{/if}
+        
+        #{if facet == FACET_PROGRAM_DATE && activeFilter.getProgramDates().size() > 0 }
+        <div class="sub-heading">&{nav.toUpperCase()+'_FACET_'+facet.name()}</div>
+        <ul class="unstyled editable">
+            #{list items:activeFilter.getProgramDates(), as:'programDate'}
+            %{ String monthName = new java.text.DateFormatSymbols().getMonths()[programDate.month]; }%
+            <li><a class="removable" href="@{FilterTab.ModifyFilters(nav)}?action=remove&type=programDate&year=${programDate.year}&month=${programDate.month}">${programDate.year} ${monthName}</a></li>
             #{/list}
         </ul>
         #{/if}
@@ -372,13 +382,28 @@ different blocks this gets around this problem because each is independent.
         <div class="sub-heading">&{nav.toUpperCase()+'_FACET_'+facet.name()}</div>
         <ul class="unstyled">
             %{ shown = 0 }%
-            #{list items:subRepo.findAllGraduationSemesters(), as:'semester'}
-            #{if !activeFilter.getGraduationSemesters().contains(semester) }{% shown++ %}
+            #{list items:subRepo.findAllGraduationSemesters(), as:'graduationSemester'}
+            #{if !activeFilter.getGraduationSemesters().contains(graduationSemester) }{% shown++ %}
             #{if shown == 6}
             <li class="more">more...</li>
             #{/if}
-            %{ String monthName = new java.text.DateFormatSymbols().getMonths()[semester.month]; }%
-            <li #{if shown >= 6}class="hidden"#{/if}><a href="@{FilterTab.ModifyFilters(nav)}?action=add&type=semester&year=${semester.year}&month=${semester.month}">${semester.year} ${monthName}</a></li>
+            %{ String monthName = new java.text.DateFormatSymbols().getMonths()[graduationSemester.month]; }%
+            <li #{if shown >= 6}class="hidden"#{/if}><a href="@{FilterTab.ModifyFilters(nav)}?action=add&type=graduationSemester&year=${graduationSemester.year}&month=${graduationSemester.month}">${graduationSemester.year} ${monthName}</a></li>
+            #{/if}
+            #{/list}
+        </ul>
+        #{/if}
+        #{if facet == FACET_PROGRAM_DATE }
+        <div class="sub-heading">&{nav.toUpperCase()+'_FACET_'+facet.name()}</div>
+        <ul class="unstyled">
+            %{ shown = 0 }%
+            #{list items:subRepo.findAllProgramDates(), as:'programDate'}
+            #{if !activeFilter.getProgramDates().contains(programDate) }{% shown++ %}
+            #{if shown == 6}
+            <li class="more">more...</li>
+            #{/if}
+            %{ String monthName = new java.text.DateFormatSymbols().getMonths()[programDate.month]; }%
+            <li #{if shown >= 6}class="hidden"#{/if}><a href="@{FilterTab.ModifyFilters(nav)}?action=add&type=programDate&year=${programDate.year}&month=${programDate.month}">${programDate.year} ${monthName}</a></li>
             #{/if}
             #{/list}
         </ul>

@@ -156,13 +156,22 @@ in results.
                  case PRIMARY_DOCUMENT:
                      if (sub.getPrimaryDocument() != null)
                         out.print(sub.getPrimaryDocument().getName());
-                     break;
+                     break;                 
                  case GRADUATION_DATE:
                      String monthName = null;
                      if (sub.getGraduationMonth() != null && sub.getGraduationMonth() >= 0 && sub.getGraduationMonth() <= 11)
                         monthName = new java.text.DateFormatSymbols().getMonths()[sub.getGraduationMonth()]; 
                      if (sub.getGraduationYear() != null)
                         out.print(sub.getGraduationYear());
+                     if (monthName != null)
+                        out.print(" "+monthName);
+                     break;
+                 case PROGRAM_DATE:
+                     String monthName = null;
+                     if (sub.getProgramMonth() != null && sub.getProgramMonth() >= 0 && sub.getProgramMonth() <= 11)
+                        monthName = new java.text.DateFormatSymbols().getMonths()[sub.getProgramMonth()]; 
+                     if (sub.getProgramYear() != null)
+                        out.print(sub.getProgramYear());
                      if (monthName != null)
                         out.print(" "+monthName);
                      break;
@@ -286,7 +295,6 @@ in results.
                  	if (sub.getOrcid() != null)
                  		out.print(sub.getOrcid());
                      break;
-
                      
              } // switch (column)
              out.print("</a></td>");

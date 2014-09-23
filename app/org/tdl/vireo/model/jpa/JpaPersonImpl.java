@@ -92,6 +92,10 @@ public class JpaPersonImpl extends JpaAbstractModel<JpaPersonImpl> implements Pe
 	public Integer currentGraduationYear;
 	@Column(length=255) 
 	public Integer currentGraduationMonth;
+	@Column(length=255) 
+	public Integer currentProgramYear;
+	@Column(length=255) 
+	public Integer currentProgramMonth;
 
 	@OneToMany(targetEntity=JpaPreferenceImpl.class, mappedBy="person", cascade=CascadeType.ALL)
 	public List<Preference> preferences;
@@ -478,10 +482,8 @@ public class JpaPersonImpl extends JpaAbstractModel<JpaPersonImpl> implements Pe
 	}
 
 	@Override
-	public void setCurrentGraduationYear(Integer year) {
-		
-		assertReviewerOrOwner(this);
-		
+	public void setCurrentGraduationYear(Integer year) {		
+		assertReviewerOrOwner(this);		
 		this.currentGraduationYear = year;
 	}
 
@@ -494,11 +496,34 @@ public class JpaPersonImpl extends JpaAbstractModel<JpaPersonImpl> implements Pe
 	public void setCurrentGraduationMonth(Integer month) {
 		if (month != null && ( month > 11 || month < 0)) {
 			throw new IllegalArgumentException("Graduation month is out of bounds.");
-		}
-		
-		assertReviewerOrOwner(this);
-		
+		}		
+		assertReviewerOrOwner(this);		
 		this.currentGraduationMonth = month;
+	}
+	
+	@Override
+	public Integer getCurrentProgramYear() {
+		return currentProgramYear;
+	}
+
+	@Override
+	public void setCurrentProgramYear(Integer year) {		
+		assertReviewerOrOwner(this);		
+		this.currentProgramYear = year;
+	}
+
+	@Override
+	public Integer getCurrentProgramMonth() {
+		return currentProgramMonth;
+	}
+
+	@Override
+	public void setCurrentProgramMonth(Integer month) {
+		if (month != null && ( month > 11 || month < 0)) {
+			throw new IllegalArgumentException("Program month is out of bounds.");
+		}		
+		assertReviewerOrOwner(this);		
+		this.currentProgramMonth = month;
 	}
 
 	@Override
@@ -607,7 +632,5 @@ public class JpaPersonImpl extends JpaAbstractModel<JpaPersonImpl> implements Pe
 					"Unable to generate password hash because no such algorithm exists for: "
 							+ HASH_ALGORITHM, nsae);
 		}
-
 	}
-
 }

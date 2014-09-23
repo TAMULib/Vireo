@@ -678,7 +678,6 @@ public class ApplicationSettingsTab extends SettingsTab {
 	}
 	
 	
-	
 	/**
 	 * Search the current list of members and generate. This action is designed
 	 * to be invoked from an AJAX call but does not produce JSON. Instead it
@@ -723,8 +722,7 @@ public class ApplicationSettingsTab extends SettingsTab {
 			
 			if (newRole.ordinal() > context.getPerson().getRole().ordinal())
 				throw new IllegalArgumentException("Unable to set a user's role to a higher level that the current user.");
-			
-			
+						
 			String[] parts = personId.split("_");
 			Long id = Long.valueOf(parts[1]);
 			Person updated = personRepo.findPerson(id);
@@ -746,8 +744,6 @@ public class ApplicationSettingsTab extends SettingsTab {
 
 			renderTemplate("SettingTabs/listMembers.include",reviewers,updated);
 			
-			
-			
 		} catch (RuntimeException re) {
 			Logger.error(re,"Unable to update person's role");
 			String error = re.getMessage();
@@ -755,17 +751,6 @@ public class ApplicationSettingsTab extends SettingsTab {
 		}		
 	}
 	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-
 	
 	/**
 	 * Validate the current semester string which must be of the format: month
@@ -822,6 +807,8 @@ public class ApplicationSettingsTab extends SettingsTab {
 			sub.setDocumentType("Test Document Type");
 			sub.setGraduationMonth(new Date().getMonth());
 			sub.setGraduationYear(new Date().getYear()+1900);
+			sub.setProgramMonth(new Date().getMonth());
+			sub.setProgramYear(new Date().getYear()+1900);
 			
 			CommitteeMember member = sub.addCommitteeMember("Test", "Advisor", null).save();
 			member.addRole("Chair");
@@ -840,7 +827,4 @@ public class ApplicationSettingsTab extends SettingsTab {
 				sub.delete();
 		}
 	}
-	
-	
-	
 }
