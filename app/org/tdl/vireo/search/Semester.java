@@ -30,7 +30,7 @@ public class Semester {
 		this.year = year;
 		this.month = month;
 	}
-
+	
 	/**
 	 * @return true if the two objects are equal, otherwise false.
 	 */
@@ -51,7 +51,6 @@ public class Semester {
 
 		if (this.month != null && !this.month.equals(other.month))
 			return false;
-
-		return true;
-	}
+			return true;
+	}	
 }

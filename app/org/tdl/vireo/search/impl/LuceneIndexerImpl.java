@@ -87,6 +87,7 @@ import play.Play;
  * submissionDate: The submission date for the submission as a numeric date
  * stored as milliseconds.
  * 
+ * programDate: The program year & month converted into a date object and
  * 
  * 
  * ONLY USED FOR SORTING:
@@ -110,7 +111,7 @@ import play.Play;
  * publishedMaterial: The description of previously published material
  * 
  * primaryDocument: The name of the primary document for sorting.
- * 
+ *
  * licenseAgreementDate: The date the license was agreed too for sorting.
  * 
  * approvalDate: The date the submission was approved for sorting.

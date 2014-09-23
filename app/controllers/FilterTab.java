@@ -34,6 +34,8 @@ import org.tdl.vireo.search.SearchOrder;
 import org.tdl.vireo.search.SearchResult;
 import org.tdl.vireo.state.State;
 
+import org.tdl.vireo.search.Semester;
+
 import play.Logger;
 import play.libs.F.Promise;
 import play.modules.spring.Spring;
@@ -59,7 +61,6 @@ public class FilterTab extends AbstractVireoController {
 	public static ExportService exportService = Spring.getBeanOfType(ExportService.class);
 	public static AssignService assignService = Spring.getBeanOfType(AssignService.class);
 	public static CommentService commentService = Spring.getBeanOfType(CommentService.class);
-
 	
 	// Store the cookie and session names in an easy to lookup two dimensional
 	// array, so that modifySearch() and modifyFilter() can be easily coded to
@@ -68,15 +69,14 @@ public class FilterTab extends AbstractVireoController {
 	// submission list's active filter. Or easily switch that to lookup the same
 	// name for the action log.
 	public final static String[][] NAMES = {
-		{
+		{	
 			"SubmissionFilter",
 			"SubmissionDirection",
 			"SubmissionOrderBy",
 			"SubmissionOffset",
 			"SubmissionColumns",
 			"SubmissionFacets",
-			"SubmissionResultsPerPage",
-		},
+			"SubmissionResultsPerPage", },
 		{
 			"ActionLogFilter",
 			"ActionLogDirection",
@@ -84,8 +84,7 @@ public class FilterTab extends AbstractVireoController {
 			"ActionLogOffset",
 			"ActionLogColumns",
 			"ActionLogFacets",
-			"ActionLogResultsPerPage"
-		}
+			"ActionLogResultsPerPage" }
 	};
 	
 	// Static index lookups into the NAMES array for name sets.
@@ -108,8 +107,7 @@ public class FilterTab extends AbstractVireoController {
 	public static void listRedirect() {
 		list();
 	}
-	
-	
+		
 	/**
 	 * List page
 	 * 
@@ -337,8 +335,7 @@ public class FilterTab extends AbstractVireoController {
 			}
 		} else {
 			facets = getDefaultFacets(ACTION_LOG);
-		}
-		
+		}		
 		
 		// Add all search orders to the view
 		for (SearchOrder order : SearchOrder.values())
@@ -923,10 +920,15 @@ public class FilterTab extends AbstractVireoController {
 			EmbargoType embargo = settingRepo.findEmbargoType(embargoId);
 			activeFilter.addEmbargoType(embargo);
 			
-		} else if ("semester".equals(type)) {
+		} else if ("graduationSemester".equals(type)) {
 			Integer year = params.get("year",Integer.class);
 			Integer month = params.get("month",Integer.class);
 			activeFilter.addGraduationSemester(year, month);
+			
+		} else if ("programDate".equals(type)) {
+			Integer year = params.get("year",Integer.class);
+			Integer month = params.get("month",Integer.class);
+			activeFilter.addProgramDate(year, month);
 
 		} else if ("degree".equals(type)) {
 			activeFilter.addDegree(value);
@@ -1104,10 +1106,15 @@ public class FilterTab extends AbstractVireoController {
 			EmbargoType embargo = settingRepo.findEmbargoType(embargoId);
 			activeFilter.removeEmbargoType(embargo);
 			
-		} else if ("semester".equals(type)) {
+		} else if ("graduationSemester".equals(type)) {
 			Integer year = params.get("year",Integer.class);
 			Integer month = params.get("month",Integer.class);
 			activeFilter.removeGraduationSemester(year, month);
+			
+		} else if ("programDate".equals(type)) {
+			Integer year = params.get("year",Integer.class);
+			Integer month = params.get("month",Integer.class);
+			activeFilter.removeProgramDate(year, month);
 
 		} else if ("degree".equals(type)) {
 			activeFilter.removeDegree(value);
@@ -1192,6 +1199,7 @@ public class FilterTab extends AbstractVireoController {
 			facets.add(SearchFacet.STATE);
 			facets.add(SearchFacet.ASSIGNEE);
 			facets.add(SearchFacet.GRADUATION_SEMESTER);
+			facets.add(SearchFacet.PROGRAM_DATE);
 		}
 		
 		return facets;

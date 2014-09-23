@@ -420,6 +420,7 @@ public class ViewTab extends AbstractVireoController {
 				String gradMonth = new DateFormatSymbols().getMonths()[submission.getGraduationMonth()];
 
 				currentValue = gradMonth + " " + submission.getGraduationYear().toString();
+
 				//Program Date
 			} else if("programDate".equals(field)){
 
@@ -1215,7 +1216,8 @@ public class ViewTab extends AbstractVireoController {
 		String[] strings = graduation.split(" ");
 
 		if(strings.length != 2 || strings[1].length() != 4)
-			throw new IllegalArgumentException("The graduation date "+graduation+" is invalid. The format must be 'May 2013'.");
+			throw new IllegalArgumentException("The graduation date "+graduation+
+											   " is invalid. The format must be 'May 2013'.");
 
 		for(int i = 0; i < strings.length; i++) {
 			String item = strings[i];
@@ -1244,7 +1246,8 @@ public class ViewTab extends AbstractVireoController {
 		String[] strings = rawProgramDate.split(" ");
 
 		if(strings.length != 2 || strings[1].length() != 4)
-			throw new IllegalArgumentException("The program date "+rawProgramDate+" is invalid. The format must be 'May 2013'.");
+			throw new IllegalArgumentException("The program date "+rawProgramDate+
+											   " is invalid. The format must be 'May 2013'.");
 
 		for(int i = 0; i < strings.length; i++) {
 			String item = strings[i];

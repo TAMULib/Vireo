@@ -251,6 +251,44 @@ public class JpaSubmissionImplTests extends UnitTest {
 	}
 	
 	/**
+	 * Test find all distinct program dates.
+	 */
+	@Test
+	public void testFindAllProgramDates() {
+		
+		Submission sub2002 = subRepo.createSubmission(person);
+		Submission sub2003 = subRepo.createSubmission(person);
+		Submission sub2005 = subRepo.createSubmission(person);
+		Submission subNull = subRepo.createSubmission(person);
+		
+		sub2002.setProgramYear(2002);
+		sub2002.setProgramMonth(05);
+		sub2003.setProgramYear(2003);
+		sub2003.setProgramMonth(11);
+		sub2005.setProgramYear(2005);
+		sub2005.setProgramMonth(05);
+		
+		sub2002.save();
+		sub2003.save();
+		sub2005.save();
+		subNull.save();		
+		
+		List<Semester> semesters = subRepo.findAllProgramDates();
+		
+		sub2002.delete();
+		sub2003.delete();
+		sub2005.delete();
+		subNull.delete();
+		
+		// Remember there may be other submissions causing other data points.
+		assertNotNull(semesters);
+		assertTrue(semesters.contains(new Semester(2002,05)));
+		assertTrue(semesters.contains(new Semester(2003,11)));
+		assertTrue(semesters.contains(new Semester(2005,05)));
+		assertTrue(semesters.size() >= 3);
+	}
+	
+	/**
 	 * Test find all distinct submission years
 	 */
 	@Test
@@ -649,8 +687,7 @@ public class JpaSubmissionImplTests extends UnitTest {
 		State nextState = initialState.getTransitions(sub).get(0);
 		
 		sub.setState(nextState);
-		sub.save();
-		
+		sub.save();		
 		
 		// Okay, we should start generating action log messages now.
 		sub.setStudentFirstName("first");
@@ -957,8 +994,7 @@ public class JpaSubmissionImplTests extends UnitTest {
 		sub.setDepositDate(now);
 		sub.setReviewerNotes("notes");
 		sub.save();
-		
-		
+				
 		// Commit and reopen a new transaction.
 		JPA.em().getTransaction().commit();
 		JPA.em().getTransaction().begin();
@@ -1041,7 +1077,6 @@ public class JpaSubmissionImplTests extends UnitTest {
 		Submission sub = subRepo.createSubmission(person).save();
 		sub.setDocumentTitle("changed");
 		sub.save();
-
 		
 		// Test that a reviewer can edit a submission
 		context.login(MockPerson.getReviewer());

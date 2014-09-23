@@ -30,6 +30,7 @@ import org.tdl.vireo.model.Configuration;
 import org.tdl.vireo.model.DocumentType;
 import org.tdl.vireo.model.EmbargoType;
 import org.tdl.vireo.model.GraduationMonth;
+import org.tdl.vireo.model.ProgramMonth;
 import org.tdl.vireo.model.Language;
 import org.tdl.vireo.model.NameFormat;
 import org.tdl.vireo.model.RoleType;
@@ -235,6 +236,12 @@ public class DocumentInfo extends AbstractSubmitStep {
 			
 			if (isFieldEnabled(GRADUATION_DATE) && sub.getGraduationYear() != null)
 				degreeYear = sub.getGraduationYear().toString();
+			
+			if (isFieldEnabled(PROGRAM_DATE) && sub.getProgramMonth() != null)
+				programMonth =  sub.getProgramMonth().toString();
+			
+			if (isFieldEnabled(PROGRAM_DATE) && sub.getProgramYear() != null)
+				programYear = sub.getProgramYear().toString();
 
 			if (isFieldEnabled(DEFENSE_DATE) && sub.getDefenseDate() != null)
 				defenseDate = sub.getDefenseDate();
@@ -350,7 +357,7 @@ public class DocumentInfo extends AbstractSubmitStep {
 		
 		renderTemplate("Submit/documentInfo.html", subId, stickies,
 
-				title, degreeMonth, degreeYear, defenseDate, docType, abstractText, keywords, 
+				title, degreeMonth, degreeYear, programMonth, programYear, defenseDate, docType, abstractText, keywords, 
 				subjectPrimary, subjectSecondary, subjectTertiary, docLanguage, committeeSlots, 
 				committee, chairEmail, publishedMaterialFlag, publishedMaterial, embargo);
 	}
@@ -376,6 +383,13 @@ public class DocumentInfo extends AbstractSubmitStep {
 
 		if (!isValidDegreeYear(sub.getGraduationYear()))
 			validation.addError("degreeYear", "Please select a degree year");
+		
+		// Program Date (month & year)
+		if (!isValidProgramMonth(sub.getProgramMonth()))
+			validation.addError("programMonth", "Please select a program month");
+
+		if (!isValidProgramYear(sub.getProgramYear()))
+			validation.addError("programYear", "Please select a program year");
 	
 		// Defense Date
 		Date now = new Date();
@@ -495,6 +509,47 @@ public class DocumentInfo extends AbstractSubmitStep {
 
 		return false;
 	}
+	
+	/**
+	 * @param programMonth
+	 *            The month of the program
+	 * @return True if the name is a valid program month.
+	 */
+	protected static boolean isValidProgramMonth(Integer programMonth) {		
+		if (programMonth == null) {
+			if (isFieldRequired(PROGRAM_DATE))
+				return false;
+			return true;
+		}
+		
+		for (ProgramMonth month : settingRepo.findAllProgramMonths()) {
+			if (programMonth == month.getMonth()) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * @param programYear
+	 *            The year of the program
+	 * @return True if the name is a valid program year.
+	 */
+	protected static boolean isValidProgramYear(Integer programYear) {
+		if (programYear == null) {
+			if (isFieldRequired(PROGRAM_DATE))
+				return false;
+			return true;
+		}
+		
+		for (Integer y : getProgramYears()) {
+			if (programYear.equals(y)) {
+				return true;
+			}
+		}
+
+		return false;
+	}
 
 	/**
 	 * 
@@ -519,8 +574,7 @@ public class DocumentInfo extends AbstractSubmitStep {
 
 		return false;
 	}
-	
-	
+		
 	/**
 	 * Determine if the provided roles are valid for this given degree level of the submission.
 	 * 

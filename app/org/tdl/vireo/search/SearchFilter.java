@@ -197,6 +197,43 @@ public interface SearchFilter {
 	 *            The graduation month.
 	 */
 	public void removeGraduationSemester(Integer year, Integer month);
+	
+	/**
+	 * @return The program dates
+	 */
+	public List<Semester> getProgramDates();
+
+	/**
+	 * @param program
+	 *            The program date to add to the filter.
+	 */
+	public void addProgramDate(Semester semester);
+
+	/**
+	 * @param program
+	 *            The program date to remove from the filter.
+	 */
+	public void removeProgramDate(Semester semester);
+
+	/**
+	 * Add a program date with the provided year and month.
+	 * 
+	 * @param year
+	 *            The program year.
+	 * @param month
+	 *            The program month.
+	 */
+	public void addProgramDate(Integer year, Integer month);
+
+	/**
+	 * Remove a program date with the provided year and month.
+	 * 
+	 * @param year
+	 *            The program year.
+	 * @param month
+	 *            The program month.
+	 */
+	public void removeProgramDate(Integer year, Integer month);
 
 	/**
 	 * @return The list of degrees

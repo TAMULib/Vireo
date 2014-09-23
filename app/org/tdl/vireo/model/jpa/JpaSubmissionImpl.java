@@ -47,6 +47,8 @@ import org.tdl.vireo.state.State;
 import org.tdl.vireo.state.StateManager;
 import org.tdl.vireo.services.Utilities;
 
+import org.tdl.vireo.search.Semester;
+
 import play.modules.spring.Spring;
 
 /**
@@ -133,12 +135,16 @@ public class JpaSubmissionImpl extends JpaAbstractModel<JpaSubmissionImpl> imple
 	@Column(length=255)
 	public String documentType;
 
+	@Column(length=255)
 	public Integer graduationYear;
+	@Column(length=255)
 	public Integer graduationMonth;
 	
+	@Column(length=255)
 	public Integer programYear;
+	@Column(length=255)
 	public Integer programMonth;
-
+	
 	public String stateName;
 
 	@OneToOne(targetEntity = JpaPersonImpl.class)
@@ -1266,8 +1272,7 @@ public class JpaSubmissionImpl extends JpaAbstractModel<JpaSubmissionImpl> imple
 			primary.save();
 		}
 	}
-	
-	
+		
 	/**
 	 * Return true if the two objects are equals, accounting for nulls.
 	 * 
@@ -1286,6 +1291,4 @@ public class JpaSubmissionImpl extends JpaAbstractModel<JpaSubmissionImpl> imple
 			return a.equals(b);
 		}	
 	}
-	
-
 }
