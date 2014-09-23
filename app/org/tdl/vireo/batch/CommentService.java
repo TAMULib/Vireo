@@ -29,10 +29,10 @@ public interface CommentService {
 	 * @param visibility
 	 *            A boolean to flag if the comment is private or public.
 	 * 
-	 * @param sendEmail
+	 * @param emailStudent
 	 *            A boolean flag to specify w an email should be sent.
 	 * 
-	 * @param ccAdvisor
+	 * @param emailAdvisor
 	 *            A boolean flag that is only effective when sending an email to
 	 *            specify if the advisor should be CC'ed.
 	 * 
@@ -40,7 +40,7 @@ public interface CommentService {
 	 *         this object to keep track of the task's progress.
 	 */
 	public JobMetadata comment(SearchFilter filter, String comment,
-			String subject, Boolean visibility, Boolean sendEmail,
-			Boolean ccAdvisor);
+			String subject, Boolean visibility, Boolean emailStudent,
+			Boolean emailAdvisor);
 
 }

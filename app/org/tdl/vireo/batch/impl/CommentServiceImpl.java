@@ -110,7 +110,7 @@ public class CommentServiceImpl implements CommentService {
 
 	@Override
 	public JobMetadata comment(SearchFilter filter, String comment,
-			String subject, Boolean visibility, Boolean sendEmail, Boolean ccAdvisor) {
+			String subject, Boolean visibility, Boolean emailStudent, Boolean emailAdvisor) {
 		if (filter == null)
 			throw new IllegalArgumentException("A search filter is required");
 		
@@ -120,7 +120,7 @@ public class CommentServiceImpl implements CommentService {
 		if (context.isAuthorizationActive() && !context.isReviewer())
 			throw new SecurityException("Unauthorized to transition submissions.");
 
-		CommentJob job = new CommentJob(filter, comment, subject, visibility, ccAdvisor, sendEmail);
+		CommentJob job = new CommentJob(filter, comment, subject, visibility, emailAdvisor, emailStudent);
 
 		job.now();
 
@@ -137,8 +137,8 @@ public class CommentServiceImpl implements CommentService {
 		public final String comment;
 		public final String subject;
 		public final Boolean visibility;
-		public final Boolean ccAdvisor;
-		public final Boolean sendEmail;
+		public final Boolean emailAdvisor;
+		public final Boolean emailStudent;
 		public final Long personId;
 		public final JobMetadata metadata;
 
@@ -154,20 +154,20 @@ public class CommentServiceImpl implements CommentService {
 		 * 			  The subject of the comment or email message.
 		 * @param visibility
 		 * 			  Whether the comment should be marked private.
-		 * @param ccAdvisor
-		 *            Whether the advisior should be CC'ed.
-		 * @param sendEmail
+		 * @param emailAdvisor
+		 *            Whether the advisor should be CC'ed.
+		 * @param emailStudent
 		 *            Whether to send email, or just leave a comment.
 		 */
 		public CommentJob(SearchFilter filter, String comment, String subject, Boolean visibility,
-				Boolean ccAdvisor, Boolean sendEmail) {
+				Boolean emailAdvisor, Boolean emailStudent) {
 
 			this.filter = filter;
 			this.comment = comment;
 			this.subject = subject;
 			this.visibility = visibility;
-			this.ccAdvisor = ccAdvisor;
-			this.sendEmail = sendEmail;
+			this.emailAdvisor = emailAdvisor;
+			this.emailStudent = emailStudent;
 
 			if (context.getPerson() != null) 
 				personId = context.getPerson().getId();
@@ -176,7 +176,7 @@ public class CommentServiceImpl implements CommentService {
 			
 			
 			String jobTitle = "Batch Comment"	;		
-			if (this.sendEmail)
+			if (this.emailStudent)
 				jobTitle = "Batch Email";
 			metadata = jobManager.register(jobTitle,context.getPerson());
 
@@ -210,7 +210,7 @@ public class CommentServiceImpl implements CommentService {
 				metadata.getProgress().completed = 0;
 				
 				// Comment!
-				if (this.sendEmail)
+				if (this.emailStudent)
 					metadata.setMessage("Sending emails...");
 				else
 					metadata.setMessage("Adding comments...");
@@ -219,7 +219,7 @@ public class CommentServiceImpl implements CommentService {
 
 					Submission sub = subRepo.findSubmission(subId);
 					
-					if(sendEmail){
+					if(emailStudent || emailAdvisor){
 						VireoEmail email = emailService.createEmail();
 						
 						// Run the parameters
@@ -232,8 +232,13 @@ public class CommentServiceImpl implements CommentService {
 						email.addTo(sub.getSubmitter());
 						
 						// Create list of carbon copies
-						if(ccAdvisor && sub.getCommitteeContactEmail() != null)
-							email.addCc(sub.getCommitteeContactEmail());
+						if(emailAdvisor && sub.getCommitteeContactEmail() != null) {
+							if(emailStudent) {
+								email.addCc(sub.getCommitteeContactEmail());
+							} else {
+								email.addTo(sub.getCommitteeContactEmail());
+							}
+						}
 						
 						if(context.getPerson()!=null)
 							email.setReplyTo(context.getPerson());

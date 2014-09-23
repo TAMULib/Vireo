@@ -3,7 +3,9 @@
 <script type="text/javascript">
 jQuery(document).ready(function(){
 
-	
+    // Settings toggle and input/textarea fields
+     jQuery(".vireo-ajax-toggle").click(applicationSettingsHandler('@{settings.ConfigurableSettingsTab.updateConfigurableSettingsJSON()}'));
+     jQuery(".vireo-ajax-text").change(applicationSettingsHandler('@{settings.ConfigurableSettingsTab.updateConfigurableSettingsJSON()}'));
 	
 	
 	 // Global handler for stray clicks to cancel editing.
@@ -265,7 +267,8 @@ jQuery(document).ready(function(){
      jQuery("#add-language-save").click(saveAddActionHandler('language','@{settings.ConfigurableSettingsTab.addLanguageJSON()}'));
      jQuery("#add-language-cancel").click(cancelAddActionHandler('language'));
      
-     
+     // Tooltips
+     jQuery('.tooltip-icon').tooltip();     
 }) // document ready
 </script>
 #{/set}
@@ -798,7 +801,7 @@ jQuery(document).ready(function(){
 	
 	<div class="accordion-group">
 		<div class="accordion-heading">
-			<a class="accordion-toggle" data-toggle="collapse" href="#availableCommitteeMemberRoleTypes"><strong>Available Committee Member Role Types</strong></a>			
+			<a class="accordion-toggle" data-toggle="collapse" href="#availableCommitteeMemberRoleTypes"><strong>Committee Member Settings</strong></a>			
 		</div>
 		<div id="availableCommitteeMemberRoleTypes" class="accordion-body collapse ${ "availableCommitteeMemberRoleTypes".equals(flash.get("open")) ? "in" : "" }">
 			<div class="accordion-inner">
@@ -877,6 +880,37 @@ jQuery(document).ready(function(){
 				    </form>
 				</div>
 				<br/><br/>
+                <div id="committeeMemberadditionSettings">
+                    <h2>COMMITTEE MEMBER ADDITION</h2>
+                    
+                    <ul class="unstyled">
+                        <li>
+                            <label>Committee Member Count:</label>
+                            <span>
+                                 <input class="vireo-ajax-text monospace" name="${org.tdl.vireo.constant.AppConfig.COMMITTEE_MEMBER_DEFAULT_COUNT}" type="text" value="${COMMITTEE_MEMBER_DEFAULT_COUNT}" />
+                                 <a href="#" class="tooltip-icon" rel="tooltip" data-original-title="The initial number of committee member fields shown in the Document Info step of the submission process."><i class="icon-info-sign"></i></a>
+                            </span>
+                        </li>
+                        <li>
+                            <label>Committee Member Addition Count:</label>
+                            <span>
+                                 <input class="vireo-ajax-text monospace" name="${org.tdl.vireo.constant.AppConfig.COMMITTEE_MEMBER_DEFAULT_ADD_COUNT}" type="text" value="${COMMITTEE_MEMBER_DEFAULT_ADD_COUNT}" />
+                                 <a href="#" class="tooltip-icon" rel="tooltip" data-original-title="The number of committee member fields added when the 'Add Additional Members' button is clicked in the Document Info step of the submission process."><i class="icon-info-sign"></i></a>
+                            </span>
+                        </li>
+                        <li>
+                            <label>Committee Member Addition:</label>
+                            <span>
+				                <div class="btn-group" data-toggle="buttons-radio">
+				                    <button name="${org.tdl.vireo.constant.AppConfig.COMMITTEE_MEMBER_ADD_ENABLED}" class="btn vireo-ajax-toggle #{if !"false".equals(COMMITTEE_MEMBER_ADD_ENABLED)}active#{/if}" value="true">Yes</button>
+				                    <button name="${org.tdl.vireo.constant.AppConfig.COMMITTEE_MEMBER_ADD_ENABLED}" class="btn vireo-ajax-toggle #{if "false".equals(COMMITTEE_MEMBER_ADD_ENABLED)}active#{/if}" value="false">No</button>
+				                </div>
+                                <a href="#" class="tooltip-icon" rel="tooltip" data-original-title="Enable/disable the ability to add committee members on the Document Info step of the submission process."><i class="icon-info-sign"></i></a>
+                            </span>
+                        </li>
+                    </ul>
+                </div>
+                <br/><br/>
 			</div>
 		</div>
 	</div>

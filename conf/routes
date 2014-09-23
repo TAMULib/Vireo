@@ -83,6 +83,7 @@ GET     /admin/settings/theme/?                 settings.ThemeSettingsTab.themeS
 GET     /admin/settings/email/?					settings.EmailSettingsTab.emailSettings
 GET     /admin/settings/configurable/?			settings.ConfigurableSettingsTab.configurableSettings
 POST    /admin/settings/configurable/bulk       settings.ConfigurableSettingsTab.bulkAdd
+POST    /admin/settings/configurable/update     settings.ConfigurableSettingsTab.updateConfigurableSettingsJSON
 
 ### Settings tab - General AJAX
 POST	/admin/settings/updateProfile			SettingsTab.updateProfileJSON

@@ -42,7 +42,10 @@ public class SubmissionSettingsTab extends SettingsTab {
 		for (FieldConfig field : FieldConfig.values()) {
 			allSettings.add(field.LABEL);
 			allSettings.add(field.HELP);
-			allSettings.add(field.ENABLED);			
+			allSettings.add(field.ENABLED);
+			allSettings.add(AppConfig.SUBMIT_UPLOAD_FILES_STEP_DESCRIPTION);
+			allSettings.add(AppConfig.SUBMIT_ADDITIONAL_FILES_HEADING);
+			allSettings.add(AppConfig.SUBMIT_ADDITIONAL_DOCUMENTS_LABELS);
 		}
 	}
 	
@@ -68,7 +71,10 @@ public class SubmissionSettingsTab extends SettingsTab {
 		renderArgs.put("SUBMIT_PERSONAL_INFO_STICKIES",AppConfig.SUBMIT_PERSONAL_INFO_STICKIES);
 		renderArgs.put("SUBMIT_DOCUMENT_INFO_STICKIES",AppConfig.SUBMIT_DOCUMENT_INFO_STICKIES);
 		renderArgs.put("SUBMIT_UPLOAD_FILES_STICKIES",AppConfig.SUBMIT_UPLOAD_FILES_STICKIES);
-		
+		renderArgs.put("SUBMIT_UPLOAD_FILES_STEP_DESCRIPTION", settingRepo.getConfigValue(SUBMIT_UPLOAD_FILES_STEP_DESCRIPTION));
+		renderArgs.put("SUBMIT_ADDITIONAL_FILES_HEADING", settingRepo.getConfigValue(SUBMIT_ADDITIONAL_FILES_HEADING));
+		renderArgs.put("SUBMIT_ADDITIONAL_DOCUMENTS_LABELS", settingRepo.getConfigValue(SUBMIT_ADDITIONAL_DOCUMENTS_LABELS));
+
 		
 		List<String> personalInfoStickies = new ArrayList<String>();
 		String personalInfoStickiesValue = settingRepo.getConfigValue(SUBMIT_PERSONAL_INFO_STICKIES);

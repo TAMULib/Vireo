@@ -49,6 +49,7 @@ public class MockPerson extends AbstractMock implements Person {
 	public Integer currentProgramMonth;
 	public List<Preference> preferences = new ArrayList<Preference>();
 	public RoleType role;
+	public String orcid;
 	
 	/**
 	 * @return A new mock person with the role ADMINISTRATOR.
@@ -434,6 +435,17 @@ public class MockPerson extends AbstractMock implements Person {
 	@Override
 	public void setRole(RoleType role) {
 		this.role = role;
+	}
+
+	@Override
+	public void setOrcid(String orcid) {
+		this.orcid = orcid;
+		
+	}
+
+	@Override
+	public String getOrcid() {
+		return orcid;
 	}
 
 }

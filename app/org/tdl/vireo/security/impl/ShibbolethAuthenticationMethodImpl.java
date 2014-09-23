@@ -70,6 +70,7 @@ public class ShibbolethAuthenticationMethodImpl extends
 	public String headerCurrentGraduationMonth = "SHIB_gradMonth";
 	public String headerCurrentProgramYear = "SHIB_progYear";
 	public String headerCurrentProgramMonth = "SHIB_progMonth";
+	public String headerOrcid = "SHIB_orcid";
 	
 	// Map of mock shibboleth attributes
 	public Map<String,String> mockAttributes = new HashMap<String,String>();
@@ -220,6 +221,7 @@ public class ShibbolethAuthenticationMethodImpl extends
 		headerCurrentGraduationMonth = attributeMap.get("currentGraduationMonth");
 		headerCurrentProgramYear = attributeMap.get("currentProgramYear");
 		headerCurrentProgramMonth = attributeMap.get("currentProgramMonth");
+		headerOrcid = attributeMap.get("orcid");
 	}
 	
 	@Override
@@ -431,6 +433,11 @@ public class ShibbolethAuthenticationMethodImpl extends
 						Logger.warn("Shib: Illegal value for current program month attribute '"+headerCurrentProgramMonth+"'='"+currentProgramMonthString+"', 0=January, 11=Dember. Any values outside this range are illegal.");
 					}
 				}
+			}
+			if (headerOrcid != null) {
+				String orcidString = getSingleAttribute(request, headerOrcid);
+				if (!isEmpty(orcidString) && person.getOrcid() == null)
+					person.setOrcid(orcidString);
 			}
 			person.save();
 

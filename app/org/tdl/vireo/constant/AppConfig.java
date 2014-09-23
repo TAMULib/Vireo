@@ -79,9 +79,26 @@ public class AppConfig {
 	
 	/** Instructions to show after completing a submission */
 	public final static String SUBMIT_INSTRUCTIONS = "submit_instructions";
-
+	
+	/** The ProQuest license students may have to agree to during submission */
+	public final static String SUBMIT_UPLOAD_FILES_STEP_DESCRIPTION = "submit_upload_files_step_description";
+	public final static String SUBMIT_ADDITIONAL_FILES_HEADING  = "submit_additional_files_heading";
+	public final static String SUBMIT_ADDITIONAL_DOCUMENTS_LABELS  = "submit_additional_documents_label";
+	
 	/** Instructions to show after submitting corrections */
 	public final static String CORRECTION_INSTRUCTIONS = "correction_instructions";
+	
+	//ORCID settings
+	/** Whether or not to validate ORCID IDs when changed */
+	public final static String ORCID_VALIDATION = "orcid_validation";
+	
+	/** Whether or not to authenticate the Student against the ORCID ID. */
+	public final static String ORCID_AUTHENTICATION = "orcid_authentication";
+
+	//Configurable Settings
+	public final static String COMMITTEE_MEMBER_DEFAULT_COUNT = "committee_member_default_count";
+	public final static String COMMITTEE_MEMBER_DEFAULT_ADD_COUNT = "committee_member_default_add_count";
+	public final static String COMMITTEE_MEMBER_ADD_ENABLED = "committee_member_add_enabled";
 	
 	//Proquest settings
 	/** The proquest institution code visible during export. */

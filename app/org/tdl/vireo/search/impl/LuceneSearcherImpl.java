@@ -91,7 +91,8 @@ public class LuceneSearcherImpl implements Searcher {
 		SORT_SUB_FIELDS[SearchOrder.DEPOSIT_ID.ordinal()] = "depositId";
 		SORT_SUB_FIELDS[SearchOrder.REVIEWER_NOTES.ordinal()] = "reviewerNotes";
 		SORT_SUB_FIELDS[SearchOrder.LAST_EVENT_ENTRY.ordinal()] = "lastEventEntry";
-		SORT_SUB_FIELDS[SearchOrder.LAST_EVENT_TIME.ordinal()] = "lastEventTime";		
+		SORT_SUB_FIELDS[SearchOrder.LAST_EVENT_TIME.ordinal()] = "lastEventTime";
+		SORT_SUB_FIELDS[SearchOrder.ORCID.ordinal()] = "orcid";
 		
 		// Sort fields for action logs
 		for (int i=0; i < SearchOrder.values().length; i++) 

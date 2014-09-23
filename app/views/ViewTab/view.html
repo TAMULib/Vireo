@@ -170,6 +170,7 @@ jQuery(document).ready(function(){
 	 */
 	 jQuery(".emailOptions input[name='visibility']").live("click", toggleAddCommentEmailOptions());
 	 jQuery("input[name='email_student']").live("click", toggleCarbonCopyAdvisor());
+	 jQuery("input[name='email_advisor']").live("click", toggleCarbonCopyAdvisor());
 	 
 	/**
 	 * Add File Events
@@ -274,6 +275,13 @@ jQuery(document).ready(function(){
 					<li class="edit"><label>Year of Birth:</label><span id="birthYear"
 						#{if submission.getStudentBirthYear()}
 							><i class="icon-pencil"></i> ${submission.getStudentBirthYear()}
+						#{/if}#{else}
+							class="empty"><i class="icon-pencil"></i> none
+						#{/else}
+					</span></li>
+					<li class="edit"><label>ORCID:</label><span id="orcid"
+						#{if submission.getOrcid()}
+							><i class="icon-pencil"></i> ${submission.getOrcid()}
 						#{/if}#{else}
 							class="empty"><i class="icon-pencil"></i> none
 						#{/else}

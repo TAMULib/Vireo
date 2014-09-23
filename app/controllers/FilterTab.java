@@ -719,15 +719,16 @@ public class FilterTab extends AbstractVireoController {
 		String comment = params.get("comment");
 		String subject = params.get("subject");
 		Boolean visibility = false;
-		Boolean sendEmail = false;
-		Boolean ccAdvisor = false;
+		Boolean emailStudent = false;
+		Boolean emailAdvisor = false;
 		if("public".equals(params.get("visibility"))){
 			visibility = true;
-			if(params.get("email_student") != null){
-				sendEmail = true;
-				if(params.get("cc_advisor") != null)
-					ccAdvisor = true;
-			}
+			if(params.get("email_student") != null)
+				emailStudent = true;
+			
+			if(params.get("email_advisor") != null)
+				emailAdvisor = true;
+			
 		}
 		
 		// Get the current filter
@@ -742,7 +743,7 @@ public class FilterTab extends AbstractVireoController {
 		}
 		
 		// Kick off the batch comment/email
-		JobMetadata job = commentService.comment(filter, comment, subject, visibility, sendEmail, ccAdvisor);
+		JobMetadata job = commentService.comment(filter, comment, subject, visibility, emailStudent, emailAdvisor);
 	
 		// Show a progress bar
 		JobTab.adminStatus(job.getId().toString());

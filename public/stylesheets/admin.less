@@ -309,7 +309,7 @@ LAYOUT
 	margin:20px 0;
 }
 
-.submissionAvailability li{
+.submissionAvailability li, #committeeMemberadditionSettings li {
 	padding:10px 0;
 	height: 25px;
 	width: 600px;
@@ -323,13 +323,18 @@ LAYOUT
     margin-top: -10px;
 }
 
-.submissionAvailability label{
+.submissionAvailability label, #committeeMemberadditionSettings label {
 	font-size:1.2em;
 	float:left;
 	text-align:right;
 	width:40%;
 }
-.submissionAvailability span{
+
+#committeeMemberadditionSettings label {
+	width: 44%;
+}
+
+.submissionAvailability span,#committeeMemberadditionSettings span{
 	float:left;
 	padding-left:10px;
 	clear:right;
@@ -385,7 +390,7 @@ LAYOUT
     margin-top: 3px;
     width: 350px;
 }
-#degreeCodes input {
+#degreeCodes input, #committeeMemberadditionSettings input {
     width: 75px;
 }
 
@@ -828,6 +833,10 @@ input.settings-error:focus,
 .theme-protected .lock-control .icon-lock,
 .theme-protected .lock-control .icon-pencil {
     opacity: 0.5;
+}
+
+#committeeMemberadditionSettings .btn-group {
+	display: inline-block;
 }
 
 .submissionAvailability .btn-group,

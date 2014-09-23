@@ -58,7 +58,9 @@ public enum SearchOrder {
 	REVIEWER_NOTES(35),
 	
 	LAST_EVENT_ENTRY(35),
-	LAST_EVENT_TIME(36);
+	LAST_EVENT_TIME(36),
+	
+	ORCID(37);
 	
 	// The id for this search order.
 	private int id;
