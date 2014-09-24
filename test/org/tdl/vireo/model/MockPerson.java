@@ -45,8 +45,6 @@ public class MockPerson extends AbstractMock implements Person {
 	public String currentMajor;
 	public Integer currentGraduationYear;
 	public Integer currentGraduationMonth;
-	public Integer currentProgramYear;
-	public Integer currentProgramMonth;
 	public List<Preference> preferences = new ArrayList<Preference>();
 	public RoleType role;
 	public String orcid;
@@ -383,26 +381,6 @@ public class MockPerson extends AbstractMock implements Person {
 		this.currentGraduationMonth = month;
 	}
 	
-	@Override
-	public Integer getCurrentProgramYear() {
-		return currentProgramYear;
-	}
-
-	@Override
-	public void setCurrentProgramYear(Integer year) {
-		this.currentProgramYear = year;
-	}
-
-	@Override
-	public Integer getCurrentProgramMonth() {
-		return currentProgramMonth;
-	}
-
-	@Override
-	public void setCurrentProgramMonth(Integer month) {
-		this.currentProgramMonth = month;
-	}
-
 	@Override
 	public List<Preference> getPreferences() {
 		return preferences;
