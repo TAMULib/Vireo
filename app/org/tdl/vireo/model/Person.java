@@ -342,31 +342,6 @@ public interface Person extends AbstractModel {
 	public void setCurrentGraduationMonth(Integer month);
 	
 	/**
-	 * 
-	 * @return The current program year.
-	 */
-	public Integer getCurrentProgramYear();
-
-	/**
-	 * @param year
-	 *            The new program year.
-	 */
-	public void setCurrentProgramYear(Integer year);
-
-	/**
-	 * 
-	 * @return The current non-controlled program month.
-	 */
-	public Integer getCurrentProgramMonth();
-
-	/**
-	 * 
-	 * @param month
-	 *            The new program month.
-	 */
-	public void setCurrentProgramMonth(Integer month);
-
-	/**
 	 * @return return all the preferences for this person.
 	 */
 	public List<Preference> getPreferences();
