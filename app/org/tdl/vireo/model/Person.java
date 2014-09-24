@@ -340,7 +340,6 @@ public interface Person extends AbstractModel {
 	 *            The new graduation month.
 	 */
 	public void setCurrentGraduationMonth(Integer month);
-
 	/**
 	 * @return return all the preferences for this person.
 	 */
