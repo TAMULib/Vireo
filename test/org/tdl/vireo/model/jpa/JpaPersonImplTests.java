@@ -646,8 +646,6 @@ public class JpaPersonImplTests extends UnitTest {
 		person.setCurrentMajor("major");
 		person.setCurrentGraduationYear(2005);
 		person.setCurrentGraduationMonth(5);
-		person.setCurrentProgramYear(2005);
-		person.setCurrentProgramMonth(5);
 		person.setRole(RoleType.ADMINISTRATOR);
 		person.save();
 		
@@ -672,8 +670,6 @@ public class JpaPersonImplTests extends UnitTest {
 		assertEquals("major",person.getCurrentMajor());
 		assertEquals(Integer.valueOf(2005),person.getCurrentGraduationYear());
 		assertEquals(Integer.valueOf(5),person.getCurrentGraduationMonth());
-		assertEquals(Integer.valueOf(2005),person.getCurrentProgramYear());
-		assertEquals(Integer.valueOf(5),person.getCurrentProgramMonth());
 		assertEquals(RoleType.ADMINISTRATOR,person.getRole());
 		
 		person.delete();
