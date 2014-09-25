@@ -496,7 +496,7 @@ public class JpaPersonImpl extends JpaAbstractModel<JpaPersonImpl> implements Pe
 		assertReviewerOrOwner(this);		
 		this.currentGraduationMonth = month;
 	}
-	
+
 	@Override
 	public Preference getPreference(String name) {
 		return JpaPreferenceImpl.find("person = (?1) and name = (?2)", this,name).first();
