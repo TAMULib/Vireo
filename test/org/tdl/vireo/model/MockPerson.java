@@ -44,7 +44,7 @@ public class MockPerson extends AbstractMock implements Person {
 	public String currentCollege;
 	public String currentMajor;
 	public Integer currentGraduationYear;
-	public Integer currentGraduationMonth;	
+	public Integer currentGraduationMonth;
 	public List<Preference> preferences = new ArrayList<Preference>();
 	public RoleType role;
 	public String orcid;
