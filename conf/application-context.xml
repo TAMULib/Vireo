@@ -75,8 +75,6 @@
         		<entry key="currentMajor" value="${auth.shib.attribute.currentMajor}"/>
         		<entry key="currentGraduationYear" value="${auth.shib.attribute.currentGraduationYear}"/>
         		<entry key="currentGraduationMonth" value="${auth.shib.attribute.currentGraduationMonth}"/>
-        		<entry key="currentProgramYear" value="${auth.shib.attribute.currentProgramYear}"/>
-        		<entry key="currentProgramMonth" value="${auth.shib.attribute.currentProgramMonth}"/>
         		<entry key="orcid" value="${auth.shib.attribute.orcid}"/>
         	</util:map>
         </property>
@@ -105,8 +103,6 @@
         		<entry key="${auth.shib.attribute.currentMajor}" value="Performance Studies"/>
         		<entry key="${auth.shib.attribute.currentGraduationYear}" value="2012"/>
         		<entry key="${auth.shib.attribute.currentGraduationMonth}" value="04"/>
-        		<entry key="${auth.shib.attribute.currentProgramYear}" value="2012"/>
-        		<entry key="${auth.shib.attribute.currentProgramMonth}" value="04"/>
         		<entry key="${auth.shib.attribute.orcid}" value="1234-1234-1234-1234"/>
         	</util:map>
         </property>
