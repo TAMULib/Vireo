@@ -92,7 +92,7 @@ public class JpaPersonImpl extends JpaAbstractModel<JpaPersonImpl> implements Pe
 	public Integer currentGraduationYear;
 	@Column(length=255) 
 	public Integer currentGraduationMonth;
-	
+
 	@OneToMany(targetEntity=JpaPreferenceImpl.class, mappedBy="person", cascade=CascadeType.ALL)
 	public List<Preference> preferences;
 	
