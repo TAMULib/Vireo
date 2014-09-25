@@ -238,7 +238,7 @@ public class DocumentInfo extends AbstractSubmitStep {
 				degreeYear = sub.getGraduationYear().toString();
 			
 			if (isFieldEnabled(PROGRAM_DATE) && sub.getProgramMonth() != null)
-				programMonth =  sub.getProgramMonth().toString();
+				programMonth = sub.getProgramMonth().toString();
 			
 			if (isFieldEnabled(PROGRAM_DATE) && sub.getProgramYear() != null)
 				programYear = sub.getProgramYear().toString();
@@ -353,8 +353,7 @@ public class DocumentInfo extends AbstractSubmitStep {
 		
 		if (publishedMaterial != null)
 			publishedMaterialFlag = true;
-		
-		
+				
 		renderTemplate("Submit/documentInfo.html", subId, stickies,
 
 				title, degreeMonth, degreeYear, programMonth, programYear, defenseDate, docType, abstractText, keywords, 
