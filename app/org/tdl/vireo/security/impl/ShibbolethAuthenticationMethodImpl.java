@@ -69,7 +69,7 @@ public class ShibbolethAuthenticationMethodImpl extends
 	public String headerCurrentGraduationYear = "SHIB_gradYear";
 	public String headerCurrentGraduationMonth = "SHIB_gradMonth";
 	public String headerOrcid = "SHIB_orcid";
-	
+
 	// Map of mock shibboleth attributes
 	public Map<String,String> mockAttributes = new HashMap<String,String>();
 	
@@ -182,7 +182,7 @@ public class ShibbolethAuthenticationMethodImpl extends
 	 * currentPhoneNumber, currentPostalAddress, currentEmailAddress,
 	 * permanentPhoneNumber, permanentPostalAddress, permanentEmailAddress,
 	 * currentDepartment, currentCollege, currentMajor, currentGraduationYear,
-	 * currentGraduationMonth, currentProgramYear, currentProgramMonth.
+	 * currentGraduationMonth.
 	 * 
 	 * netId is only required if useNetIdAsIdentifier is turned on.
 	 * 
