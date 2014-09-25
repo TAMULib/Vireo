@@ -92,11 +92,7 @@ public class JpaPersonImpl extends JpaAbstractModel<JpaPersonImpl> implements Pe
 	public Integer currentGraduationYear;
 	@Column(length=255) 
 	public Integer currentGraduationMonth;
-	@Column(length=255) 
-	public Integer currentProgramYear;
-	@Column(length=255) 
-	public Integer currentProgramMonth;
-
+	
 	@OneToMany(targetEntity=JpaPreferenceImpl.class, mappedBy="person", cascade=CascadeType.ALL)
 	public List<Preference> preferences;
 	
@@ -499,31 +495,6 @@ public class JpaPersonImpl extends JpaAbstractModel<JpaPersonImpl> implements Pe
 		}		
 		assertReviewerOrOwner(this);		
 		this.currentGraduationMonth = month;
-	}
-	
-	@Override
-	public Integer getCurrentProgramYear() {
-		return currentProgramYear;
-	}
-
-	@Override
-	public void setCurrentProgramYear(Integer year) {		
-		assertReviewerOrOwner(this);		
-		this.currentProgramYear = year;
-	}
-
-	@Override
-	public Integer getCurrentProgramMonth() {
-		return currentProgramMonth;
-	}
-
-	@Override
-	public void setCurrentProgramMonth(Integer month) {
-		if (month != null && ( month > 11 || month < 0)) {
-			throw new IllegalArgumentException("Program month is out of bounds.");
-		}		
-		assertReviewerOrOwner(this);		
-		this.currentProgramMonth = month;
 	}
 
 	@Override
