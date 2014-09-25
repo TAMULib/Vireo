@@ -181,7 +181,7 @@ public class ShibbolethAuthenticationMethodImpl extends
 	 * currentPhoneNumber, currentPostalAddress, currentEmailAddress,
 	 * permanentPhoneNumber, permanentPostalAddress, permanentEmailAddress,
 	 * currentDepartment, currentCollege, currentMajor, currentGraduationYear,
-	 * currentGraduationMonth, currentProgramYear, currentProgramMonth.
+	 * currentGraduationMonth.
 	 * 
 	 * netId is only required if useNetIdAsIdentifier is turned on.
 	 * 
