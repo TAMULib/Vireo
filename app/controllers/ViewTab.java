@@ -255,6 +255,11 @@ public class ViewTab extends AbstractVireoController {
 				//ORCID
 			} else if("orcid".equals(field)) {
 				
+				value = Utilities.formatOrcidAsDashedId(value);
+				
+				if(!Utilities.validateOrcidFormat(value))
+					throw new RuntimeException("The provided ORCiD is not in a valid format.");
+				
 				// Verify the ORCID id by pinging their API
 				boolean orcidVerify = true;
 				if (settingRepo.getConfigBoolean(AppConfig.ORCID_VALIDATION)) {
@@ -264,7 +269,7 @@ public class ViewTab extends AbstractVireoController {
 						orcidVerify = Utilities.verifyOrcid(value);
 				}
 				if (!orcidVerify)
-					throw new RuntimeException("The provided ORCID could not be validated.");
+					throw new RuntimeException("The provided ORCiD could not be validated.");
 				
 				submission.setOrcid(value);
 				currentValue = submission.getOrcid();	
