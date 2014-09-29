@@ -871,7 +871,7 @@ public class ViewTab extends AbstractVireoController {
 			if(((params.get("email_student") != null)||(params.get("email_advisor") != null)) && "public".equals(params.get("visibility"))) {	
 				// Send the email and log it after completion
 				email.setLogOnCompletion(context.getPerson(), submission);
-				emailService.sendEmail(email,false);
+				emailService.sendEmail(email,true);
 				
 			} else {
 				// Otherwise just log it.
@@ -1010,7 +1010,7 @@ public class ViewTab extends AbstractVireoController {
 		}	
 		
 		if (email != null)
-			emailService.sendEmail(email,false);
+			emailService.sendEmail(email,true);
 	}
 	
 	/**
@@ -1192,7 +1192,7 @@ public class ViewTab extends AbstractVireoController {
 		email.setFailureLogMessage("Failed to resend advisor request to "+advisorEmail);
 		
 		
-		emailService.sendEmail(email,false);
+		emailService.sendEmail(email,true);
 		
 		view();
 	}
