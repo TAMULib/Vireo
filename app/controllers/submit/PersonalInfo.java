@@ -1,7 +1,6 @@
 package controllers.submit;
 
 import static org.tdl.vireo.constant.AppConfig.*;
-
 import static org.tdl.vireo.constant.FieldConfig.*;
 
 import java.io.IOException;
@@ -27,9 +26,9 @@ import org.tdl.vireo.model.Person;
 import org.tdl.vireo.model.Program;
 import org.tdl.vireo.model.RoleType;
 import org.tdl.vireo.model.Submission;
+import org.tdl.vireo.services.Utilities;
 
 import au.com.bytecode.opencsv.CSVReader;
-
 import play.Logger;
 import play.Play;
 import controllers.Application;
@@ -127,7 +126,9 @@ public class PersonalInfo extends AbstractSubmitStep {
 		String firstName = params.get("firstName");
 		String middleName = params.get("middleName");
 		String lastName = params.get("lastName");
-		String orcid = params.get("orcid");
+		String orcid = null;
+		if(params.get("orcid")!=null)
+			orcid = Utilities.formatOrcidAsDashedId(params.get("orcid"));
 		String birthYear = params.get("birthYear");
 		String program = params.get("program");
 		String college = params.get("college");
@@ -159,9 +160,11 @@ public class PersonalInfo extends AbstractSubmitStep {
 				disabledFields.add("lastName");
 				lastName = submitter.getLastName();
 			}
-			if (sub.getOrcid() != null) {
-				disabledFields.add("orcid");
-				orcid = sub.getOrcid();
+			if (submitter.getOrcid() != null) {
+				if(Utilities.validateOrcidFormat(Utilities.formatOrcidAsDashedId(submitter.getOrcid()))) {
+					disabledFields.add("orcid");				
+					orcid = submitter.getOrcid();
+				}
 			}
 			if (submitter.getBirthYear() != null) {
 				if (submitter.getBirthYear() == null)
@@ -172,7 +175,7 @@ public class PersonalInfo extends AbstractSubmitStep {
 				disabledFields.add("birthYear");
 			}
 		}
-
+		
 		// Should the affiliation group be locked.
 		if (isFieldGroupLocked("affiliation")) {
 			if (isValidProgram(submitter.getCurrentProgram())) {
@@ -235,8 +238,18 @@ public class PersonalInfo extends AbstractSubmitStep {
 				sub.setStudentMiddleName(middleName);
 			if (isFieldEnabled(STUDENT_LAST_NAME))
 				sub.setStudentLastName(lastName);
-			if (isFieldEnabled(STUDENT_ORCID))
-				sub.setOrcid(orcid);
+			if (isFieldEnabled(STUDENT_ORCID)) {
+				// Don't set the ORCiD if it's formatted incorrect.
+				if(orcid != null && orcid.trim().length() > 0) {
+					if(Utilities.validateOrcidFormat(Utilities.formatOrcidAsDashedId(orcid)))
+						sub.setOrcid(orcid);
+					else
+						validation.addError("orcid","Your ORCiD must be formatted XXXX-XXXX-XXXX-XXXX");
+						
+				} else {
+					sub.setOrcid(orcid);
+				}
+			}
 			if (isFieldEnabled(STUDENT_BIRTH_YEAR)) {
 				// Don't fail if the year is invalid
 				if (birthYear != null && birthYear.trim().length() > 0) {
@@ -321,7 +334,7 @@ public class PersonalInfo extends AbstractSubmitStep {
 		} 
 		
 		// Has this form ever been displayed before, if not then load all the data.
-		if (params.get("form_submit") == null) {
+		if (params.get("submit_next") == null) {
 			firstName = sub.getStudentFirstName();
 			middleName = sub.getStudentMiddleName();
 			lastName = sub.getStudentLastName();
@@ -337,11 +350,8 @@ public class PersonalInfo extends AbstractSubmitStep {
 			permEmail = submitter.getPermanentEmailAddress();
 			currentPhone = submitter.getCurrentPhoneNumber();
 			currentAddress = submitter.getCurrentPostalAddress();
-			orcid = submitter.getOrcid();
 		}
-	
-	
-	
+			
 		// Get display settings
 		List<String> stickies = new ArrayList<String>();
 		String stickiesRaw = settingRepo.getConfigValue(SUBMIT_PERSONAL_INFO_STICKIES);
@@ -392,8 +402,14 @@ public class PersonalInfo extends AbstractSubmitStep {
 		}
 		if (isFieldRequired(STUDENT_MIDDLE_NAME) && isEmpty(sub.getStudentMiddleName()))
 			validation.addError("middleName","Your middle name is required");
+		
+		//ORCiD
 		if (isFieldRequired(STUDENT_ORCID) && isEmpty(sub.getOrcid()))
-			validation.addError("orcid","Your ORCID id is required");
+			validation.addError("orcid","Your ORCiD is required");
+		if(sub.getOrcid()!=null) {
+			if (!Utilities.validateOrcidFormat(Utilities.formatOrcidAsDashedId(sub.getOrcid())))
+				validation.addError("orcid","Your ORCiD must be formatted XXXX-XXXX-XXXX-XXXX");
+		}
 	
 		// Birth year
 		if (sub.getStudentBirthYear() != null && sub.getStudentBirthYear() < 1900)
