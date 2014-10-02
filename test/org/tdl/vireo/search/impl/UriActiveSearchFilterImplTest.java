@@ -286,7 +286,6 @@ public class UriActiveSearchFilterImplTest extends UnitTest {
 		assertEquals(0,newFilter.getStates().size());
 		assertEquals(0,newFilter.getAssignees().size());
 		assertEquals(0,newFilter.getEmbargoTypes().size());
-		assertEquals(0,newFilter.getProgramDates().size());
 		assertEquals(0,newFilter.getGraduationSemesters().size());
 		assertEquals(0,newFilter.getProgramDates().size());
 		assertEquals(0,newFilter.getDegrees().size());

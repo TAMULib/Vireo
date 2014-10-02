@@ -405,7 +405,6 @@ public class UriActiveSearchFilterImpl implements ActiveSearchFilter {
 		encodeList(result,states);
 		encodeList(result,assignees);
 		encodeList(result,embargos);
-		encodeList(result,programDates);
 		encodeList(result,semesters);
 		encodeList(result,programDates);
 		encodeList(result,degrees);
@@ -452,7 +451,6 @@ public class UriActiveSearchFilterImpl implements ActiveSearchFilter {
 			states = decodeList(split[i++],String.class);
 			assignees = decodeList(split[i++],Person.class);
 			embargos = decodeList(split[i++],EmbargoType.class);
-			programDates = decodeList(split[i++],Semester.class);
 			semesters = decodeList(split[i++],Semester.class);
 			programDates = decodeList(split[i++],Semester.class);
 			degrees = decodeList(split[i++],String.class);
@@ -535,9 +533,6 @@ public class UriActiveSearchFilterImpl implements ActiveSearchFilter {
 		other.getEmbargoTypes().clear();
 		other.getEmbargoTypes().addAll(this.embargos);
 		
-		other.getProgramDates().clear();
-		other.getProgramDates().addAll(this.programDates);
-		
 		other.getGraduationSemesters().clear();
 		other.getGraduationSemesters().addAll(this.semesters);
 		
@@ -578,7 +573,6 @@ public class UriActiveSearchFilterImpl implements ActiveSearchFilter {
 		this.states = new ArrayList<String>(other.getStates());
 		this.assignees = new ArrayList<Person>(other.getAssignees());
 		this.embargos = new ArrayList<EmbargoType>(other.getEmbargoTypes());
-		this.programDates = new ArrayList<Semester>(other.getProgramDates());
 		this.semesters = new ArrayList<Semester>(other.getGraduationSemesters());
 		this.programDates = new ArrayList<Semester>(other.getProgramDates());
 		this.degrees = new ArrayList<String>(other.getDegrees());
