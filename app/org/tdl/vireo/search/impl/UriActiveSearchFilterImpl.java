@@ -46,7 +46,6 @@ public class UriActiveSearchFilterImpl implements ActiveSearchFilter {
 	public List<String> states = new ArrayList<String>();
 	public List<Person> assignees = new ArrayList<Person>();
 	public List<EmbargoType> embargos = new ArrayList<EmbargoType>();
-	public List<Semester> programDates = new ArrayList<Semester>();
 	public List<Semester> semesters = new ArrayList<Semester>();
 	public List<Semester> programDates = new ArrayList<Semester>();
 	public List<String> degrees = new ArrayList<String>();

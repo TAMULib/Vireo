@@ -548,26 +548,26 @@ public class JpaNamedSearchFilterImpl extends JpaAbstractModel<JpaNamedSearchFil
 	}
 
 	@Override
-	public void addGraduationSemester(Semester semester) {
+	public void addProgramDate(Semester semester) {
 		assertManagerOrOwner(creator);
 		cachedProgramDates.add(semester);
 	}
-	
+
 	@Override
-	public void removeGraduationSemester(Semester semester) {
+	public void removeProgramDate(Semester semester) {
 		assertManagerOrOwner(creator);
 		cachedProgramDates.remove(semester);
 	}
-	
+
 	@Override
 	public void addProgramDate(Integer year, Integer month) {
 		addProgramDate(new Semester(year,month));
 	}
-	
+
 	@Override
 	public void removeProgramDate(Integer year, Integer month) {
 		removeProgramDate(new Semester(year,month));
-	}	
+	}
 	
 	@Override
 	public List<Semester> getGraduationSemesters() {
