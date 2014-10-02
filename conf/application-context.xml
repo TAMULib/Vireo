@@ -102,12 +102,6 @@
         		<entry key="${auth.shib.attribute.currentMajor}" value="Performance Studies"/>
         		<entry key="${auth.shib.attribute.currentGraduationYear}" value="2012"/>
         		<entry key="${auth.shib.attribute.currentGraduationMonth}" value="04"/>
-<<<<<<< HEAD
-        		<entry key="${auth.shib.attribute.currentProgramYear}" value="2012"/>
-        		<entry key="${auth.shib.attribute.currentProgramMonth}" value="04"/>
-=======
-        		<entry key="${auth.shib.attribute.orcid}" value="1234-1234-1234-1234"/>
->>>>>>> daf2b83... Removed lingering currentProgramMonth and currentProgramYear attributes.
         	</util:map>
         </property>
     </bean>
