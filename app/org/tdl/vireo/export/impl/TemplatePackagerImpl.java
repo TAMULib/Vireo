@@ -288,7 +288,7 @@ public class TemplatePackagerImpl extends AbstractPackagerImpl {
 					ZipOutputStream zos = new ZipOutputStream(fos);
 					
 					// Copy the manifest
-					File manifestFile = new File(manifestName);
+					File manifestFile = new File(Play.tmpDir + File.pathSeparator + manifestName);
 					FileUtils.writeStringToFile(manifestFile, manifest);
 					
 					ZipEntry ze = new ZipEntry(manifestName);
