@@ -288,7 +288,7 @@ public class TemplatePackagerImpl extends AbstractPackagerImpl {
 					ZipOutputStream zos = new ZipOutputStream(fos);
 					
 					// Copy the manifest
-					File manifestFile = new File(manifestName);
+					File manifestFile = new File(Play.tmpDir + File.pathSeparator + manifestName);
 					FileUtils.writeStringToFile(manifestFile, manifest);
 					
 					ZipEntry ze = new ZipEntry(manifestName);
@@ -338,11 +338,11 @@ public class TemplatePackagerImpl extends AbstractPackagerImpl {
 									String dirName = (String) attachmentAttributes.get(attachment.getType().name()).get("directory");
 									dirName = dirName.replace("{FILE_NAME}", shortFileName);
 									dirName = StringVariableReplacement.applyParameterSubstitution(dirName, parameters);
-									exportFile = new File(dirName,fileName);
+									exportFile = new File(Play.tmpDir + File.pathSeparator + dirName,fileName);
 									fileName = dirName + fileName;
 									hasDir = true;
 								} else {
-									exportFile = new File(fileName);
+									exportFile = new File(Play.tmpDir + File.pathSeparator + fileName);
 								}
 																
 								FileUtils.copyFile(
