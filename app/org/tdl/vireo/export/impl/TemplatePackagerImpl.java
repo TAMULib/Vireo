@@ -342,7 +342,7 @@ public class TemplatePackagerImpl extends AbstractPackagerImpl {
 									fileName = dirName + fileName;
 									hasDir = true;
 								} else {
-									exportFile = new File(fileName);
+									exportFile = new File(Play.tmpDir + File.pathSeparator + fileName);
 								}
 																
 								FileUtils.copyFile(
