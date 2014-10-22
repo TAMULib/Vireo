@@ -44,7 +44,7 @@
                     
                     <!--  dc.creator.orcid = Student ORCID -->
                     #{if sub.getOrcid() != null }
-                    <dim:field mdschema="dc" element="creator" qualifier="orcid">
+                    <dim:field mdschema="local" element="etdauthor" qualifier="orcid">
                     	${ sub.getOrcid()?.raw() }
                     </dim:field>
                     #{/if}
