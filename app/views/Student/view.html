@@ -60,6 +60,7 @@ jQuery(document).ready(function() {
 	</ul>
 	</br>
 	#{/ifErrors}
+	#{ifEnabled PRIMARY_ATTACHMENT}
 	<div class="control-group #{if errors.forKey('primaryDocument')}error#{/if}">
 		<label class="control-label">#{fieldLabel PRIMARY_ATTACHMENT /}:</label>
 		<div class="controls">
@@ -91,6 +92,7 @@ jQuery(document).ready(function() {
 			#{/else}
 		</div>
 	</div>
+	#{/ifEnabled}
 	#{ifEnabled [SUPPLEMENTAL_ATTACHMENT,SOURCE_ATTACHMENT,ADMINISTRATIVE_ATTACHMENT]}
     <div class="control-group #{if errors.forKey('additionalDocument')}error#{/if}">
         <label class="control-label">Additional Documents:</label>
