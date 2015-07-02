@@ -9,10 +9,7 @@ import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
 import javax.persistence.PostLoad;
 import javax.persistence.PostPersist;
 import javax.persistence.PostUpdate;
@@ -26,6 +23,7 @@ import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
 import org.tdl.vireo.model.ActionLog;
+import org.tdl.vireo.model.CustomActionDefinition;
 import org.tdl.vireo.model.EmbargoType;
 import org.tdl.vireo.model.NamedSearchFilter;
 import org.tdl.vireo.model.Person;
@@ -33,6 +31,7 @@ import org.tdl.vireo.model.PersonRepository;
 import org.tdl.vireo.model.SettingsRepository;
 import org.tdl.vireo.model.Submission;
 import org.tdl.vireo.model.SubmissionRepository;
+import org.tdl.vireo.search.SearchOrder;
 import org.tdl.vireo.search.Semester;
 
 import play.modules.spring.Spring;
@@ -166,6 +165,12 @@ public class JpaNamedSearchFilterImpl extends JpaAbstractModel<JpaNamedSearchFil
 			joinColumns=@JoinColumn(name="search_filter_id"))
 	public List<String> documentTypes;
 	
+	@ElementCollection
+	@CollectionTable(
+			name="search_filter_columns",
+			joinColumns=@JoinColumn(name="search_filter_id"))
+	public List<SearchOrder> columns;
+
 	public Boolean umiRelease;
 
 	@Temporal(TemporalType.DATE)
@@ -173,6 +178,12 @@ public class JpaNamedSearchFilterImpl extends JpaAbstractModel<JpaNamedSearchFil
 	
 	@Temporal(TemporalType.DATE)
 	public Date rangeEnd;
+	
+	@ElementCollection
+	@CollectionTable(
+			name="search_filter_customactions",
+			joinColumns=@JoinColumn(name="search_filter_id"))
+	public List<Long> customActionIds;
 	
 	/**
 	 * Construct a new Named Search Filter
@@ -211,6 +222,8 @@ public class JpaNamedSearchFilterImpl extends JpaAbstractModel<JpaNamedSearchFil
 		this.colleges = new ArrayList<String>();
 		this.majors = new ArrayList<String>();
 		this.documentTypes = new ArrayList<String>();
+		this.columns = new ArrayList<SearchOrder>();
+		this.customActionIds = new ArrayList<Long>();
 	}
 
 	/**
@@ -267,7 +280,7 @@ public class JpaNamedSearchFilterImpl extends JpaAbstractModel<JpaNamedSearchFil
 			program_dates.add(value);
 		}
 	}
-
+	
 	/**
 	 * After being loaded from the database update our cached copy of the
 	 * semester data structure and unassigned assignees.
@@ -344,11 +357,16 @@ public class JpaNamedSearchFilterImpl extends JpaAbstractModel<JpaNamedSearchFil
 	}
 
 	@Override
+	public boolean hasColumns() {
+		return (this.columns.size() > 0);
+	}
+
+	@Override
 	public List<Submission> getIncludedSubmissions() {
 		
 		List<Submission> result = new ArrayList<Submission>();
+		SubmissionRepository subRepo = Spring.getBeanOfType(SubmissionRepository.class);
 		for (Long id : includedSubmissionIds) {
-			SubmissionRepository subRepo = Spring.getBeanOfType(SubmissionRepository.class);
 			Submission sub = subRepo.findSubmission(id);
 			if (sub != null)
 				result.add(sub);
@@ -372,8 +390,8 @@ public class JpaNamedSearchFilterImpl extends JpaAbstractModel<JpaNamedSearchFil
 	public List<Submission> getExcludedSubmissions() {
 		
 		List<Submission> result = new ArrayList<Submission>();
+		SubmissionRepository subRepo = Spring.getBeanOfType(SubmissionRepository.class);
 		for (Long id : excludedSubmissionIds) {
-			SubmissionRepository subRepo = Spring.getBeanOfType(SubmissionRepository.class);
 			Submission sub = subRepo.findSubmission(id);
 			if (sub != null)
 				result.add(sub);
@@ -730,4 +748,37 @@ public class JpaNamedSearchFilterImpl extends JpaAbstractModel<JpaNamedSearchFil
 	public void setDateRangeEnd(Date end) {
 		rangeEnd = end;
 	}
+
+	@Override
+	public List<SearchOrder> getColumns() {
+		return columns;
+	}
+
+	@Override
+	public void setColumns(List<SearchOrder> columns) {
+		this.columns = columns;
+	}
+
+	@Override
+    public List<CustomActionDefinition> getCustomActions() {
+		List<CustomActionDefinition> result = new ArrayList<CustomActionDefinition>();
+		
+		SettingsRepository settingRepo = Spring.getBeanOfType(SettingsRepository.class);
+		for (Long id : customActionIds) {
+			CustomActionDefinition customActionDefinition = settingRepo.findCustomActionDefinition(id);
+			if (customActionDefinition != null)
+				result.add(customActionDefinition);
+		}
+	    return result;
+    }
+
+	@Override
+    public void addCustomAction(CustomActionDefinition customAction) {
+		this.customActionIds.add(customAction.getId());
+    }
+
+	@Override
+    public void removeCustomAction(CustomActionDefinition customAction) {
+		this.customActionIds.remove(customAction.getId());
+    }
 }

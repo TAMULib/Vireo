@@ -12,8 +12,8 @@ import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 
 import org.apache.commons.codec.binary.Base64;
+import org.tdl.vireo.constant.AppConfig;
 import org.tdl.vireo.email.EmailService;
-import org.tdl.vireo.email.SystemEmailTemplateService;
 import org.tdl.vireo.email.VireoEmail;
 import org.tdl.vireo.model.EmailTemplate;
 import org.tdl.vireo.model.NameFormat;
@@ -21,6 +21,7 @@ import org.tdl.vireo.model.Person;
 import org.tdl.vireo.model.RoleType;
 import org.tdl.vireo.security.AuthenticationMethod;
 import org.tdl.vireo.security.AuthenticationResult;
+import org.tdl.vireo.services.Utilities;
 
 import play.Logger;
 import play.Play;
@@ -51,7 +52,6 @@ public class Authentication extends AbstractVireoController {
 	
 	// Spring dependencies
 	public static EmailService emailService = Spring.getBeanOfType(EmailService.class);
-	public static SystemEmailTemplateService systemEmailService = Spring.getBeanOfType(SystemEmailTemplateService.class);
 	
 	// Constants
 	public static final String REGISTRATION_TEMPLATE = "SYSTEM New User Registration";
@@ -442,7 +442,6 @@ public class Authentication extends AbstractVireoController {
 			
 			if (!validation.hasErrors()) {
 				// We're good let's send this off.
-				systemEmailService.generateAllSystemEmailTemplates();
 				EmailTemplate template = settingRepo.findEmailTemplateByName(REGISTRATION_TEMPLATE);
 				
 				ActionDefinition action = Router.reverse("Authentication.register");
@@ -575,7 +574,6 @@ public class Authentication extends AbstractVireoController {
 
 			if (!validation.hasErrors()) {
 				// We're good let's send this off.
-				systemEmailService.generateAllSystemEmailTemplates();
 				EmailTemplate template = settingRepo.findEmailTemplateByName(RECOVER_TEMPLATE);
 				
 				ActionDefinition action = Router.reverse("Authentication.recover");
@@ -616,6 +614,7 @@ public class Authentication extends AbstractVireoController {
 		String firstName = person.getFirstName();
 		String lastName = person.getLastName();
 		String middleName = person.getMiddleName();
+		String orcid = person.getOrcid();
 		
 		String birthYear = "";
 		if (person.getBirthYear() != null)
@@ -632,7 +631,7 @@ public class Authentication extends AbstractVireoController {
 		
 		
 		renderTemplate("Authentication/profile.html", updateProfile, updatePassword, fullName, firstName, email, lastName, middleName, 
-				birthYear, currentPhoneNumber, currentPostalAddress, permanentPhoneNumber,
+				birthYear, orcid, currentPhoneNumber, currentPostalAddress, permanentPhoneNumber,
 				permanentPostalAddress, permanentEmailAddress);
 	}
 	
@@ -663,6 +662,7 @@ public class Authentication extends AbstractVireoController {
 		String lastName = params.get("lastName");
 		String middleName = params.get("middleName");
 		String birthYear = params.get("birthYear");
+		String orcid = params.get("orcid");
 		String currentPhoneNumber = params.get("currentPhoneNumber");
 		String currentPostalAddress = params.get("currentPostalAddress");
 		String permanentPhoneNumber = params.get("permanentPhoneNumber");
@@ -696,6 +696,17 @@ public class Authentication extends AbstractVireoController {
 				}
 			}
 			
+			// Verify the ORCID id by pinging their API
+			boolean orcidVerify = true;
+			if (settingRepo.getConfigBoolean(AppConfig.ORCID_VALIDATION)) {
+				if (settingRepo.getConfigBoolean(AppConfig.ORCID_AUTHENTICATION))
+					orcidVerify = Utilities.verifyOrcid(orcid, person.getFirstName(), person.getLastName());
+				else
+					orcidVerify = Utilities.verifyOrcid(orcid);
+			}
+			if (!orcidVerify)
+				validation.addError("orcid","The provided ORCID could not be validated.");
+			
 			if (!validation.hasErrors()) {
 				person.setFirstName(firstName);
 				person.setLastName(lastName);
@@ -706,9 +717,10 @@ public class Authentication extends AbstractVireoController {
 				person.setPermanentPhoneNumber(permanentPhoneNumber);
 				person.setPermanentPostalAddress(permanentPostalAddress);
 				person.setPermanentEmailAddress(permanentEmailAddress);
+				person.setOrcid(orcid);
 				person.save();
 				
-				Logger.info("%s (%d: %s) has updated their profile. \nFirst Name = '%s'\nLast Name = '%s'\nMiddle Name = '%s'\nBirth Year = '%d'\nCurrent Phone Number = '%s'\nCurrent Postal Address = '%s'\nPermanent Phone Number = '%s'\nPermanent Postal Address = '%s'\nPermanent Email Address = '%s'",
+				Logger.info("%s (%d: %s) has updated their profile. \nFirst Name = '%s'\nLast Name = '%s'\nMiddle Name = '%s'\nBirth Year = '%d'\nORCID = '%s'\nCurrent Phone Number = '%s'\nCurrent Postal Address = '%s'\nPermanent Phone Number = '%s'\nPermanent Postal Address = '%s'\nPermanent Email Address = '%s'",
 						person.getFormattedName(NameFormat.FIRST_LAST), 
 						person.getId(), 
 						person.getEmail(),
@@ -716,6 +728,7 @@ public class Authentication extends AbstractVireoController {
 						person.getLastName(),
 						person.getMiddleName(),
 						person.getBirthYear(),
+						person.getOrcid(),
 						person.getCurrentPhoneNumber(),
 						person.getCurrentPostalAddress(),
 						person.getPermanentPhoneNumber(),
@@ -733,6 +746,7 @@ public class Authentication extends AbstractVireoController {
 				birthYear = "";
 			else
 				birthYear = String.valueOf(person.getBirthYear());
+			orcid = person.getOrcid();
 			currentPhoneNumber = person.getCurrentPhoneNumber();
 			currentPostalAddress = person.getCurrentPostalAddress();
 			permanentPhoneNumber = person.getPermanentPhoneNumber();
@@ -741,7 +755,7 @@ public class Authentication extends AbstractVireoController {
 		}
 		
 		renderTemplate("Authentication/updateProfile.html", fullName, firstName, email, lastName, middleName, 
-				birthYear, currentPhoneNumber, currentPostalAddress, permanentPhoneNumber,
+				birthYear, orcid, currentPhoneNumber, currentPostalAddress, permanentPhoneNumber,
 				permanentPostalAddress, permanentEmailAddress);
 	}
 	

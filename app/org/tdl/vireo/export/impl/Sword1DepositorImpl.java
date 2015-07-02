@@ -86,6 +86,8 @@ public class Sword1DepositorImpl implements Depositor, BeanNameAware {
 			
 			//Building the client
 			Client client = new Client();
+			// get the timeout from the location, or default it to the default
+			client.setSocketTimeout(location.getTimeout() == null ? DepositLocation.DEFAULT_TIMEOUT : (location.getTimeout() * 1000));
 			client.setServer(repositoryURL.getHost(), repositoryURL.getPort());
 			client.setUserAgent(USER_AGENT);
 			
@@ -204,6 +206,8 @@ public class Sword1DepositorImpl implements Depositor, BeanNameAware {
 			
 			//Building the client
 			Client client = new Client();
+			// get the timeout from the location, or default it to the default
+			client.setSocketTimeout(location.getTimeout() == null ? DepositLocation.DEFAULT_TIMEOUT : (location.getTimeout() * 1000));
 			client.setServer(
 					repositoryURL.getHost(), 
 					repositoryURL.getPort());

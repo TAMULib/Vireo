@@ -30,8 +30,14 @@
 	    <div class="alert alert-error">
 		    <button class="close" data-dismiss="alert" type="button">×</button>
 		    <p><strong>Oops, an error occurred: </strong> ${flash.get("error")}</p>
-		    <p>Your filter has been reset.</p>
+		    <p>Your filter and/or columns may have been reset.</p>
 	    </div>
+	    #{/if}
+	    #{if flash.get("noSubmission") != null}
+	    <div class="alert alert-error">
+	    	<button class="close" data-dismiss="alert" type="button">×</button>
+		    <p><strong>Oops, an error occurred: </strong> ${flash.get("noSubmission")}</p>
+		</div>
 	    #{/if}
 	
 		<h1>List ETDs</h1>

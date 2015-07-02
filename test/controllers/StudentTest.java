@@ -28,12 +28,12 @@ import org.tdl.vireo.security.SecurityContext;
 import org.tdl.vireo.state.State;
 import org.tdl.vireo.state.StateManager;
 
+import play.Logger;
 import play.Play;
 import play.db.jpa.JPA;
 import play.modules.spring.Spring;
 import play.mvc.Http.Response;
 import play.mvc.Router;
-
 import static org.tdl.vireo.constant.AppConfig.*;
 
 
@@ -150,9 +150,16 @@ public class StudentTest extends AbstractVireoFunctionalTest {
 
 		
 		Response response = GET(LIST_URL);
-		assertEquals(PERSONAL_INFO_URL,response.getHeader("Location"));
+		assertContentMatch(">Start a new submission</a>",response);
 		response = GET(PERSONAL_INFO_URL);
-		assertContentMatch("<title>Verify Personal Information</title>",response);		
+		assertNotNull(response.getHeader("Location"));
+		int lastSlash = response.getHeader("Location").indexOf('/', 8);
+		String part1 = response.getHeader("Location").substring(0, 8);
+		String part2 = response.getHeader("Location").substring(lastSlash, response.getHeader("Location").length());
+		assertEquals("/submit/", part1);
+		assertEquals("/personalInfo", part2);
+		response = GET(response.getHeader("Location"));
+		assertContentMatch("<title>Vireo Thesis and Dissertaion Submital System - Submission - Verify Your Information</title>",response);
 	}
 
 	/**
@@ -226,7 +233,7 @@ public class StudentTest extends AbstractVireoFunctionalTest {
 
 		
 		Response response = GET(LIST_URL);
-		assertEquals(VIEW_URL,response.getHeader("Location"));
+		assertContentMatch("You've already submitted an ETD or have one in progress!", response);
 		response = GET(VIEW_URL);
 		assertContentMatch("<title>View Application</title>",response);	
 	}
@@ -234,7 +241,7 @@ public class StudentTest extends AbstractVireoFunctionalTest {
 	/**
 	 * Test that when submissons are open, and multiple submissions are
 	 * disallowed, and the student has an archived submission that they
-	 * are able to submit a new submission.
+	 * are NOT able to submit a new submission.
 	 */
 	@Test
 	public void testOpenAndNoMultipleWithOneArchivedSubmission() {
@@ -271,14 +278,15 @@ public class StudentTest extends AbstractVireoFunctionalTest {
 
 	
 		response = GET(NEW_URL);
-		assertContentMatch("<title>Verify Personal Information</title>",response);
+		assertNull(response.getHeader("Location"));
+		assertContentMatch("<h1>Multiple submissions are not allowed, and the submitter already has another submission.</h1>",response);
 		
 		JPA.em().getTransaction().commit();
 		JPA.em().clear();
 		JPA.em().getTransaction().begin();
 		
 		List<Submission> found = subRepo.findSubmission(submitter);
-		assertEquals(2,found.size());
+		assertEquals(1,found.size());
 		subs.addAll(found);
 		
 	}
@@ -287,9 +295,9 @@ public class StudentTest extends AbstractVireoFunctionalTest {
 	 * Test that if a student has an archived submission they can see the list page to start another submission.
 	 */
 	@Test
-	public void testOpenAndMultipleArchivedSubmission() {
+	public void testOpenAndMultipleWithOneArchivedSubmission() {
 		
-		configure(true,false);
+		configure(true,true);
 		
 		Submission sub = subRepo.createSubmission(submitter);
 		sub.setState(sub.getState().getTransitions(sub).get(0));
@@ -314,7 +322,6 @@ public class StudentTest extends AbstractVireoFunctionalTest {
 		assertIsOk(response);
 		assertContentMatch("<title>Submission Status</title>",response);
 		assertContentMatch(">Start a new submission</a>",response);
-		
 	}
 
 	/**
@@ -347,7 +354,7 @@ public class StudentTest extends AbstractVireoFunctionalTest {
 
 	/**
 	 * Test that when submissions are closed, and multiple submissions are
-	 * disallowed, and the user has one submission that the view page is shown.
+	 * disallowed, and the user has one submission that the view page can be shown.
 	 */
 	@Test
 	public void testClosedAndNoMultipleWithOneSubmission() {
@@ -372,7 +379,7 @@ public class StudentTest extends AbstractVireoFunctionalTest {
 
 		
 		Response response = GET(LIST_URL);
-		assertEquals(VIEW_URL,response.getHeader("Location"));
+		assertContentMatch("The system is currently closed for new submissions; please contact your thesis office for more information.", response);
 		response = GET(VIEW_URL);
 		assertContentMatch("<title>View Application</title>",response);
 	}
@@ -503,6 +510,7 @@ public class StudentTest extends AbstractVireoFunctionalTest {
 		
 		Map<String,Object> routeArgs = new HashMap<String,Object>();
 		routeArgs.put("subId",sub.getId());
+		final String ADD_MSG_URL = Router.reverse("Student.submissionAddMessageJSON",routeArgs).url;
 		final String VIEW_URL = Router.reverse("Student.submissionView",routeArgs).url;
 
 		Response response = GET(VIEW_URL);
@@ -512,10 +520,13 @@ public class StudentTest extends AbstractVireoFunctionalTest {
 		
 		// Post a message
 		Map<String,String> params = new HashMap<String,String>();
-		params.put("studentMessage","This is an action log");
-		params.put("submit_addMessage","Add Message");
-		response = POST(VIEW_URL,params);
+		params.put("message","This is an action log");
+		response = POST(ADD_MSG_URL, params);
+		assertIsOk(response);
+		assertContentMatch("\"success\": \"true\"", response);
 		
+		// Verify the message
+		response = GET(VIEW_URL);
 		assertIsOk(response);
 		assertContentMatch("<title>View Application</title>",response);
 		assertContentMatch("This is an action log",response);
@@ -557,7 +568,7 @@ public class StudentTest extends AbstractVireoFunctionalTest {
 		Response response = GET(VIEW_URL);
 		assertIsOk(response);
 		assertContentMatch("<title>View Application</title>",response);
-		assertTrue(getContent(response).contains("Upload additional files"));
+		assertTrue(getContent(response).contains("Browse for Additional Document"));
 		
 		File testPDF = getResourceFile("SamplePrimaryDocument.pdf");
 		
@@ -613,7 +624,7 @@ public class StudentTest extends AbstractVireoFunctionalTest {
 		Response response = GET(VIEW_URL);
 		assertIsOk(response);
 		assertContentMatch("<title>View Application</title>",response);
-		assertContentMatch("class=\"btn btn-primary disabled\" name=\"submit_corrections\" value=\"Complete Corrections\"",response);
+		assertContentMatch("class=\"btn btn-primary disabled\" name=\"submit_corrections\" value=\"Corrections Completed\"",response);
 		
 		Map<String,String> params = new HashMap<String,String>();
 		params.put("submit_corrections","Confirm Corrections");
@@ -621,7 +632,7 @@ public class StudentTest extends AbstractVireoFunctionalTest {
 		
 		assertIsOk(response);
 		assertContentMatch("<title>View Application</title>",response);
-		assertContentMatch("class=\"btn btn-primary disabled\" name=\"submit_corrections\" value=\"Complete Corrections\"",response);
+		assertContentMatch("class=\"btn btn-primary disabled\" name=\"submit_corrections\" value=\"Corrections Completed\"",response);
 
 		File primaryFile = getResourceFile("SamplePrimaryDocument.pdf");
 		

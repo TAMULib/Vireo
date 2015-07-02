@@ -228,23 +228,27 @@ public class ApplicationSettingsTab extends SettingsTab {
 	 *            The label of the new action
 	 */
 	@Security(RoleType.MANAGER)
-	public static void addCustomActionJSON(String name) {
+	public static void addCustomActionJSON(String name, Boolean isStudentVisible) {
 		
 		try {
 			if (name == null || name.trim().length() == 0)
 				throw new IllegalArgumentException("Label is required");
 			
+			if(isStudentVisible == null) {
+				throw new IllegalArgumentException("isStudentVisible is required");
+			}
+			
 			// Add the new action to the end of the list.
 			List<CustomActionDefinition> actions = settingRepo.findAllCustomActionDefinition();
 			
-			CustomActionDefinition action = settingRepo.createCustomActionDefinition(name);
+			CustomActionDefinition action = settingRepo.createCustomActionDefinition(name, isStudentVisible);
 			actions.add(action);
 			
 			saveModelOrder(actions);
 			
 			name = escapeJavaScript(name);
 			
-			renderJSON("{ \"success\": \"true\", \"id\": "+action.getId()+", \"name\": \""+name+"\" }");
+			renderJSON("{ \"success\": \"true\", \"id\": "+action.getId()+", \"name\": \""+name+"\", \"level\": " + isStudentVisible + "}");
 		} catch (IllegalArgumentException iae) {
 			String message = escapeJavaScript(iae.getMessage());			
 			renderJSON("{ \"failure\": \"true\", \"message\": \""+message+"\" }");
@@ -268,22 +272,27 @@ public class ApplicationSettingsTab extends SettingsTab {
 	 *            The new label of the action.
 	 */
 	@Security(RoleType.MANAGER)
-	public static void editCustomActionJSON(String actionId, String name) {
+	public static void editCustomActionJSON(String actionId, String name, Boolean level) {
 		try {
 			// Check input
 			if (name == null || name.trim().length() == 0)
 				throw new IllegalArgumentException("Label is required");
+			
+			if(level == null) {
+				throw new IllegalArgumentException("isStudentVisible is required");
+			}
 			
 			// Save the new label
 			String[] parts = actionId.split("_");
 			Long id = Long.valueOf(parts[1]);
 			CustomActionDefinition action = settingRepo.findCustomActionDefinition(id);
 			action.setLabel(name);
+			action.setIsStudentVisible(level);
 			action.save();
 			
 			name = escapeJavaScript(name);
 			
-			renderJSON("{ \"success\": \"true\", \"id\": "+action.getId()+", \"name\": \""+name+"\" }");
+			renderJSON("{ \"success\": \"true\", \"id\": "+action.getId()+", \"name\": \""+name+"\", \"level\": " + level + "}");
 		} catch (IllegalArgumentException iae) {
 			String message = escapeJavaScript(iae.getMessage());			
 			renderJSON("{ \"failure\": \"true\", \"message\": \""+message+"\" }");
@@ -377,6 +386,7 @@ public class ApplicationSettingsTab extends SettingsTab {
 		String password = null;
 		String onBehalfOf = null;
 		String repository = null;
+		Integer timeout = null;
 		String collection = null;
 		
 		
@@ -394,6 +404,7 @@ public class ApplicationSettingsTab extends SettingsTab {
 			password = location.getPassword();
 			onBehalfOf = location.getOnBehalfOf();
 			repository = location.getRepository();
+			timeout = location.getTimeout();
 			collection = location.getCollection();
 						
 // Don't try to connect on inital load because it could take too long.
@@ -426,7 +437,7 @@ public class ApplicationSettingsTab extends SettingsTab {
 		renderTemplate("SettingTabs/editDepositLocation.include",nav, subNav, packagers, depositors, collectionsMap, connectionOk,
 				
 				// Deposit location
-				depositLocationId, name, packager, depositor, username, password, onBehalfOf, repository, collection
+				depositLocationId, name, packager, depositor, username, password, onBehalfOf, repository, timeout, collection
 				);
 	}
 	
@@ -454,6 +465,7 @@ public class ApplicationSettingsTab extends SettingsTab {
 		String password = params.get("password");
 		String onBehalfOf = params.get("onBehalfOf");
 		String repository = params.get("repository");
+		String sTimeout = params.get("timeout");
 		String collection = params.get("collection");
 				
 		// Nullify things
@@ -463,7 +475,8 @@ public class ApplicationSettingsTab extends SettingsTab {
 			password = null;
 		if (onBehalfOf != null && onBehalfOf.trim().length() == 0)
 			onBehalfOf = null;
-		
+		if (sTimeout != null && sTimeout.trim().length() == 0)
+			sTimeout = null;
 		
 		// Validation and format conversions
 		if (name == null || name.trim().length() == 0)
@@ -485,6 +498,13 @@ public class ApplicationSettingsTab extends SettingsTab {
 		
 		if (repository == null || repository.trim().length() == 0)
 			validation.addError("repository", "The repository location is required");
+		
+		Integer timeout = null;
+		try {
+			timeout = Integer.parseInt(sTimeout);
+		} catch (NumberFormatException e) {
+			validation.addError("timeout", "The timeout value was invalid");
+		}
 		
 		// If no errors then try and save location
 		DepositLocation location = null;
@@ -527,13 +547,14 @@ public class ApplicationSettingsTab extends SettingsTab {
 				location.setUsername(username);
 				location.setOnBehalfOf(onBehalfOf);
 				location.setRepository(repository);
+				location.setTimeout(timeout);
 				location.setCollection(collection);
 				location.setPackager(packager);
 				location.setDepositor(depositor);
 				location.setName(name);
 				location.save();
 				
-				Logger.info("%s (%d: %s) has %s deposit location #%d.\nDeposit Name = '%s'\nDeposit Packager = '%s'\nDeposit Depositor = '%s'\nDeposit Repository = '%s'\nDeposit Username = '%s'\nDeposit On Behalf Of = '%s'\nDeposit Collection = '%s'",
+				Logger.info("%s (%d: %s) has %s deposit location #%d.\nDeposit Name = '%s'\nDeposit Packager = '%s'\nDeposit Depositor = '%s'\nDeposit Repository = '%s'\nDeposit Timeout = '%s'\nDeposit Username = '%s'\nDeposit On Behalf Of = '%s'\nDeposit Collection = '%s'",
 						context.getPerson().getFormattedName(NameFormat.FIRST_LAST), 
 						context.getPerson().getId(), 
 						context.getPerson().getEmail(),
@@ -543,6 +564,7 @@ public class ApplicationSettingsTab extends SettingsTab {
 						location.getPackager()==null ? "null" : location.getPackager().getBeanName(),
 						location.getDepositor()==null ? "null" : location.getDepositor().getBeanName(),
 						location.getRepository(),
+						location.getTimeout(),
 						location.getUsername(),
 						location.getOnBehalfOf(),
 						location.getCollection());
@@ -613,7 +635,7 @@ public class ApplicationSettingsTab extends SettingsTab {
 		renderTemplate("SettingTabs/editDepositLocation.include", packagers, depositors, collectionsMap, testDepositId, connectionOk, action,
 			
 			// Deposit location
-			depositLocationId, name, packager, depositor, username, password, onBehalfOf, repository, collection);
+			depositLocationId, name, packager, depositor, username, password, onBehalfOf, repository, timeout, collection);
 	}
 
 	/**
@@ -632,7 +654,7 @@ public class ApplicationSettingsTab extends SettingsTab {
 			DepositLocation location = settingRepo.findDepositLocation(id);
 			location.delete();
 
-			Logger.info("%s (%d: %s) has deleted deposit location #%d.\nDeposit Name = '%s'\nDeposit Packager = '%s'\nDeposit Depositor = '%s'\nDeposit Repository = '%s'\nDeposit Username = '%s'\nDeposit On Behalf Of = '%s'\nDeposit Collection = '%s'",
+			Logger.info("%s (%d: %s) has deleted deposit location #%d.\nDeposit Name = '%s'\nDeposit Packager = '%s'\nDeposit Depositor = '%s'\nDeposit Repository = '%s'\nDeposit Timeout = '%s'\nDeposit Username = '%s'\nDeposit On Behalf Of = '%s'\nDeposit Collection = '%s'",
 					context.getPerson().getFormattedName(NameFormat.FIRST_LAST), 
 					context.getPerson().getId(), 
 					context.getPerson().getEmail(),
@@ -641,6 +663,7 @@ public class ApplicationSettingsTab extends SettingsTab {
 					location.getPackager()==null ? "null" : location.getPackager().getBeanName(),
 					location.getDepositor()==null ? "null" : location.getDepositor().getBeanName(),
 					location.getRepository(),
+					location.getTimeout(),
 					location.getUsername(),
 					location.getOnBehalfOf(),
 					location.getCollection());

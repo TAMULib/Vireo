@@ -1,10 +1,11 @@
 package controllers;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+
 import org.apache.commons.lang.StringEscapeUtils;
 import org.tdl.vireo.constant.FieldConfig;
 import org.tdl.vireo.error.ErrorLog;
-import org.tdl.vireo.model.NameFormat;
-import org.tdl.vireo.model.Person;
 import org.tdl.vireo.model.PersonRepository;
 import org.tdl.vireo.model.SettingsRepository;
 import org.tdl.vireo.model.SubmissionRepository;
@@ -126,6 +127,16 @@ public abstract class AbstractVireoController extends Controller {
 		return value;
 	}
 	
+	protected static String URIEncode(String value) {
+		String ret = value;
+		try {
+	        ret = URLEncoder.encode(value, "UTF-8").replace("+", "%20");
+        } catch (UnsupportedEncodingException e) {
+	        Logger.error(e, "Error URI Encoding value '%s'", value);
+        }
+		return ret;
+	}
+	
 	/**
 	 * Convert a simple java array of strings into a JSON object.
 	 * 
@@ -161,6 +172,10 @@ public abstract class AbstractVireoController extends Controller {
 	 */
 	protected static String text2html(String value) {
 
+		// null check
+		if(value == null)
+			value = "";
+		
 		String html = value.replaceAll("  ", "&nbsp;&nbsp;");
 		String[] paragraphs = html.split("\n\\s*\n");
 		html = "";

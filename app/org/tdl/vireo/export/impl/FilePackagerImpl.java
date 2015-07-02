@@ -43,7 +43,8 @@ import play.vfs.VirtualFile;
  * 
  * @author <a href="http://www.scottphillips.com">Scott Phillips</a>
  * @author Micah Cooper
- * @author Jeremy Huff
+ * @author <a href="mailto:huff@library.tamu.edu">Jeremy Huff</a>
+ * @author <a href=mailto:gad.krumholz@austin.utexas.edu>Gad Krumholz</a>
  */
 public class FilePackagerImpl extends AbstractPackagerImpl {
 	
@@ -99,6 +100,11 @@ public class FilePackagerImpl extends AbstractPackagerImpl {
 	public void setPackageType(String packageType) {
 		this.packageType = packageType;
 	}
+
+    @Override
+    public String getExportServiceBeanName() {
+        return "ExportService";
+    }
 	
 	@Override
 	public ExportPackage generatePackage(Submission submission) {
@@ -122,6 +128,7 @@ public class FilePackagerImpl extends AbstractPackagerImpl {
 			
 			File pkg = null;
 			
+			List<Attachment> actionLogAttachments = new ArrayList<Attachment>();
 			//Check the package type set in the spring configuration
 			if(packageType.equals("zip")) {
 			
@@ -134,7 +141,13 @@ public class FilePackagerImpl extends AbstractPackagerImpl {
 				int len;
 							
 				// Add all the attachments
-				for(Attachment attachment : submission.getAttachments())
+	            List<Attachment> attachments = submission.getAttachments();
+	            List<Attachment> actionLogs = submission.getAttachmentsByType(AttachmentType.ACTIONLOG);
+	            // add them to this list to delete the temp files later
+				actionLogAttachments.addAll(actionLogs);
+				// add them to this list to add them to export
+	            attachments.addAll(actionLogs);
+				for(Attachment attachment : attachments)
 				{
 					// Do we include this type?
 					if (!attachmentTypes.contains(attachment.getType()))
@@ -203,7 +216,13 @@ public class FilePackagerImpl extends AbstractPackagerImpl {
 				pkg.mkdir();
 							
 				// Add all the attachments
-				for(Attachment attachment : submission.getAttachments())
+				List<Attachment> attachments = submission.getAttachments();
+				List<Attachment> actionLogs = submission.getAttachmentsByType(AttachmentType.ACTIONLOG);
+	            // add them to this list to delete the temp files later
+				actionLogAttachments.addAll(actionLogs);
+				// add them to this list to add them to export
+	            attachments.addAll(actionLogs);
+				for(Attachment attachment : attachments)
 				{
 					// Do we include this type?
 					if (!attachmentTypes.contains(attachment.getType()))
@@ -246,7 +265,7 @@ public class FilePackagerImpl extends AbstractPackagerImpl {
 			this.setEntryName(entryNameTemplate);
 			
 			// Create the actual package!
-			return new FilePackage(submission, pkg, customEntryName);
+			return new FilePackage(submission, pkg, customEntryName, actionLogAttachments);
 			
 		} catch (IOException ioe) {
 			throw new RuntimeException("Unable to generate package",ioe);
@@ -267,11 +286,13 @@ public class FilePackagerImpl extends AbstractPackagerImpl {
 		public final Submission submission;
 		public final File file;
 		public final String entryName;
+		private final List<Attachment> actionLogAttachments;
 
-		public FilePackage(Submission submission, File file, String entryName) {
+		public FilePackage(Submission submission, File file, String entryName, List<Attachment> actionLogAttachments) {
 			this.submission = submission;
 			this.file = file;
 			this.entryName = entryName;
+			this.actionLogAttachments = actionLogAttachments;
 		}
 
 		@Override
@@ -313,6 +334,21 @@ public class FilePackagerImpl extends AbstractPackagerImpl {
 					file.delete();
 				}
 
+			}
+			// clean up tempoarary action logs too
+			if(actionLogAttachments != null && actionLogAttachments.size() > 0) {
+				for(Attachment actionLogAttachment : actionLogAttachments) {
+					File actionLogFile = actionLogAttachment.getFile();
+					if (actionLogFile.isDirectory()) {
+						try {
+							FileUtils.deleteDirectory(actionLogFile);
+						} catch (IOException ioe) {
+							throw new RuntimeException("Unable to cleanup export package: " + actionLogFile.getAbsolutePath(),ioe);
+						}
+					} else {
+						actionLogFile.delete();
+					}
+				}
 			}
 		}
 

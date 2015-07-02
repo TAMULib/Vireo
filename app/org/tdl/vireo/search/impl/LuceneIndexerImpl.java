@@ -88,6 +88,9 @@ import play.Play;
  * stored as milliseconds.
  * 
  * programDate: The program year & month converted into a date object and
+ *
+ * customAction: The submission's completed custom actions (search and sort)
+ * 
  * 
  * 
  * ONLY USED FOR SORTING:
@@ -126,9 +129,6 @@ import play.Play;
  * name for sorting.
  * 
  * committeeContactEmail: The committee email for sorting
- * 
- * customActions: The count of custom actions that have been checked off on the
- * submission for sorting.
  * 
  * degreeLevel: the degree level, single token not analyzed just for sorting
  * 
@@ -174,7 +174,7 @@ public class LuceneIndexerImpl implements Indexer {
 	 * Construct a new LuceneIndexer
 	 */
 	public LuceneIndexerImpl() throws IOException {
-		indexFile = new File(Play.configuration.getProperty("index.path","data/indexes"));
+		indexFile = new File(Play.applicationPath + File.separator + Play.configuration.getProperty("index.path","data/indexes"));
 		index = FSDirectory.open(indexFile);
 	}
 	

@@ -1,5 +1,7 @@
 package org.tdl.vireo.model;
 
+import java.util.List;
+
 /**
  * Embargoes restrict the release of a submission for a length of time. If an
  * embargo type is active then it may be selected by a student for any new
@@ -59,5 +61,35 @@ public interface EmbargoType extends AbstractOrderedModel {
 	 *            Set the new active value for this type.
 	 */
 	public void setActive(boolean active);
+
+	/**
+	 * @return True, if this embargo is required by the system. These
+	 *         embargos may not be deleted.
+	 */
+	public boolean isSystemRequired();
+	
+	/**
+	 * @param required
+	 *            Set weather this embargo is required by the system. These
+	 *            embargos bay not be renamed or deleted.
+	 */
+	public void setSystemRequired(boolean required);
+	
+	/**
+	 * 
+	 * @return The guarantor of the embargo in enum.
+	 */
+	public EmbargoGuarantor getGuarantor();
+	
+	/**
+	 * @param guarantor The guarantor of the embargo.
+	 */
+	public void setGuarantor(EmbargoGuarantor guarantor);
+	
+	/**
+	 * 
+	 * @return The list of associated submissions.
+	 */
+	public List<Submission> getSubmissions();
 
 }

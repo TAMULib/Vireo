@@ -20,7 +20,6 @@ import java.util.Map;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 
-import org.apache.commons.io.FilenameUtils;
 import org.tdl.vireo.constant.AppConfig;
 import org.tdl.vireo.email.EmailService;
 import org.tdl.vireo.email.VireoEmail;
@@ -29,15 +28,17 @@ import org.tdl.vireo.model.ActionLog;
 import org.tdl.vireo.model.Attachment;
 import org.tdl.vireo.model.AttachmentType;
 import org.tdl.vireo.model.CommitteeMember;
+import org.tdl.vireo.model.CommitteeMemberRoleType;
 import org.tdl.vireo.model.CustomActionDefinition;
 import org.tdl.vireo.model.CustomActionValue;
 import org.tdl.vireo.model.DegreeLevel;
 import org.tdl.vireo.model.DepositLocation;
 import org.tdl.vireo.model.EmailTemplate;
+import org.tdl.vireo.model.EmbargoGuarantor;
+import org.tdl.vireo.model.EmbargoType;
 import org.tdl.vireo.model.Person;
 import org.tdl.vireo.model.RoleType;
 import org.tdl.vireo.model.Submission;
-import org.tdl.vireo.proquest.ProquestVocabularyRepository;
 import org.tdl.vireo.services.Utilities;
 import org.tdl.vireo.state.State;
 
@@ -52,6 +53,8 @@ import play.mvc.With;
  * The controller for the view tab.
  * 
  * @author Micah Cooper
+ * @author Jeremy Huff
+ * @author James Creel (http://www.jamescreel.net)
  *
  */
 
@@ -83,24 +86,22 @@ public class ViewTab extends AbstractVireoController {
 	 * The main view method.
 	 */
 	@Security(RoleType.REVIEWER)
-	public static void view() {			
+	public static void view(Long subId) {
 		
-		if(params.get("subId") != null){
-			session.put("submission", params.get("subId"));
-		}
-
-		Long id = null;
-		if(session.contains("submission")){
-			id = Long.valueOf(session.get("submission"));
-		} else {
+		if (subId == null) {
+			flash.put("noSubmission", "Please select a submission to view.");
 			FilterTab.list();
 		}
-		Submission submission = subRepo.findSubmission(id);
+		Submission submission = subRepo.findSubmission(subId);
 		
 		//Check for "Add Action Log Comment"
 		if(params.get("addActionLogComment")!=null)
 			addActionLogComment(submission);
 		
+		//Check for "Flag submission as "Needs Corrections""
+		if(params.get("status_change") != null)
+		    changeStatus(submission);
+
 		//Check for "Add File"
 		if(params.get("addFile")!=null)
 			addFile(submission);		
@@ -114,9 +115,10 @@ public class ViewTab extends AbstractVireoController {
 			deleteFile(submission);
 		
 		JPA.em().detach(submission);
-		submission = subRepo.findSubmission(id);
+		submission = subRepo.findSubmission(subId);
 		
-		Boolean isManager = context.isManager();		
+		Boolean isManager = context.isManager();
+		Boolean isReviewer = context.isReviewer();
 
 		if(submission==null){
 			FilterTab.list();
@@ -155,12 +157,23 @@ public class ViewTab extends AbstractVireoController {
 		for(AttachmentType type : AttachmentType.values()){
 			attachmentTypes.add(type.toString());
 		}
+		
+		List<EmbargoType> embargoTypes = settingRepo.findAllEmbargoTypes();
+		
+		ArrayList<String> roles = new ArrayList<String>();
+		for(CommitteeMemberRoleType role : settingRepo.findAllCommitteeMemberRoleTypes()) {
+			String encodedName = URIEncode(role.getName());
+			if(!roles.contains(encodedName)){
+				roles.add(encodedName);
+			}
+		}
 				
 		String nav = "view";
 		render(	nav,
 				submission,
 				submitter,
 				isManager,
+				isReviewer,
 				advisorUrl,
 				gradMonth,
 				progMonth,
@@ -174,7 +187,9 @@ public class ViewTab extends AbstractVireoController {
 				actionValues,
 				depositLocations,
 				attachments,
-				attachmentTypes
+				attachmentTypes,
+				embargoTypes,
+				roles
 				);
 	}
 
@@ -280,7 +295,7 @@ public class ViewTab extends AbstractVireoController {
 					
 					submission.setOrcid(value);
 				}
-				currentValue = submission.getOrcid();	
+				currentValue = submission.getOrcid();
 
 				//Permanent Phone
 			} else if("permPhone".equals(field)){
@@ -330,9 +345,10 @@ public class ViewTab extends AbstractVireoController {
 				currentValue = submission.getDocumentTitle();
 
 				//Embargo
-			} else if("embargo".equals(field)){			
-				submission.setEmbargoType(settingRepo.findEmbargoType(Long.parseLong(value)));
-				currentValue = submission.getEmbargoType().getName();
+			} else if("embargo".equals(field)){	
+				EmbargoType embargo = settingRepo.findEmbargoType(Long.parseLong(value));
+				submission.addEmbargoType(embargo);
+				currentValue = submission.getEmbargoTypeByGuarantor(EmbargoGuarantor.DEFAULT).getName();
 
 				//UMI Release
 			} else if("umiRelease".equals(field)){
@@ -524,6 +540,60 @@ public class ViewTab extends AbstractVireoController {
 		}
 
 		renderJSON(json);
+	}
+	
+	/**
+	 * A method to add/edit the submission's embargos.
+	 * 
+	 * @param subId (The submission id)
+	 * @param embargoId (The embargo to be added)
+	 * @param action (The action to be carried out)
+	 * 
+	 */
+	public static void embargoJSON(Long subID, Long embargoID, String action){
+		
+		String json = "{ \"success\": false, \"error\": \"Something has gone wrong\"}";
+		
+		boolean validSubID = subID != null && subID.toString().trim().length() != 0;
+		boolean validEmbargoID = embargoID != null && embargoID.toString().trim().length() != 0;
+		boolean validAction = action != null && action.trim().length() != 0;
+		
+		if(validSubID && validEmbargoID && validAction) { 
+
+			Submission sub = subRepo.findSubmission(subID);
+			EmbargoType targetEmbargo = settingRepo.findEmbargoType(embargoID);
+			
+			if(action.equals("add")) 
+				sub.addEmbargoType(targetEmbargo);
+			if(action.equals("remove"))
+				sub.removeEmbargoType(targetEmbargo);
+			
+			sub.save();
+			
+			String embargosObject = "[";
+			List<EmbargoType> currentEmbargos = sub.getEmbargoTypes();
+			
+			if(currentEmbargos.size() == 0)	embargosObject += "]";
+			
+			int n = 1;
+			for(EmbargoType currentEmbargo : currentEmbargos) {
+				embargosObject += currentEmbargo.getId();
+				if(currentEmbargos.size() != n) {
+					embargosObject += ",";
+				} else {
+					embargosObject += "]";
+				}
+				n++;
+			}
+						
+			json = "{ \"success\": true, \"subID\": \""+subID+"\", \"embargoIDs\": "+embargosObject+", \"action\": \""+action+"\" }";
+			
+		} else {
+			json = "{ \"success\": false, \"error\": \"Your request had missing paramaters\"}";
+		}
+		
+		renderJSON(json);
+		
 	}
 
 	/**
@@ -764,13 +834,13 @@ public class ViewTab extends AbstractVireoController {
 				// Deposit the item
 				DepositLocation location = settingRepo.findDepositLocation(depositLocationId);
 				depositService.deposit(location, submission, state, true);
-				view();
+				view(id);
 			}
 			
 			// Normal state transition, update & save.
 			submission.setState(state);
 			submission.save();
-			view();
+			view(id);
 		}
 	}
 
@@ -798,7 +868,7 @@ public class ViewTab extends AbstractVireoController {
 		
 		submission.save();
 
-		view();
+		view(id);
 
 	}
 	
@@ -826,7 +896,7 @@ public class ViewTab extends AbstractVireoController {
 			validation.addError("changeSubmissionDate", "The date provided was not formatted correctly. Please format your date like MM/DD/YYYY.");
 		}
 		
-		view();
+		view(id);
 		
 	}
 	
@@ -838,24 +908,39 @@ public class ViewTab extends AbstractVireoController {
 	
 	@Security(RoleType.REVIEWER)
 	private static void addActionLogComment(Submission submission){
-				
+		
+		List<String> primary_recipients = params.get("primary_recipients") == null ? new ArrayList<String>() : Utilities.processEmailDesigneeArray(params.get("primary_recipients").split(","), submission);
+		List<String> cc_recipients =  params.get("cc_recipients") == null ? new ArrayList<String>() :  Utilities.processEmailDesigneeArray(params.get("cc_recipients").split(","), submission);
+		
 		String subject = params.get("subject");
 		String message = params.get("comment");
-		
-		if((params.get("email_student")!=null)||(params.get("email_advisor")!=null)) {
 			
-			if(subject == null || subject.isEmpty())
-				validation.addError("addActionLogSubject", "You must include a subject when sending an email.");
+		if(subject == null || subject.isEmpty())
+			validation.addError("addActionLogSubject", "You must include a subject when sending an email.");
+	
+		if(message == null || message.isEmpty())
+			validation.addError("addActionLogComment", "You must include a comment when sending an email.");
 		
-			if(message == null || message.isEmpty())
-				validation.addError("addActionLogComment", "You must include a comment when sending an email.");
-			
+		
+		for(String email_address : primary_recipients)
+		{
+			Utilities.validateEmailAddress(email_address, validation);
+		}
+		
+		for(String email_address : cc_recipients)
+		{
+			Utilities.validateEmailAddress(email_address, validation);
+		}
+		
+		if((params.get("primary_recipients_toggle") != null && primary_recipients.size() == 0) || (params.get("primary_recipients_toggle") == null && params.get("cc_recipients_toggle") != null)) {
+			validation.addError("addActionLogComment", "You must include at least one primary recipient (not cc) when sending an email.");
+		}
+		
+		if(params.get("cc_recipients_toggle") != null && cc_recipients.size() == 0) {
+			validation.addError("addActionLogComment", "You must include at least one cc recipient when cc'ing an email.");
 		}
 		
 		if(!validation.hasErrors()) {
-			if(params.get("status_change") != null)
-				submission.setState(stateManager.getState("NeedsCorrection"));
-						
 			VireoEmail email = emailService.createEmail();
 			
 			// Run the parameters
@@ -865,29 +950,26 @@ public class ViewTab extends AbstractVireoController {
 			email.applyParameterSubstitution();
 			
 			//Create list of recipients
-			if(params.get("email_student") != null) {
-				email.addTo(submission.getSubmitter());
+			for(String email_address : primary_recipients)
+			{
+				email.addTo(email_address);
 			}
 			
-			// Create list of carbon copies
-			if(params.get("email_advisor") != null && submission.getCommitteeContactEmail() != null) {
-				if(params.get("email_student") != null) {
-					email.addCc(submission.getCommitteeContactEmail());
-				} else {
-					email.addTo(submission.getCommitteeContactEmail());
-				}
+			
+			//Create list of carbon copies
+			for(String email_address : cc_recipients)
+			{
+				email.addCc(email_address);
 			}
 			
-			email.setFrom(context.getPerson());
 			email.setReplyTo(context.getPerson());
 						
-			if(((params.get("email_student") != null)||(params.get("email_advisor") != null)) && "public".equals(params.get("visibility"))) {	
+			if(primary_recipients.size() > 0 && params.get("visibility").equals("public")) {
 				// Send the email and log it after completion
 				email.setLogOnCompletion(context.getPerson(), submission);
 				emailService.sendEmail(email,true);
-				
 			} else {
-				// Otherwise just log it.
+				// Generate log.
 				subject = email.getSubject();
 				message = email.getMessage();
 				
@@ -901,7 +983,6 @@ public class ViewTab extends AbstractVireoController {
 				if("private".equals(params.get("visibility")))
 					log.setPrivate(true);
 				
-				submission.save();
 				log.save();
 			}
 		}
@@ -959,6 +1040,19 @@ public class ViewTab extends AbstractVireoController {
 	}
 	
 	/**
+	 * The method to change the status of a submission to Needs Correction
+	 *
+	 * @param sub
+	 */
+	@Security(RoleType.REVIEWER)
+	private static void changeStatus(Submission sub){
+	    if(!validation.hasErrors()) {
+	        sub.setState(stateManager.getState("NeedsCorrection"));
+	        sub.save();
+	    }
+	}
+
+	/**
 	 * The method to add a file to the submission being viewed.
 	 * This checks the type of file being uploaded (note, primary, supplement)
 	 * and calls the appropriate private method.
@@ -968,7 +1062,7 @@ public class ViewTab extends AbstractVireoController {
 	@Security(RoleType.REVIEWER)
 	private static void addFile(Submission sub){
 		
-		String uploadType = params.get("uploadType");		
+		String uploadType = params.get("uploadType");
 		
 		if("primary".equals(uploadType)) {
 			uploadPrimary(sub);
@@ -977,8 +1071,11 @@ public class ViewTab extends AbstractVireoController {
 		}
 		
 		VireoEmail email = null;
-		if((params.get("email_student") != null)||(params.get("email_advisor") != null)) {			
-						
+		if(params.get("primary_recipients_toggle") != null || params.get("cc_recipients_toggle") != null) {			
+			
+			List<String> primary_recipients = params.get("primary_recipients") == null ? new ArrayList<String>() : Utilities.processEmailDesigneeArray(params.get("primary_recipients").split(","), sub);
+			List<String> cc_recipients =  params.get("cc_recipients") == null ? new ArrayList<String>() :  Utilities.processEmailDesigneeArray(params.get("cc_recipients").split(","), sub);
+
 			String subject = params.get("subject");
 			String comment = params.get("comment");
 			
@@ -988,15 +1085,31 @@ public class ViewTab extends AbstractVireoController {
 			if(comment==null || comment.isEmpty())
 				validation.addError("addFileComment", "You must include a comment when sending an email.");
 			
+			if((params.get("primary_recipients_toggle") != null && primary_recipients.size() == 0) || (params.get("primary_recipients_toggle") == null && params.get("cc_recipients_toggle") != null)) {
+				validation.addError("addFileTo", "You must include at least one primary recipient (not cc) when sending an email.");
+			}
+			
+			if(params.get("cc_recipients_toggle") != null && cc_recipients.size() == 0) {
+				validation.addError("addFileCc", "You must include at least one cc recipient when cc'ing an email.");
+			}
+			
 			if(!validation.hasErrors()){
 				email = emailService.createEmail();
 				email.addParameters(sub);
-				
-				if(params.get("email_student") != null) {
-					email.addTo(sub.getSubmitter());
+
+				//Create list of recipients
+				for(String email_address : primary_recipients)
+				{
+					email.addTo(email_address);
 				}
 				
-				email.setFrom(context.getPerson());
+				//Create list of carbon copies
+				for(String email_address : cc_recipients)
+				{
+					email.addCc(email_address);
+				}
+		
+				email.addTo(sub.getSubmitter());
 				email.setReplyTo(context.getPerson());
 				
 				// Create list of carbon copies
@@ -1015,15 +1128,8 @@ public class ViewTab extends AbstractVireoController {
 			}			
 		}		
 
-		if(!validation.hasErrors()) {
-			if(params.get("needsCorrection") != null)
-				sub.setState(stateManager.getState("NeedsCorrection"));
-						
-			sub.save();
-		}	
-		
-		if (email != null)
-			emailService.sendEmail(email,true);
+		if(!validation.hasErrors() && email != null)
+				emailService.sendEmail(email,true);
 	}
 	
 	/**
@@ -1146,14 +1252,7 @@ public class ViewTab extends AbstractVireoController {
 	 * @param name (The name of the file)
 	 */
 	@Security(RoleType.REVIEWER)
-	public static void viewFile(Long id, String name){
-		
-		Long subId = null;
-		if(session.contains("submission")){
-			subId = Long.valueOf(session.get("submission"));
-		} else {
-			FilterTab.list();
-		}
+	public static void viewFile(Long subId, Long id, String name){
 		
 		Submission sub = subRepo.findSubmission(subId);
 		
@@ -1192,9 +1291,11 @@ public class ViewTab extends AbstractVireoController {
 		email.getBcc().clear();
 		
 		email.addTo(advisorEmail);
-		email.setFrom(context.getPerson());
-		email.setReplyTo(context.getPerson());
-						
+		
+		//TODO:  delete me
+//		email.setFrom(context.getPerson());
+//		email.setReplyTo(context.getPerson());
+//						
 		//Setup Params
 		email.setTemplate(template);
 		email.addParameters(submission);
@@ -1207,7 +1308,7 @@ public class ViewTab extends AbstractVireoController {
 		
 		emailService.sendEmail(email,true);
 		
-		view();
+		view(id);
 	}
 
 	/**

@@ -7,23 +7,26 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
-import org.apache.commons.lang.LocaleUtils;
-
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
 import javax.persistence.PersistenceException;
 
 import org.tdl.vireo.model.AbstractOrderedModel;
+import org.tdl.vireo.model.AdministrativeGroup;
 import org.tdl.vireo.model.College;
-import org.tdl.vireo.model.CommitteeMember;
 import org.tdl.vireo.model.CommitteeMemberRoleType;
 import org.tdl.vireo.model.Configuration;
 import org.tdl.vireo.model.Degree;
 import org.tdl.vireo.model.DegreeLevel;
 import org.tdl.vireo.model.Department;
 import org.tdl.vireo.model.DocumentType;
+import org.tdl.vireo.model.EmbargoGuarantor;
 import org.tdl.vireo.model.EmbargoType;
 import org.tdl.vireo.model.GraduationMonth;
 import org.tdl.vireo.model.Language;
@@ -32,10 +35,8 @@ import org.tdl.vireo.model.NameFormat;
 import org.tdl.vireo.model.Program;
 import org.tdl.vireo.model.ProgramMonth;
 import org.tdl.vireo.model.RoleType;
-import org.tdl.vireo.proquest.ProquestDegree;
-import org.tdl.vireo.proquest.ProquestLanguage;
 import org.tdl.vireo.proquest.ProquestUtilityService;
-import org.tdl.vireo.proquest.ProquestVocabularyRepository;
+import org.tdl.vireo.services.Utilities;
 
 import play.Logger;
 import play.modules.spring.Spring;
@@ -60,6 +61,7 @@ public class ConfigurableSettingsTab extends SettingsTab {
 		List<College> colleges = settingRepo.findAllColleges();
 		List<Program> programs = settingRepo.findAllPrograms();
 		List<Department> departments = settingRepo.findAllDepartments();
+		List<AdministrativeGroup> adminGroups = settingRepo.findAllAdministrativeGroups();
 		List<Major> majors = settingRepo.findAllMajors();
 		List<Degree> degrees = settingRepo.findAllDegrees();
 		List<DocumentType> docTypes = settingRepo.findAllDocumentTypes();
@@ -83,13 +85,16 @@ public class ConfigurableSettingsTab extends SettingsTab {
 		
 		String nav = "settings";
 		String subNav = "config";
-		renderTemplate("SettingTabs/configurableSettings.html", nav, subNav, 
+		
+		EmbargoGuarantor[] guarantors = EmbargoGuarantor.values();
+		
+		renderTemplate("SettingTabs/configurableSettings.html", guarantors, nav, subNav, 
 				
 				// The lonely tabel on the page
 				embargos,
 				
 				// Sortable lists
-				colleges, programs, departments, majors, degrees, docTypes, roleTypes, gradMonths, proMonths, languages,
+				colleges, programs, departments, adminGroups, majors, degrees, docTypes, roleTypes, gradMonths, proMonths, languages,
 				
 				// Locales
 				localeLanguages);
@@ -133,6 +138,8 @@ public class ConfigurableSettingsTab extends SettingsTab {
 			models= (List) settingRepo.findAllPrograms();
 		} else if ("department".equals(modelType)) {
 			models = (List) settingRepo.findAllDepartments();
+		} else if ("adminGroup".equals(modelType)) {
+			models = (List) settingRepo.findAllAdministrativeGroups();
 		} else if ("major".equals(modelType)) {
 			models = (List) settingRepo.findAllMajors();
 		} else {
@@ -154,6 +161,9 @@ public class ConfigurableSettingsTab extends SettingsTab {
 				} else if ("department".equals(modelType)) {
 					if (item.equals(((Department) model).getName()))
 						itr.remove();
+				} else if ("adminGroup".equals(modelType)) {
+					if (item.equals(((AdministrativeGroup) model).getName()))
+						itr.remove();
 				} else if ("major".equals(modelType)) {
 					if (item.equals(((Major) model).getName()))
 						itr.remove();
@@ -173,6 +183,8 @@ public class ConfigurableSettingsTab extends SettingsTab {
 				models.add(settingRepo.createProgram(item));
 			} else if ("department".equals(modelType)) {
 				models.add(settingRepo.createDepartment(item));
+			} else if ("adminGroup".equals(modelType)) {
+				models.add(settingRepo.createAdministrativeGroup(item));
 			} else if ("major".equals(modelType)) {
 				models.add(settingRepo.createMajor(item));
 			} else {
@@ -190,6 +202,8 @@ public class ConfigurableSettingsTab extends SettingsTab {
 			flash.put("open","availablePrograms");
 		} else if ("department".equals(modelType)) {
 			flash.put("open","availableDepartments");
+		} else if ("adminGroup".equals(modelType)) {
+			flash.put("open","availableAdminGroups");
 		} else if ("major".equals(modelType)) {
 			flash.put("open","availableMajors");
 		} else {
@@ -218,7 +232,9 @@ public class ConfigurableSettingsTab extends SettingsTab {
 	 *            Whether this embargo is active.
 	 */
 	@Security(RoleType.MANAGER)
-	public static void editEmbargoTypeJSON(String embargoTypeId, String name, String description, Integer months, boolean active) {
+	public static void editEmbargoTypeJSON(String embargoTypeId, String name, String description, Integer months, boolean active, String guarantor) {
+		
+		Logger.info(embargoTypeId +" - "+ name +" - "+ description +" - "+ guarantor);
 		
 		try {
 			if (name == null || name.trim().length() == 0)
@@ -230,21 +246,20 @@ public class ConfigurableSettingsTab extends SettingsTab {
 			// Create or modify the embargo
 			EmbargoType embargo = null;
 			if (embargoTypeId != null && embargoTypeId.trim().length() > 0) {
-				
 				// Modify an existing embargo
-				String[] parts = embargoTypeId.split("_");
-				Long id = Long.valueOf(parts[1]);
+				Long id = Long.valueOf(embargoTypeId);
 				embargo = settingRepo.findEmbargoType(id);
 				embargo.setName(name);
 				embargo.setDescription(description);
 				embargo.setDuration(months);
 				embargo.setActive(active);
+				embargo.setGuarantor(EmbargoGuarantor.valueOf(guarantor));
 				embargo.save();
 			} else {
 				List<EmbargoType> embargos = settingRepo.findAllEmbargoTypes();
 
 				// Create a new embargo
-				embargo = settingRepo.createEmbargoType(name, description, months, active);
+				embargo = settingRepo.createEmbargoType(name, description, months, active, EmbargoGuarantor.valueOf(guarantor));
 				embargos.add(embargo);
 
 				saveModelOrder(embargos);
@@ -258,12 +273,13 @@ public class ConfigurableSettingsTab extends SettingsTab {
 					embargo.getName(),
 					embargo.getDescription(),
 					embargo.getDuration(),
-					embargo.isActive());
+					embargo.isActive(),
+					embargo.getGuarantor());
 
 			name = escapeJavaScript(embargo.getName());
 			description = escapeJavaScript(embargo.getDescription());
 
-			renderJSON("{ \"success\": \"true\", \"id\": " + embargo.getId() + ", \"name\": \"" + name + "\", \"description\": \"" + description + "\", \"active\": \"" + active + "\", \"months\": \"" + months + "\" }");
+			renderJSON("{ \"success\": \"true\", \"id\": " + embargo.getId() + ", \"name\": \"" + name + "\", \"description\": \"" + description + "\", \"active\": " + active + ", \"months\": " + months + ", \"guarantor\": \"" + guarantor + "\" }");
 		} catch (IllegalArgumentException iae) {
 			String message = escapeJavaScript(iae.getMessage());			
 			renderJSON("{ \"failure\": \"true\", \"message\": \""+message+"\" }");
@@ -271,7 +287,7 @@ public class ConfigurableSettingsTab extends SettingsTab {
 			name = escapeJavaScript(name);
 			renderJSON("{ \"failure\": \"true\", \"message\": \"Another embargo type already exists with the name: '"+name+"'\" }");
 		} catch (RuntimeException re) {
-			Logger.error(re,"Unable to add college");
+			Logger.error(re,"Unable to add/edit embargo.");
 			String message = escapeJavaScript(re.getMessage());
 			renderJSON("{ \"failure\": \"true\", \"message\": \"" + message
 					+ "\" }");
@@ -288,8 +304,7 @@ public class ConfigurableSettingsTab extends SettingsTab {
 	public static void removeEmbargoTypeJSON(String embargoTypeId) {
 		
 		try {
-			String[] parts = embargoTypeId.split("_");
-			Long id = Long.valueOf(parts[1]);
+			Long id = Long.valueOf(embargoTypeId);
 			EmbargoType embargo = settingRepo.findEmbargoType(id);			
 			embargo.delete();
 			
@@ -301,7 +316,8 @@ public class ConfigurableSettingsTab extends SettingsTab {
 					embargo.getName(),
 					embargo.getDescription(),
 					embargo.getDuration(),
-					embargo.isActive());
+					embargo.isActive(),
+					embargo.getGuarantor());
 			
 			renderJSON("{ \"success\": \"true\" }");
 		} catch (RuntimeException re) {
@@ -321,15 +337,18 @@ public class ConfigurableSettingsTab extends SettingsTab {
 
 		List<EmbargoType> embargos = settingRepo.findAllEmbargoTypes();
 		for (EmbargoType embargo : embargos) {
-			embargo.delete();
-
-			Logger.info(
-					"%s (%d: %s) has deleted embargo #%d.\nEmbargo Name = '%s'\nEmbargo Description = '%s'\nEmbargo Duration = '%d'\nEmbargo Active = '%b'",
-					context.getPerson().getFormattedName(NameFormat.FIRST_LAST),
-					context.getPerson().getId(),
-					context.getPerson().getEmail(), embargo.getId(),
-					embargo.getName(), embargo.getDescription(),
-					embargo.getDuration(), embargo.isActive());
+			// don't delete system embargos
+			if(!embargo.isSystemRequired()) {
+				embargo.delete();
+	
+				Logger.info(
+						"%s (%d: %s) has deleted embargo #%d.\nEmbargo Name = '%s'\nEmbargo Description = '%s'\nEmbargo Duration = '%d'\nEmbargo Active = '%b'",
+						context.getPerson().getFormattedName(NameFormat.FIRST_LAST),
+						context.getPerson().getId(),
+						context.getPerson().getEmail(), embargo.getId(),
+						embargo.getName(), embargo.getDescription(),
+						embargo.getDuration(), embargo.isActive());
+			}
 		}
 
 		flash.put("open","availableEmbargoTypes");
@@ -383,30 +402,60 @@ public class ConfigurableSettingsTab extends SettingsTab {
 	// ////////////////////////////////////////////
 
 	/**
-	 * Create a new College. The id of the new college will be returned.
+	 * Create or edit a new College. The id of the new college will be returned.
 	 * 
-	 * @param name
-	 *            The name of the new college
+	 * @param collegeId - The id of the college we're editing
+	 * @param name - The name of the new college
+	 * @param emails - The list of email addresses to associate with this college
 	 */
 	@Security(RoleType.MANAGER)
-	public static void addCollegeJSON(String name) {
+	public static void addEditCollegeJSON(String collegeId, String name, String emails) {
 
 		try {
 			if (name == null || name.trim().length() == 0)
 				throw new IllegalArgumentException("Name is required");
+			
+			// make sure emails isn't null
+			if(emails == null) {
+				emails = "";
+			}
+			
+			// remove whitespace from email address string
+			emails = emails.replaceAll("\\s+","");
 
 			// Add the new college to the end of the list.
-			List<College> colleges = settingRepo.findAllColleges();
-
-			College college = settingRepo.createCollege(name);
-			colleges.add(college);
+            List<College> colleges = settingRepo.findAllColleges();
+			
+			// Create or modify the college
+			College college = null;
+			String jsonEmails = "";
+            if (collegeId != null && collegeId.trim().length() > 0) {
+                Long id = Long.valueOf(collegeId);
+                college = settingRepo.findCollege(id);
+                college.setName(name);
+                // create a new hashMap for the new emails
+                HashMap<Integer, String> emails_map = new HashMap<Integer, String>();
+                // create the json for the response and also add them to the created hashMap
+                jsonEmails = createEmailsJsonAndAddToMap(emails, emails_map);
+                // set the new emails with the hashMap
+				college.setEmails(emails_map);
+                college.save();
+            } else {
+				// create a new hashMap for the new emails
+                HashMap<Integer, String> emails_map = new HashMap<Integer, String>();
+                // create the json for the response and also add them to the created hashMap
+                jsonEmails = createEmailsJsonAndAddToMap(emails, emails_map);
+                // create the new college with the passed-in emails
+				college = settingRepo.createCollege(name, emails_map);
+    			colleges.add(college);
+            }
 
 			saveModelOrder(colleges);
 
 			name = escapeJavaScript(college.getName());
 
 			renderJSON("{ \"success\": \"true\", \"id\": " + college.getId()
-					+ ", \"name\": \"" + name + "\" }");
+					+ ", \"name\": \"" + name + "\", \"emails\": " + jsonEmails+" }");
 		} catch (IllegalArgumentException iae) {
 			String message = escapeJavaScript(iae.getMessage());			
 			renderJSON("{ \"failure\": \"true\", \"message\": \""+message+"\" }");
@@ -420,58 +469,18 @@ public class ConfigurableSettingsTab extends SettingsTab {
 					+ "\" }");
 		}
 	}
-
-	/**
-	 * Edit an existing college's name. Both the id and new name will be
-	 * returned.
-	 * 
-	 * @param collegeId
-	 *            The id of the college to be edited, in the form "college_id"
-	 * @param name
-	 *            The new name
-	 */
-	@Security(RoleType.MANAGER)
-	public static void editCollegeJSON(String collegeId, String name) {
-		try {
-			// Check input
-			if (name == null || name.trim().length() == 0)
-				throw new IllegalArgumentException("Name is required");
-
-			// Save the new college
-			String[] parts = collegeId.split("_");
-			Long id = Long.valueOf(parts[1]);
-			College college = settingRepo.findCollege(id);
-			college.setName(name);
-			college.save();
-
-			name = escapeJavaScript(name);
-
-			renderJSON("{ \"success\": \"true\", \"id\": " + college.getId() + ", \"name\": \"" + name + "\" }");
-		} catch (IllegalArgumentException iae) {
-			String message = escapeJavaScript(iae.getMessage());			
-			renderJSON("{ \"failure\": \"true\", \"message\": \""+message+"\" }");
-		} catch (PersistenceException pe) {
-			name = escapeJavaScript(name);
-			renderJSON("{ \"failure\": \"true\", \"message\": \"Another college already exists with the name: '"+name+"'\" }");
-		} catch (RuntimeException re) {
-			Logger.error(re,"Unable to edit college");
-			String message = escapeJavaScript(re.getMessage());
-			renderJSON("{ \"failure\": \"true\", \"message\": \"" + message + "\" }");
-		}
-	}
-
+	
 	/**
 	 * Remove an existing college
 	 * 
 	 * @param collegeId
-	 *            The id of the college to be removed of the form "college_id"
+	 *            The id of the college to be removed
 	 */
 	@Security(RoleType.MANAGER)
 	public static void removeCollegeJSON(String collegeId) {
 		try {
 			// Delete the old college
-			String[] parts = collegeId.split("_");
-			Long id = Long.valueOf(parts[1]);
+			Long id = Long.valueOf(collegeId);
 			College college = settingRepo.findCollege(id);
 			college.delete();
 
@@ -546,30 +555,58 @@ public class ConfigurableSettingsTab extends SettingsTab {
 	// ////////////////////////////////////////////
 
 	/**
-	 * Create a new Program. The id of the new program will be returned.
+	 * Create or edit a new Program. The id of the new program will be returned.
 	 * 
-	 * @param name
-	 *            The name of the new program
+	 * @param programId - The id of the program we're editing
+	 * @param name - The name of the new program
+	 * @param emails - The list of email addresses to associate with this program
 	 */
 	@Security(RoleType.MANAGER)
-	public static void addProgramJSON(String name) {
+	public static void addEditProgramJSON(String programId, String name, String emails) {
 
 		try {
 			if (name == null || name.trim().length() == 0)
 				throw new IllegalArgumentException("Name is required");
+			
+			// make sure emails isn't null
+			if(emails == null) {
+				emails = "";
+			}
+			
+			// remove whitespace from email address string
+            emails = emails.replaceAll("\\s+","");
 
-			// Add the new program to the end of the list.
-			List<Program> programs = settingRepo.findAllPrograms();
-
-			Program program = settingRepo.createProgram(name);
-			programs.add(program);
+			// Add the new college to the end of the list.
+            List<Program> programs = settingRepo.findAllPrograms();
+			
+			// Create or modify the college
+            Program program = null;
+			String jsonEmails = "";
+            if (programId != null && programId.trim().length() > 0) {
+                Long id = Long.valueOf(programId);
+                program = settingRepo.findProgram(id);
+                program.setName(name);
+                // create a new hashMap for the new emails
+                HashMap<Integer, String> emails_map = new HashMap<Integer, String>();
+                // create the json for the response and also add them to the created hashMap
+                jsonEmails = createEmailsJsonAndAddToMap(emails, emails_map);
+				program.setEmails(emails_map);
+				program.save();
+            } else {
+				// create a new hashMap for the new emails
+                HashMap<Integer, String> emails_map = new HashMap<Integer, String>();
+                // create the json for the response and also add them to the created hashMap
+                jsonEmails = createEmailsJsonAndAddToMap(emails, emails_map);
+				program = settingRepo.createProgram(name, emails_map);
+    			programs.add(program);
+            }
 
 			saveModelOrder(programs);
 
 			name = escapeJavaScript(program.getName());
 
 			renderJSON("{ \"success\": \"true\", \"id\": " + program.getId()
-					+ ", \"name\": \"" + name + "\" }");
+					+ ", \"name\": \"" + name + "\", \"emails\": " + jsonEmails+" }");
 		} catch (IllegalArgumentException iae) {
 			String message = escapeJavaScript(iae.getMessage());			
 			renderJSON("{ \"failure\": \"true\", \"message\": \""+message+"\" }");
@@ -585,45 +622,6 @@ public class ConfigurableSettingsTab extends SettingsTab {
 	}
 
 	/**
-	 * Edit an existing program's name. Both the id and new name will be
-	 * returned.
-	 * 
-	 * @param programId
-	 *            The id of the program to be edited, in the form "program_id"
-	 * @param name
-	 *            The new name
-	 */
-	@Security(RoleType.MANAGER)
-	public static void editProgramJSON(String programId, String name) {
-		try {
-			// Check input
-			if (name == null || name.trim().length() == 0)
-				throw new IllegalArgumentException("Name is required");
-
-			// Save the new program
-			String[] parts = programId.split("_");
-			Long id = Long.valueOf(parts[1]);
-			Program program = settingRepo.findProgram(id);
-			program.setName(name);
-			program.save();
-
-			name = escapeJavaScript(name);
-
-			renderJSON("{ \"success\": \"true\", \"id\": " + program.getId() + ", \"name\": \"" + name + "\" }");
-		} catch (IllegalArgumentException iae) {
-			String message = escapeJavaScript(iae.getMessage());			
-			renderJSON("{ \"failure\": \"true\", \"message\": \""+message+"\" }");
-		} catch (PersistenceException pe) {
-			name = escapeJavaScript(name);
-			renderJSON("{ \"failure\": \"true\", \"message\": \"Another program already exists with the name: '"+name+"'\" }");
-		} catch (RuntimeException re) {
-			Logger.error(re,"Unable to edit program");
-			String message = escapeJavaScript(re.getMessage());
-			renderJSON("{ \"failure\": \"true\", \"message\": \"" + message + "\" }");
-		}
-	}
-
-	/**
 	 * Remove an existing program
 	 * 
 	 * @param programId
@@ -632,9 +630,8 @@ public class ConfigurableSettingsTab extends SettingsTab {
 	@Security(RoleType.MANAGER)
 	public static void removeProgramJSON(String programId) {
 		try {
-			// Delete the old college
-			String[] parts = programId.split("_");
-			Long id = Long.valueOf(parts[1]);
+			// Delete the old program
+			Long id = Long.valueOf(programId);
 			Program program = settingRepo.findProgram(id);
 			program.delete();
 
@@ -709,30 +706,58 @@ public class ConfigurableSettingsTab extends SettingsTab {
 	// ////////////////////////////////////////////
 
 	/**
-	 * Create a new Department. The id of the new department will be returned.
+	 * Create or edit a new Department. The id of the new department will be returned.
 	 * 
-	 * @param name
-	 *            The name of the new department
+	 * @param departmentId - The id of the department we're editing
+	 * @param name - The name of the new department
+	 * @param emails - The list of email addresses to associate with this department
 	 */
 	@Security(RoleType.MANAGER)
-	public static void addDepartmentJSON(String name) {
+	public static void addEditDepartmentJSON(String departmentId, String name, String emails) {
 
 		try {
 			if (name == null || name.trim().length() == 0)
 				throw new IllegalArgumentException("Name is required");
+			
+			// make sure emails isn't null
+			if(emails == null) {
+				emails = "";
+			}
+			
+			// remove whitespace from email address string
+            emails = emails.replaceAll("\\s+","");
 
-			// Add the new department to the end of the list.
-			List<Department> departments = settingRepo.findAllDepartments();
-
-			Department department = settingRepo.createDepartment(name);
-			departments.add(department);
+			// Add the new college to the end of the list.
+            List<Department> departments = settingRepo.findAllDepartments();
+			
+			// Create or modify the college
+            Department department = null;
+			String jsonEmails = "";
+            if (departmentId != null && departmentId.trim().length() > 0) {
+                Long id = Long.valueOf(departmentId);
+                department = settingRepo.findDepartment(id);
+                department.setName(name);
+                // create a new hashMap for the new emails
+                HashMap<Integer, String> emails_map = new HashMap<Integer, String>();
+                // create the json for the response and also add them to the created hashMap
+                jsonEmails = createEmailsJsonAndAddToMap(emails, emails_map);
+				department.setEmails(emails_map);
+				department.save();
+            } else {
+            	// create a new hashMap for the new emails
+                HashMap<Integer, String> emails_map = new HashMap<Integer, String>();
+                // create the json for the response and also add them to the created hashMap
+                jsonEmails = createEmailsJsonAndAddToMap(emails, emails_map);
+				department = settingRepo.createDepartment(name, emails_map);
+    			departments.add(department);
+            }
 
 			saveModelOrder(departments);
 
 			name = escapeJavaScript(department.getName());
 
 			renderJSON("{ \"success\": \"true\", \"id\": " + department.getId()
-					+ ", \"name\": \"" + name + "\" }");
+					+ ", \"name\": \"" + name + "\", \"emails\": " + jsonEmails+" }");
 		} catch (IllegalArgumentException iae) {
 			String message = escapeJavaScript(iae.getMessage());			
 			renderJSON("{ \"failure\": \"true\", \"message\": \""+message+"\" }");
@@ -741,48 +766,6 @@ public class ConfigurableSettingsTab extends SettingsTab {
 			renderJSON("{ \"failure\": \"true\", \"message\": \"Another department already exists with the name: '"+name+"'\" }");
 		} catch (RuntimeException re) {
 			Logger.error(re,"Unable to add department");
-			String message = escapeJavaScript(re.getMessage());
-			renderJSON("{ \"failure\": \"true\", \"message\": \"" + message
-					+ "\" }");
-		}
-	}
-
-	/**
-	 * Edit an existing department's name. Both the id and new name will be
-	 * returned.
-	 * 
-	 * @param departmentId
-	 *            The id of the department to be edited, in the form
-	 *            "department_id"
-	 * @param name
-	 *            The new name
-	 */
-	@Security(RoleType.MANAGER)
-	public static void editDepartmentJSON(String departmentId, String name) {
-		try {
-			// Check input
-			if (name == null || name.trim().length() == 0)
-				throw new IllegalArgumentException("Name is required");
-
-			// Save the new department
-			String[] parts = departmentId.split("_");
-			Long id = Long.valueOf(parts[1]);
-			Department department = settingRepo.findDepartment(id);
-			department.setName(name);
-			department.save();
-
-			name = escapeJavaScript(name);
-
-			renderJSON("{ \"success\": \"true\", \"id\": " + department.getId()
-					+ ", \"name\": \"" + name + "\" }");
-		} catch (IllegalArgumentException iae) {
-			String message = escapeJavaScript(iae.getMessage());			
-			renderJSON("{ \"failure\": \"true\", \"message\": \""+message+"\" }");
-		} catch (PersistenceException pe) {
-			name = escapeJavaScript(name);
-			renderJSON("{ \"failure\": \"true\", \"message\": \"Another department already exists with the name: '"+name+"'\" }");
-		} catch (RuntimeException re) {
-			Logger.error(re,"Unable to edit department");
 			String message = escapeJavaScript(re.getMessage());
 			renderJSON("{ \"failure\": \"true\", \"message\": \"" + message
 					+ "\" }");
@@ -800,8 +783,7 @@ public class ConfigurableSettingsTab extends SettingsTab {
 	public static void removeDepartmentJSON(String departmentId) {
 		try {
 			// Delete the old department
-			String[] parts = departmentId.split("_");
-			Long id = Long.valueOf(parts[1]);
+			Long id = Long.valueOf(departmentId);
 			Department department = settingRepo.findDepartment(id);
 			department.delete();
 
@@ -870,6 +852,159 @@ public class ConfigurableSettingsTab extends SettingsTab {
 		saveModelOrder(departments);
 		
 		flash.put("open","availableDepartments");
+		configurableSettings();
+	}
+	
+	// ////////////////////////////////////////////
+	// ADMINISTRATIVE GROUP AJAX
+	// ////////////////////////////////////////////
+
+	/**
+	 * Create or edit a new Administrative Group. The id of the new administrative group will be returned.
+	 * 
+	 * @param adminGroupId - The id of the administrative group we're editing
+	 * @param name - The name of the new administrative group
+	 * @param emails - The list of email addresses to associate with this administrative group
+	 */
+	@Security(RoleType.MANAGER)
+	public static void addEditAdministrativeGroupJSON(String adminGroupId, String name, String emails) {
+
+		try {
+			if (name == null || name.trim().length() == 0)
+				throw new IllegalArgumentException("Name is required");
+			
+			// make sure emails isn't null
+			if(emails == null) {
+				emails = "";
+			}
+			
+			// remove whitespace from email address string
+			emails = emails.replaceAll("\\s+","");
+
+			// Add the new administrative groups to the end of the list.
+            List<AdministrativeGroup> adminGroups = settingRepo.findAllAdministrativeGroups();
+			
+			// Create or modify the administrative group
+            AdministrativeGroup adminGroup = null;
+			String jsonEmails = "";
+            if (adminGroupId != null && adminGroupId.trim().length() > 0) {
+                Long id = Long.valueOf(adminGroupId);
+                adminGroup = settingRepo.findAdministrativeGroup(id);
+                adminGroup.setName(name);
+                // create a new hashMap for the new emails
+                HashMap<Integer, String> emails_map = new HashMap<Integer, String>();
+                // create the json for the response and also add them to the created hashMap
+                jsonEmails = createEmailsJsonAndAddToMap(emails, emails_map);
+                // set the new emails with the hashMap
+                adminGroup.setEmails(emails_map);
+                adminGroup.save();
+            } else {
+				// create a new hashMap for the new emails
+                HashMap<Integer, String> emails_map = new HashMap<Integer, String>();
+                // create the json for the response and also add them to the created hashMap
+                jsonEmails = createEmailsJsonAndAddToMap(emails, emails_map);
+                // create the new administrative group with the passed-in emails
+                adminGroup = settingRepo.createAdministrativeGroup(name, emails_map);
+                adminGroups.add(adminGroup);
+            }
+
+			saveModelOrder(adminGroups);
+
+			name = escapeJavaScript(adminGroup.getName());
+
+			renderJSON("{ \"success\": \"true\", \"id\": " + adminGroup.getId()
+					+ ", \"name\": \"" + name + "\", \"emails\": " + jsonEmails+" }");
+		} catch (IllegalArgumentException iae) {
+			String message = escapeJavaScript(iae.getMessage());			
+			renderJSON("{ \"failure\": \"true\", \"message\": \""+message+"\" }");
+		} catch (PersistenceException pe) {
+			name = escapeJavaScript(name);
+			renderJSON("{ \"failure\": \"true\", \"message\": \"Another administrative group already exists with the name: '"+name+"'\" }");
+		} catch (RuntimeException re) {
+			Logger.error(re,"Unable to add administrative group");
+			String message = escapeJavaScript(re.getMessage());
+			renderJSON("{ \"failure\": \"true\", \"message\": \"" + message
+					+ "\" }");
+		}
+	}
+	
+	/**
+	 * Remove an existing administrative group
+	 * 
+	 * @param adminGroupId
+	 *            The id of the administrative group to be removed
+	 */
+	@Security(RoleType.MANAGER)
+	public static void removeAdministrativeGroupJSON(String adminGroupId) {
+		try {
+			// Delete the old administrative group
+			Long id = Long.valueOf(adminGroupId);
+			AdministrativeGroup adminGroup = settingRepo.findAdministrativeGroup(id);
+			adminGroup.delete();
+
+			renderJSON("{ \"success\": \"true\" }");
+		} catch (RuntimeException re) {
+			Logger.error(re,"Unable to remove administrative group");
+			String message = escapeJavaScript(re.getMessage());
+			renderJSON("{ \"failure\": \"true\", \"message\": \"" + message
+					+ "\" }");
+		}
+	}
+	
+	/**
+	 * Remove all existing administrative groups
+	 * 
+	 */
+	@Security(RoleType.MANAGER)
+	public static void removeAllAdministrativeGroups() {
+		List<AdministrativeGroup> adminGroups = settingRepo.findAllAdministrativeGroups();
+		for (AdministrativeGroup adminGroup : adminGroups) {
+			adminGroup.delete();
+		}
+
+		flash.put("open","availableAdminGroups");
+		configurableSettings();
+	}
+
+	/**
+	 * Reorder a list of administrative groups.
+	 * 
+	 * @param adminGroupIds
+	 *            An ordered list of ids in the form:
+	 *            "adminGroup_1,adminGroup_3,adminGroup_2"
+	 */
+	@Security(RoleType.MANAGER)
+	public static void reorderAdministrativeGroupsJSON(String adminGroupIds) {
+
+		try {
+
+			if (adminGroupIds != null && adminGroupIds.trim().length() > 0) {
+				// Save the new order
+				List<AdministrativeGroup> adminGroups = resolveIds(adminGroupIds, AdministrativeGroup.class);
+				saveModelOrder(adminGroups);
+			}
+
+			renderJSON("{ \"success\": \"true\" }");
+		} catch (RuntimeException re) {
+			Logger.error(re,"Unable to reorder administrative groups");
+			String message = escapeJavaScript(re.getMessage());
+			renderJSON("{ \"failure\": \"true\", \"message\": \"" + message
+					+ "\" }");
+		}
+	}
+	
+	/**
+	 * Alphabetize all administrative groups.
+	 * 
+	 */
+	@Security(RoleType.MANAGER)
+	public static void alphabetizeAllAdministrativeGroups() {
+
+		List<AdministrativeGroup> adminGroups = settingRepo.findAllAdministrativeGroups();
+		Collections.sort(adminGroups, ascending(getModelCompator()));
+		saveModelOrder(adminGroups);
+		
+		flash.put("open","availableAdminGroups");
 		configurableSettings();
 	}
 	
@@ -2035,6 +2170,40 @@ public class ConfigurableSettingsTab extends SettingsTab {
 		configurableSettings();
 	}
 	
+	/**
+	 * Helper function to create a JSON encoded string for a hashMap of email addresses
+	 * 
+	 * Will also modify the passed-in hashMap to add the email addresses
+	 * 
+	 * Will validate the email addresses in the process 
+	 * 
+	 * @param emails - the emails String from the request
+	 * @param emails_map - a blank map to add emails to
+	 * @return - JSON encoded string representing the hashMap of emails
+	 */
+	private static String createEmailsJsonAndAddToMap(String emails, HashMap<Integer, String> emails_map){
+		String jsonEmails = "[";
+		if(emails != null) {
+			int i = 0;
+			List<String> emails_list = (emails.length() == 0 ? new ArrayList<String>() : Arrays.asList(emails.split(",")));
+	        for(String email : emails_list) {
+				// validate email
+				if(!Utilities.validateEmailAddress(email, validation)){
+					throw new IllegalArgumentException("Invalid E-Mail Address detected! [" + email + "]");
+				}
+	            emails_map.put(i, email);
+	            jsonEmails += "{\"id\":" +i+ ",\"email\":\""+email+"\"},";
+	            i++;
+	        }
+	        if(jsonEmails.length() > 1) {
+	        	jsonEmails = jsonEmails.substring(0,jsonEmails.length()-1);
+	        }
+		}
+		jsonEmails += "]";
+		
+		return jsonEmails;
+	}
+	
 	
 	/**
 	 * Sort Locales
@@ -2116,6 +2285,9 @@ public class ConfigurableSettingsTab extends SettingsTab {
 				}
 				if (model instanceof Department) {
 					return ((Department) model).getName();
+				}
+				if (model instanceof AdministrativeGroup) {
+					return ((AdministrativeGroup) model).getName();
 				}
 				if (model instanceof Major) {
 					return ((Major) model).getName();

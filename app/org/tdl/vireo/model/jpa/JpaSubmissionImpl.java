@@ -1,10 +1,11 @@
 package org.tdl.vireo.model.jpa;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.text.DateFormat;
 import java.text.DateFormatSymbols;
 import java.text.SimpleDateFormat;
-import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
@@ -16,6 +17,9 @@ import javax.persistence.CollectionTable;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
@@ -27,29 +31,35 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 
-import org.apache.commons.lang.LocaleUtils;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.tdl.vireo.model.ActionLog;
 import org.tdl.vireo.model.Attachment;
 import org.tdl.vireo.model.AttachmentType;
+import org.tdl.vireo.model.College;
 import org.tdl.vireo.model.CommitteeMember;
 import org.tdl.vireo.model.CustomActionDefinition;
 import org.tdl.vireo.model.CustomActionValue;
 import org.tdl.vireo.model.DegreeLevel;
+import org.tdl.vireo.model.Department;
+import org.tdl.vireo.model.EmbargoGuarantor;
 import org.tdl.vireo.model.EmbargoType;
-import org.tdl.vireo.model.Language;
 import org.tdl.vireo.model.NameFormat;
 import org.tdl.vireo.model.Person;
+import org.tdl.vireo.model.Program;
+import org.tdl.vireo.model.SettingsRepository;
 import org.tdl.vireo.model.Submission;
-import org.tdl.vireo.proquest.ProquestLanguage;
 import org.tdl.vireo.security.SecurityContext;
+import org.tdl.vireo.services.EmailRuleService;
 import org.tdl.vireo.services.Utilities;
 import org.tdl.vireo.state.State;
 import org.tdl.vireo.state.StateManager;
-import org.tdl.vireo.services.Utilities;
-
 import org.tdl.vireo.search.Semester;
 
+import play.Logger;
 import play.modules.spring.Spring;
+import play.vfs.VirtualFile;
 
 /**
  * JPA specific implementation of Vireo's Submission interface.
@@ -92,9 +102,13 @@ public class JpaSubmissionImpl extends JpaAbstractModel<JpaSubmissionImpl> imple
 	@Column(length=326768) // 2^15
 	public String publishedMaterial;
 
-	@OneToOne(targetEntity = JpaEmbargoTypeImpl.class)
-	public EmbargoType embargoType;
-
+	//@ManyToOne(targetEntity = JpaEmbargoTypeImpl.class, optional=true)
+	@ElementCollection
+	@CollectionTable(
+			name="submission_embargotypes",
+			joinColumns=@JoinColumn(name="submission_id"))
+	public List<Long> embargoTypeIds;
+	
 	@OneToMany(targetEntity = JpaAttachmentImpl.class, mappedBy = "submission", cascade = CascadeType.ALL)
 	public List<Attachment> attachments;
 
@@ -124,12 +138,22 @@ public class JpaSubmissionImpl extends JpaAbstractModel<JpaSubmissionImpl> imple
 	@Column(length=255)
 	public String degree;
 	public DegreeLevel degreeLevel;
+	
 	@Column(length=255)
 	public String department;
+	@Column(nullable=true)
+	public Long departmentId;
+	
 	@Column(length=255)
 	public String college;
+	@Column(nullable=true)
+	public Long collegeId;
+	
 	@Column(length=255)
 	public String program;
+	@Column(nullable=true)
+	public Long programId;
+	
 	@Column(length=255)
 	public String major;
 	@Column(length=255)
@@ -203,6 +227,7 @@ public class JpaSubmissionImpl extends JpaAbstractModel<JpaSubmissionImpl> imple
 		
 		this.submitter = submitter;
 		this.documentSubjects = new ArrayList<String>();
+		this.embargoTypeIds = new ArrayList<Long>();
 		this.attachments = new ArrayList<Attachment>();
 		this.committeeMembers = new ArrayList<CommitteeMember>();
 		this.customActions = new ArrayList<CustomActionValue>();
@@ -251,6 +276,14 @@ public class JpaSubmissionImpl extends JpaAbstractModel<JpaSubmissionImpl> imple
 		this.documentKeywords = Utilities.scrubControl(this.documentKeywords, " ");
 		this.publishedMaterial = Utilities.scrubControl(this.publishedMaterial, " ");
 		
+		// make sure we don't try to save an ActionLogAttachment
+		for(int i=0; i < attachments.size(); i++) {
+			Attachment attachment = attachments.get(i);
+			if(attachment instanceof ActionLogAttachment) {
+				attachments.remove(i);
+			}
+		}
+		
 		super.save();
 		
 		// After saving save all pending actionlogs
@@ -287,7 +320,9 @@ public class JpaSubmissionImpl extends JpaAbstractModel<JpaSubmissionImpl> imple
 					"WHERE Submission_Id = ? " 
 			).setParameter(1, this.getId())
 			.executeUpdate();
-
+		
+		embargoTypeIds.clear();
+		
 		return super.delete();
 	}
 	
@@ -297,8 +332,13 @@ public class JpaSubmissionImpl extends JpaAbstractModel<JpaSubmissionImpl> imple
 		submitter.detach();
 		if (assignee != null)
 			assignee.detach();
-		if (embargoType != null)
-			embargoType.detach();
+//		if (embargoTypeIds != null) {
+//			for (Long embargoTypeId : embargoTypeIds)
+//				embargoTypeId
+//		}
+//		for (EmbargoType embargoType : getEmbargoTypes()) {
+//	        embargoType.detach();
+//        }
 		return super.detach();
 	}
 
@@ -528,19 +568,55 @@ public class JpaSubmissionImpl extends JpaAbstractModel<JpaSubmissionImpl> imple
 	
 	
 	@Override
-	public EmbargoType getEmbargoType() {
-		return embargoType;
+	public List<EmbargoType> getEmbargoTypes() {
+		SettingsRepository settingRepo = Spring.getBeanOfType(SettingsRepository.class);
+		List<EmbargoType> ret = new ArrayList<EmbargoType>();
+		for (Long embargoTypeId : embargoTypeIds) {
+			EmbargoType embargoType = settingRepo.findEmbargoType(embargoTypeId);
+			if(embargoType!=null) {
+				ret.add(embargoType);
+			}
+        }
+		return ret;
 	}
 
 	@Override
-	public void setEmbargoType(EmbargoType embargo) {
+	public void addEmbargoType(EmbargoType embargo) {
 		
 		assertReviewerOrOwner(submitter);
 		
-		if (!equals(this.embargoType,embargo)) {
-			this.embargoType = embargo;
-			generateChangeLog("Embargo type",embargo.getName(), false);
+		if (!this.embargoTypeIds.contains(embargo.getId())) {
+			List<EmbargoType> temp = getEmbargoTypes();
+			for(EmbargoType embargoType : temp) {
+				if(embargoType.getGuarantor()==embargo.getGuarantor())
+					embargoTypeIds.remove(embargoType.getId());
+			}
+			this.embargoTypeIds.add(embargo.getId());
+			generateChangeLog("Embargo type",embargo.getName()+"("+embargo.getGuarantor()+")", false);
 		}
+	}
+	
+	@Override
+	public void removeEmbargoType(EmbargoType embargo) {
+		if(embargoTypeIds.contains(embargo.getId())){
+	    	embargoTypeIds.remove(embargo.getId());
+	    }	    
+	}
+	
+	@Override
+	public EmbargoType getEmbargoTypeByGuarantor(EmbargoGuarantor guarantor) {
+		if(embargoTypeIds != null && embargoTypeIds.size()>0) {
+			SettingsRepository settingRepo = Spring.getBeanOfType(SettingsRepository.class);
+			for(Long embargo : embargoTypeIds) {
+				EmbargoType embargoType = settingRepo.findEmbargoType(embargo);
+				if(embargoType != null) {
+					if(embargoType.getGuarantor()==guarantor)
+						return embargoType;
+				}
+			}
+		}
+		
+		return null;
 	}
 
 	@Override
@@ -566,17 +642,103 @@ public class JpaSubmissionImpl extends JpaAbstractModel<JpaSubmissionImpl> imple
 		
 		List<Attachment> filteredAttachments = new ArrayList<Attachment>();
 		for (AttachmentType type : types) {
-			for (Attachment attachment : attachments) {
-				if (type == attachment.getType())
-					filteredAttachments.add(attachment);
+			// generate an action log attachment
+			if(type == AttachmentType.ACTIONLOG) {
+				filteredAttachments.add(generateActionLogAttachment());
+			}
+			// get an attachment from JPA
+			else {
+				for (Attachment attachment : attachments) {
+					if (type == attachment.getType())
+						filteredAttachments.add(attachment);
+				}
 			}
 		}
 		
 		return filteredAttachments;
 	}
+	
+	private Attachment generateActionLogAttachment(){
+		// create an Excel Workbook to store the action log as an attachment
+		Attachment actionLogAttachment = null;
+		String sheetName = "ActionLog";
+		XSSFWorkbook wb = new XSSFWorkbook();
+        XSSFSheet sheet = wb.createSheet(sheetName);
+        XSSFRow header = sheet.createRow(0);
+        int rowNum = 1;
+        XSSFRow row = sheet.createRow(rowNum);
+        int colNum = 0;
+		for(ActionLog actionLog : actionLogs){
+			if(rowNum == 1) {
+				header.createCell(colNum).setCellValue("Action Date");
+			}
+			row.createCell(colNum).setCellValue(actionLog.getActionDate());
+			colNum++;
+			
+			if(rowNum == 1) {
+				header.createCell(colNum).setCellValue("Attachment Type");
+			}
+			if(actionLog.getAttachment() != null) {
+				row.createCell(colNum).setCellValue(actionLog.getAttachment().getType().name());
+			}
+			colNum++;
+			
+			if(rowNum == 1) {
+				header.createCell(colNum).setCellValue("Attachment Date");
+			}
+			if(actionLog.getAttachment() != null) {
+				row.createCell(colNum).setCellValue(actionLog.getAttachment().getDate());
+			}
+			colNum++;
+			
+			if(rowNum == 1) {
+				header.createCell(colNum).setCellValue("Attachment Name");
+			}
+			if(actionLog.getAttachment() != null) {
+				row.createCell(colNum).setCellValue(actionLog.getAttachment().getName());
+			}
+			colNum++;
+			
+			if(rowNum == 1) {
+				header.createCell(colNum).setCellValue("Attachment Size");
+			}
+			if(actionLog.getAttachment() != null) {
+				row.createCell(colNum).setCellValue(actionLog.getAttachment().getSize());
+			}
+			colNum++;
+			
+			if(rowNum == 1) {
+				header.createCell(colNum).setCellValue("Action Entry");
+			}
+			row.createCell(colNum).setCellValue(actionLog.getEntry());
+			colNum++;
+			
+			if(rowNum == 1) {
+				header.createCell(colNum).setCellValue("Submission State");
+			}
+			row.createCell(colNum).setCellValue(actionLog.getSubmissionState().getBeanName());
+			colNum++;
+			
+			rowNum++;
+			row = sheet.createRow(rowNum);
+			colNum = 0;
+		}
+		try {
+			File actionLogFile = File.createTempFile("actionlog-", ".xlsx");
+			actionLogFile.deleteOnExit();
+			FileOutputStream actionLogFileOS = new FileOutputStream(actionLogFile);
+			wb.write(actionLogFileOS);
+			actionLogFileOS.flush();
+			actionLogFileOS.close();
+			actionLogAttachment = new ActionLogAttachment(this, actionLogFile);
+		} catch (IOException e){
+			play.Logger.error("Error while generating Action Log Attachment! [%s]", e);
+		}
+		return actionLogAttachment;
+	}
 
 	@Override
-	public List<Attachment> getAttachments() {		
+	public List<Attachment> getAttachments() {
 		return attachments;
 	}
 
@@ -850,8 +1012,24 @@ public class JpaSubmissionImpl extends JpaAbstractModel<JpaSubmissionImpl> imple
 		if (!equals(this.department,department)) {
 			this.department = department;
 			generateChangeLog("Department",department,false);
+			// set departmentId column
+			SettingsRepository settingRepo = Spring.getBeanOfType(SettingsRepository.class);
+			Department departmentJPA = settingRepo.findDepartmentByName(department);
+			if(departmentJPA != null) {
+				setDepartmentId(departmentJPA.getId());
+			}
 		}
 	}
+	
+	@Override
+	public Long getDepartmentId() {
+	    return departmentId;
+    }
+	
+	@Override
+	public void setDepartmentId(Long departmentId) {
+	    this.departmentId = departmentId;
+    }
 
 	@Override
 	public String getCollege() {
@@ -865,8 +1043,24 @@ public class JpaSubmissionImpl extends JpaAbstractModel<JpaSubmissionImpl> imple
 		if (!equals(this.college,college)) {
 			this.college = college;
 			generateChangeLog("College",college,false);
+			// set collegeId column
+			SettingsRepository settingRepo = Spring.getBeanOfType(SettingsRepository.class);
+			College collegeJPA =settingRepo.findCollegeByName(college);
+			if(collegeJPA != null) {
+				setCollegeId(collegeJPA.getId());
+			}
 		}
 	}
+	
+	@Override
+	public Long getCollegeId() {
+	    return collegeId;
+    }
+	
+	@Override
+	public void setCollegeId(Long id) {
+	    this.collegeId = id;
+    }
 	
 	@Override
 	public String getProgram() {
@@ -880,8 +1074,24 @@ public class JpaSubmissionImpl extends JpaAbstractModel<JpaSubmissionImpl> imple
 		if (!equals(this.program,program)) {
 			this.program = program;
 			generateChangeLog("Program",program,false);
+			// set programId column
+			SettingsRepository settingRepo = Spring.getBeanOfType(SettingsRepository.class);
+			Program programJPA = settingRepo.findProgramByName(program);
+			if(programJPA != null) {
+				setProgramId(programJPA.getId());
+			}
 		}
 	}
+	
+	@Override
+	public Long getProgramId() {
+	    return programId;
+    }
+	
+	@Override
+	public void setProgramId(Long programId) {
+	    this.programId = programId;
+    }
 
 	@Override
 	public String getMajor() {
@@ -1020,7 +1230,8 @@ public class JpaSubmissionImpl extends JpaAbstractModel<JpaSubmissionImpl> imple
 		if (!equals(this.stateName,state.getBeanName())) {
 			this.stateName = state.getBeanName();
 			generateChangeLog("Submission status",state.getDisplayName(),true);
-			
+			// RUN Workflow Email Rule
+			EmailRuleService.runEmailRules(this);
 			// Check if this state is approved
 			if (this.approvalDate == null && state.isApproved())
 				this.setApprovalDate(new Date());

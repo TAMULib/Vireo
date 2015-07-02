@@ -1,5 +1,5 @@
 #{extends 'Submit/submitStep.html' /}
-#{set title:'File Upload' /}
+#{set title:'Vireo Thesis and Dissertaion Submital System - Submission - Upload Your Files' /}
 
 #{set 'moreScripts' }
 <script type="text/javascript">
@@ -91,6 +91,9 @@ jQuery(document).ready(function(){
                     	<option value="ADMINISTRATIVE">#{fieldLabel ADMINISTRATIVE_ATTACHMENT /}</option>
                     	#{/ifEnabled}
                     </select>
+                </div>
+                <label class="control-label" for="additionalFile"><span class="required-star">*</span>Browse for Additional Document:</label>
+                <div class="controls">
                     <input type="file" id="additionalFile" class="input-file" name="additionalDocument"><br/>
                     <input type="submit" value="Upload" class="uploadBtn btn" name="uploadAdditional">
                 </div>

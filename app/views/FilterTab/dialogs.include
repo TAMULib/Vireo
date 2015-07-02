@@ -24,7 +24,18 @@ jQuery(document).ready(function() {
 	 * Add Comment Disable/Enable Events
 	 */
 	 jQuery(".emailOptions input[name='visibility']").live("click", toggleAddCommentEmailOptions());
-	 //jQuery("input[name='email_student']").live("click", toggleCarbonCopyAdvisor());
+	 jQuery("input[name='primary_recipients_toggle']").on("click", toggleCarbonCopyAdvisor());
+     jQuery("input[name='cc_recipients_toggle']").on("click", function() {
+        
+        var modalsCCRecipientsName = "#" + jQuery(this).attr("data-modal-name") + " .cc_recipients";
+        
+        jQuery(modalsCCRecipientsName).toggle(300, function() {
+            if(jQuery(modalsCCRecipientsName).css("display") == "none") {
+                jQuery(modalsCCRecipientsName + " input").val("");
+             }
+        });
+     
+     });
 	
 	// Batch Confirm links
 	jQuery('.batchConfirm').click(batchConfirmHandler(${results?.getTotal()}));
@@ -47,7 +58,6 @@ jQuery(document).ready(function() {
     jQuery("#shownColumns, #hiddenColumns").sortable({
         connectWith: ".columnsSortable",
         placeholder: "placeholder",
-        cancel: '#column_1', // ID
         update: function(event,ui) {
             var list = jQuery("#shownColumns").sortable('toArray').toString();
             jQuery("#columns-field").val(list);
@@ -70,13 +80,70 @@ jQuery(document).ready(function() {
     var list = jQuery("#shownFacets").sortable('toArray').toString();
     jQuery("#facets-field").val(list);
     
+    // Export modal
     jQuery("#submit_download_export").click(function () {
         jQuery("#batch-export-modal").modal('hide');
         return true;
     });
+    var batchExportExtraSelectLabel = "<label class=\"control-label\" for=\"packager-extra\" id=\"packager-extra-label\"><strong>Export Columns</strong>:</label>";
+    var batchExportExtraSelectDiv = "<div class=\"controls\" id=\"batch-export-extra-controls\"><select class=\"input-xlarge\" name=\"packager-extra\" id=\"packager-extra\"><option value=\"Active\">Active Filter</option><option value=\"Saved\">Saved Filter</option></select></div>";
+    var batchExportSavedFiltersLabel = "<label class=\"control-label\" for=\"packager-extra-saved-filters\" id=\"packager-extra-saved-filters-label\"><strong>Saved Filters</strong>:</label>";
+    var batchExportSavedFiltersDiv = 	"<div class=\"controls\" id=\"batch-export-extra-saved-filters-controls\">" +
+    									"<select class=\"input-xlarge\" name=\"packager-extra-saved-filters\" id=\"packager-extra-saved-filters\">" +
+    									"<optgroup label=\"Without Columns\">" +
+    									%{boolean foundWithoutColumns = false;}%
+    									#{list items:allFilters, as:'exportingFilter'}
+    										#{if !exportingFilter.hasColumns()}
+    										%{foundWithoutColumns = true;}%
+    										"<option value=\"${exportingFilter.getId()}\">${exportingFilter.getName()}</option>" +
+    										#{/if}
+    									#{/list}
+    									#{if !foundWithoutColumns}
+    									"<option disabled=\"disabled\">None...</option>" +
+    									#{/if}
+    									"</optgroup>" +
+    									"<optgroup label=\"With Columns\">" +
+    									%{boolean foundWithColumns = false;}%
+    									#{list items:allFilters, as:'exportingFilter'}
+    										#{if exportingFilter.hasColumns()}
+    										%{foundWithColumns = true;}%
+    										"<option value=\"${exportingFilter.getId()}\">${exportingFilter.getName()}</option>" +
+    										#{/if}
+    									#{/list}
+    									#{if !foundWithColumns}
+    									"<option disabled=\"disabled\">None...</option>" +
+    									#{/if}
+    									"</optgroup>" +
+    									"</select></div>";
+    jQuery("#packager").on("change", function() {
+    	var selectedOption = $("#packager option:selected").text();
+    	if(selectedOption == "Excel Export"){
+    		var div = $("#batch-export-control-group");
+    		div.append(batchExportExtraSelectLabel);
+    		div.append(batchExportExtraSelectDiv);
+    		jQuery("#packager-extra").on("change", function() {
+    			var selectedOption = $("#packager-extra option:selected").text();
+    			if(selectedOption == "Saved Filter"){
+    				var div = $("#batch-export-control-group");
+		    		div.append(batchExportSavedFiltersLabel);
+    				div.append(batchExportSavedFiltersDiv);
+    			} else {
+    				var div = $("#batch-export-control-group");
+    				div.find("#packager-extra-saved-filters-label").remove();
+    				div.find("#batch-export-extra-saved-filters-controls").remove();
+    			}
+    		});
+    	} else {
+    		var div = $("#batch-export-control-group");
+    		div.find("#packager-extra-label").remove();
+    		div.find("#batch-export-extra-controls").remove();
+    		div.find("#packager-extra-saved-filters-label").remove();
+    		div.find("#batch-export-extra-saved-filters-controls").remove();
+    	}
+    });
     
     // Batch Update Status dialog box
-    jQuery("#state").click(function() {
+    jQuery("#state").change(function() {
     
         // Toggle the deposit location field display
         if (jQuery("#state option:selected").hasClass("ask-for-depositLocation") && jQuery("#ask-for-depositLocation-group").is(":hidden")) {
@@ -121,6 +188,11 @@ jQuery(document).ready(function() {
                         <input type="checkbox" name="public" value="true"/>
                         <p class="help-block">I would like this filter to be available to all users.</p>
                     </div>
+                    <label class="control-label" for="columns"><strong>Columns</strong>:</label>
+                    <div class="controls">
+                        <input type="checkbox" name="columns" value="true"/>
+                        <p class="help-block">I would like this filter to include visible columns.</p>
+                    </div>
                 </div>
             </fieldset>
         </div>
@@ -145,6 +217,7 @@ jQuery(document).ready(function() {
                 <tr>
                     <th>Remove</th>
                     <th>Filter Name</th>
+                    <th>Has Columns</th>
                     <th>Status</th>
                 </tr>
                 #{list items:subRepo.findSearchFiltersByCreatorOrPublic(securityContext.getPerson()), as:'filter'}
@@ -155,6 +228,7 @@ jQuery(document).ready(function() {
                         #{/if}
                     </td>
                     <td>${filter.getName()}</td>
+                    <td>${filter.hasColumns()}</td>
                     <td>
                         #{if filter.getCreator() == securityContext.getPerson() && filter.isPublic() }
                         Your public filter
@@ -277,6 +351,7 @@ jQuery(document).ready(function() {
         <div class="modal-footer">
             <a href="#" class="btn" data-dismiss="modal">Close</a>
             <input type="submit" class="btn btn-primary" name="submit_save" value="Save"/>
+            <input type="submit" class="btn btn-primary" name="default_columns" value="Default Columns"/>
         </div>
     </form>
 </div>
@@ -380,6 +455,60 @@ jQuery(document).ready(function() {
 	<div class="modal-body">
 		<form id="batch-comment-form" action="@{FilterTab.batchComment()}" method="POST" class="form-horizontal" enctype="multipart/form-data"> 
             <ul class="unstyled">
+                <li  class="autocomplete primary_recipients" 
+                    #{if currentUser.getPreference("notes_mark_comment_as_private_by_default") == null}
+                        #{if currentUser.getPreference("notes_email_student_by_default") != null}
+                            style="display=list-item"
+                        #{/if}
+                        #{else}
+                            style="display:none;"
+                        #{/else}
+                    #{/if}#{else}
+                        style="display:none;"
+                    #{/else}>
+                    To:<br />
+                    <input type="text" 
+                    name="primary_recipients"
+                    autocomplete="off" 
+                    class="span8" 
+                    data-items="20" 
+                    data-provide="typeahead" 
+                    data-min-length="0" 
+                    data-source="[#{list items:org.tdl.vireo.email.RecipientType.values(), as:'recipientType'}#{if recipientType.name() != "AdminGroup"}&quot;${recipientType}&quot;${recipientType_isLast ? '' : ','}#{/if}#{else}#{list items:settingRepo.findAllAdministrativeGroups() , as: "adminGroup"}&quot;${adminGroup.getName()}&quot;,#{/list}#{/else}#{/list}]" 
+                    data-mode="multiple"
+                    #{if currentUser.getPreference("notes_email_student_by_default") != null}
+                        value="Student"
+                    #{/if}
+                    placeholder="i.e. Student, College or myEmail@myProvider.com"/>
+                    
+                </li>
+                <li class="autocomplete cc_recipients"
+                    #{if currentUser.getPreference("notes_mark_comment_as_private_by_default") == null}
+                        #{if currentUser.getPreference("notes_email_student_by_default") != null}
+                            #{if currentUser.getPreference("notes_cc_student_advisor_by_default") != null}
+                                    style="display:list-item;"
+                                #{/if}
+                            #{/if}#{else}
+                                style="display:none;"
+                            #{/else}
+                    #{/if}#{else}
+                        style="display:none;"
+                    #{/else}>
+                    CC:<br />
+                    <input type="text"
+                    name="cc_recipients"
+                    autocomplete="off" 
+                    class="span8" 
+                    data-items="20" 
+                    data-provide="typeahead" 
+                    data-min-length="0" 
+                    data-source="[#{list items:org.tdl.vireo.email.RecipientType.values(), as:'recipientType'}#{if recipientType.name() != "AdminGroup"}&quot;${recipientType}&quot;${recipientType_isLast ? '' : ','}#{/if}#{else}#{list items:settingRepo.findAllAdministrativeGroups() , as: "adminGroup"}&quot;${adminGroup.getName()}&quot;,#{/list}#{/else}#{/list}]"
+                    data-mode="multiple"
+                    #{if currentUser.getPreference("notes_cc_student_advisor_by_default") != null}
+                        value="Advisor"
+                    #{/if}
+                    placeholder="i.e. Advisor, College or myEmail@myProvider.com"/>
+                </li>
             	<li>
             		Subject:<br />
             		<input type="text" name="subject" class="span8" />
@@ -402,26 +531,28 @@ jQuery(document).ready(function() {
             		#{/if}
             		> Comment is public</input><br />
             		<ul class="unstyled emailCarbon" style="padding-left:15px;" id="comment-email-options">
-            			<li>
-            				<input type="checkbox" name="email_student" class="checkbox"
-            			#{if currentUser.getPreference("notes_mark_comment_as_private_by_default") == null}
-            		 		#{if currentUser.getPreference("notes_email_student_by_default") != null}
-            		 			checked="true"
-            		 		#{/if}
-            			#{/if}#{else}
-            				disabled="true"
-            			#{/else}
-            			> Email the student</input><br />
-            			</li>
-            			<li>
-            				<input type="checkbox" name="email_advisor" class="checkbox"
+            			<li class="cc_recipients_toggle">
+                            <input data-modal-name="batch-comment-modal" type="checkbox" name="primary_recipients_toggle" class="checkbox"
                                 #{if currentUser.getPreference("notes_mark_comment_as_private_by_default") == null}
+                                    #{if currentUser.getPreference("notes_email_student_by_default") != null}
+                                        checked="true"
+                                    #{/if}
+                                #{/if}#{else}
+                                    disabled="true"
+                                #{/else}
+                            > Add Email Recipients </input> <br>
+                            <input data-modal-name="batch-comment-modal" type="checkbox" name="cc_recipients_toggle" class="checkbox" 
+                                #{if currentUser.getPreference("notes_mark_comment_as_private_by_default") == null}
+                                    #{if currentUser.getPreference("notes_email_student_by_default") == null}
+                                        disabled="true"
+                                    #{/if}
                                     #{if currentUser.getPreference("notes_cc_student_advisor_by_default") != null}
                                         checked="true"
                                     #{/if}
-                                #{/if}
-                            > Email the student's advisor</input><br />
-            			</li>
+                                #{/if}#{else}
+                                    disabled="true"
+                                #{/else}> Add CC Recipients </input> 
+                        </li>
             		</ul>
             	</li>
             	<li>            	
@@ -456,7 +587,7 @@ jQuery(document).ready(function() {
             provide an estimate of when the download is complete.</p>
             
             <fieldset>
-                <div class="control-group">
+                <div class="control-group" id="batch-export-control-group">
                     <label class="control-label" for="packager"><strong>Export Format</strong>:</label>
                     <div class="controls">
                         <select class="input-xlarge" name="packager" id="packager">

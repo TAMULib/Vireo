@@ -35,7 +35,7 @@ public class MockSubmission extends AbstractMock implements Submission {
 	public List<String> documentSubjects = new ArrayList<String>();
 	public String documentLanguage;
 	public String publishedMaterial;
-	public MockEmbargoType embargoType;
+	public List<EmbargoType> embargoTypes;
 	public List<Attachment> attachments = new ArrayList<Attachment>();
 	public List<CommitteeMember> committeeMembers = new ArrayList<CommitteeMember>();
 	public String committeeContactEmail;
@@ -49,8 +49,11 @@ public class MockSubmission extends AbstractMock implements Submission {
 	public String degree;
 	public DegreeLevel level;
 	public String department;
+	public Long departmentId;
 	public String college;
+	public Long collegeId;
 	public String program;
+	public Long programId;
 	public String major;
 	public String documentType;
 	public Integer graduationYear;
@@ -223,13 +226,30 @@ public class MockSubmission extends AbstractMock implements Submission {
 	}
 
 	@Override
-	public EmbargoType getEmbargoType() {
-		return embargoType;
+	public List<EmbargoType> getEmbargoTypes() {
+		return embargoTypes;
 	}
 
 	@Override
-	public void setEmbargoType(EmbargoType embargo) {
-		this.embargoType = (MockEmbargoType) embargo;
+	public void addEmbargoType(EmbargoType embargo) {
+		this.embargoTypes.add((MockEmbargoType) embargo);
+	}
+	
+	@Override
+    public void removeEmbargoType(EmbargoType embargo) {
+		this.embargoTypes.remove((MockEmbargoType) embargo);
+    }
+	
+	@Override
+	public EmbargoType getEmbargoTypeByGuarantor(EmbargoGuarantor guarantor) {
+		if(embargoTypes != null && embargoTypes.size()>0) {
+			for(EmbargoType embargo : embargoTypes) {
+				if(embargo.getGuarantor()==guarantor)
+					return embargo;
+			}
+		}
+		
+		return null;
 	}
 
 	@Override
@@ -429,6 +449,16 @@ public class MockSubmission extends AbstractMock implements Submission {
 	public void setDepartment(String department) {
 		this.department = department;
 	}
+	
+	@Override
+	public Long getDepartmentId() {
+	    return this.departmentId;
+	}
+	
+	@Override
+	public void setDepartmentId(Long id) {
+	    this.departmentId = id;
+	}
 
 	@Override
 	public String getCollege() {
@@ -441,6 +471,16 @@ public class MockSubmission extends AbstractMock implements Submission {
 	}
 	
 	@Override
+	public Long getCollegeId() {
+	    return this.collegeId;
+	}
+	
+	@Override
+	public void setCollegeId(Long id) {
+	    this.collegeId = id;
+	}
+	
+	@Override
 	public String getProgram() {
 		return program;
 	}
@@ -448,6 +488,16 @@ public class MockSubmission extends AbstractMock implements Submission {
 	@Override
 	public void setProgram(String program) {
 		this.program = program;
+	}
+	
+	@Override
+	public Long getProgramId() {
+	    return this.programId;
+	}
+	
+	@Override
+	public void setProgramId(Long id) {
+	    this.programId = id;
 	}
 
 	@Override
@@ -619,5 +669,5 @@ public class MockSubmission extends AbstractMock implements Submission {
 	@Override
 	public Date getLastLogDate() {
 		return lastLogDate;
-	}
+	}	
 }

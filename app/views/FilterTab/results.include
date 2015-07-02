@@ -15,16 +15,16 @@ in results.
         def routeArgs = new java.util.HashMap<String,String>();
         routeArgs.put("nav",nav);
         String modifySearchUrl = play.mvc.Router.reverse("FilterTab.modifySearch",routeArgs).url;
-                
+		def colWidth = 100 / columns.size();
         for(org.tdl.vireo.search.SearchOrder column : columns) {
             if (orderby == column) {
-                out.print("<th class=\"orderby selected " + ((direction == ASCENDING) ? "ascending" : "descending") +"\">");
+                out.print("<th style='width:"+colWidth+"%' class=\"orderby selected " + ((direction == ASCENDING) ? "ascending" : "descending") +"\">");
                 out.print("<a href=\""+modifySearchUrl+"?direction=toggle\">")
                 out.print(play.i18n.Messages.get(nav.toUpperCase() + "_COLUMN_"+column.name()));
                 out.print("</a>");
                 out.print("</th>");
             } else {
-                out.print("<th>");
+                out.print("<th style='width:"+colWidth+"%'>");
                 out.print("<a href=\""+modifySearchUrl+"?orderby="+column.getId()+"\">")
                 out.print(play.i18n.Messages.get(nav.toUpperCase() + "_COLUMN_"+column.name()));
                 out.print("</a>");
@@ -74,7 +74,7 @@ in results.
 	             }
              }
            
-             out.print("<a href=\""+viewTabUrl+"?subId="+sub.getId()+"\">");
+             out.print("<a href=\""+viewTabUrl+"/"+sub.getId()+"\">");
 
              switch (column) {
                  case ID:
@@ -238,8 +238,9 @@ in results.
                          out.print(sub.getMajor());
                      break;
                  case EMBARGO_TYPE:
-                     if (sub.getEmbargoType() != null)
-                         out.print(sub.getEmbargoType().getName());
+                     if (sub.getEmbargoTypes().size() > 0)
+                     	for(org.tdl.vireo.model.EmbargoType embargo : sub.getEmbargoTypes())
+                        	out.print("<p>" + embargo.getName() + ( embargo.getGuarantor() != org.tdl.vireo.model.EmbargoGuarantor.DEFAULT ? " (" + embargo.getGuarantor() + ")" : "") + "</p>");
                      break;
                  case DOCUMENT_TYPE:
                      if (sub.getDocumentType() != null)
@@ -255,14 +256,21 @@ in results.
                      }
                      break;
                  case CUSTOM_ACTIONS:
-                     int actions = 0;
-                     for (org.tdl.vireo.model.CustomActionValue action : sub.getCustomActions()) {
-                        if (action.getValue()) {
-                            actions++;
-                        }
+                     String sActions = "";
+                     for (org.tdl.vireo.model.jpa.JpaCustomActionDefinitionImpl systemAction : actions) {
+                     	def found = false;
+	                    for (org.tdl.vireo.model.CustomActionValue subAction : sub.getCustomActions()) {
+	                    	if(systemAction.equals(subAction.getDefinition())) {
+	                    		sActions += "<input type=\"checkbox\" class=\"checkbox custom-action\" disabled=\"disabled\" checked=\"checked\"/> " + subAction.getDefinition().getLabel();
+	                    		found = true;
+	                    	}
+	                    }
+	                    if(!found){
+	                    	sActions += "<input type=\"checkbox\" class=\"checkbox custom-action\" disabled=\"disabled\"/> " + systemAction.getLabel();
+	                    }
+	                    sActions += "<br/>";
                      }
-                     if (actions > 0)
-                        out.print(actions);
+                     out.print(sActions);
                      break;
                  case DEPOSIT_ID:
                      if (sub.getDepositId() != null)

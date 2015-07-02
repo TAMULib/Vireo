@@ -12,16 +12,23 @@ import org.tdl.vireo.constant.FieldConfig;
 import org.tdl.vireo.model.College;
 import org.tdl.vireo.model.CommitteeMember;
 import org.tdl.vireo.model.Department;
+import org.tdl.vireo.model.EmbargoGuarantor;
 import org.tdl.vireo.model.Language;
 import org.tdl.vireo.model.Major;
 import org.tdl.vireo.model.NameFormat;
 import org.tdl.vireo.model.Person;
 import org.tdl.vireo.model.Program;
 import org.tdl.vireo.model.Submission;
+import org.tdl.vireo.model.jpa.JpaCollegeImpl;
+import org.tdl.vireo.model.jpa.JpaDepartmentImpl;
+import org.tdl.vireo.model.jpa.JpaLanguageImpl;
+import org.tdl.vireo.model.jpa.JpaMajorImpl;
+import org.tdl.vireo.model.jpa.JpaProgramImpl;
 
+import play.Logger;
 import play.db.jpa.JPA;
-import play.mvc.Router;
 import play.mvc.Http.Response;
+import play.mvc.Router;
 
 /**
  * Submission tests.
@@ -38,7 +45,7 @@ public class BasicSubmissionTests extends AbstractSubmissionTests {
 	 * Test that there is not an endless redirect bug when submissions are closed and a student has a submission in progress. This condition only occurs when multiple submissions are turned off.
 	 */
 	@Test
-	public void testVIERO90() throws IOException, InterruptedException {    
+	public void testVIREO90() throws IOException, InterruptedException {    
 
 		// Turn off any of the extra parameters
 		enableFields(FieldConfig.values());
@@ -70,13 +77,14 @@ public class BasicSubmissionTests extends AbstractSubmissionTests {
 		// View the homepage
 		Response response = GET(INDEX_URL);
 		assertIsOk(response);
-		assertContentMatch("Start your submission",response); // the start button is there.
+		assertContentMatch("The system is currently closed for new submissions; please contact your thesis office for more information.<br/><br/>If you need to make corrections, please click on <a href=\"/submit\">Submission History</a>.",response); // the start button is there.
 		assertContentMatch(LIST_URL,response); // and it's url.
 
+		// View submission history
 		response = GET(LIST_URL);
 		assertIsOk(response);
 		// There should be a message telling the user that submissions are closed.
-		assertContentMatch("Submissions are currently closed",response);
+		assertContentMatch("The system is currently closed for new submissions; please contact your thesis office for more information.",response);
 		assertContentMatch("This submission was not completed by the deadline. Please contact the thesis office.",response);
 		
 		// There should be no edit links.
@@ -109,17 +117,12 @@ public class BasicSubmissionTests extends AbstractSubmissionTests {
 		// Get our URLs
 		final String INDEX_URL = Router.reverse("Application.index").url;
 		final String LIST_URL = Router.reverse("Student.submissionList").url;
-		final String PERSONAL_INFO_URL = Router.reverse("submit.PersonalInfo.personalInfo").url;
-
 
 		// View the homepage
 		Response response = GET(INDEX_URL);
 		assertIsOk(response);
 		assertContentMatch("Start your submission",response); // the start button is there.
 		assertContentMatch(LIST_URL,response); // and it's url.
-
-		response = GET(LIST_URL);
-		assertEquals(PERSONAL_INFO_URL,response.getHeader("Location"));
 
 		// PersonalInfo step
 		personalInfo(
@@ -172,7 +175,8 @@ public class BasicSubmissionTests extends AbstractSubmissionTests {
 				committee, // committee
 				"advisor@noreply.org", // committeeEmail
 				"chapter #2 has published material", // publishedMaterial
-				String.valueOf(settingRepo.findAllEmbargoTypes().get(1).getId()) // embargo
+				String.valueOf(settingRepo.findAllEmbargoTypes().get(1).getId()), // embargo
+				settingRepo.findAllEmbargoTypes().get(1).getGuarantor() // embargo Guarantor
 				);
 
 		// FileUpload Step
@@ -208,17 +212,12 @@ public class BasicSubmissionTests extends AbstractSubmissionTests {
 		// Get our URLs
 		final String INDEX_URL = Router.reverse("Application.index").url;
 		final String LIST_URL = Router.reverse("Student.submissionList").url;
-		final String PERSONAL_INFO_URL = Router.reverse("submit.PersonalInfo.personalInfo").url;
 
 		// View the homepage
 		Response response = GET(INDEX_URL);
 		assertIsOk(response);
 		assertContentMatch("Start your submission",response); // the start button is there.
 		assertContentMatch(LIST_URL,response); // and it's url.
-
-		response = GET(LIST_URL);
-		assertEquals(PERSONAL_INFO_URL,response.getHeader("Location"));
-
 
 		// PersonalInfo step
 		personalInfo(
@@ -271,7 +270,8 @@ public class BasicSubmissionTests extends AbstractSubmissionTests {
 				committee, // committee
 				"committee@noreply.org", // committeeEmail
 				"chapter #2 has published material", // publishedMaterial
-				String.valueOf(settingRepo.findAllEmbargoTypes().get(1).getId()) // embargo
+				String.valueOf(settingRepo.findAllEmbargoTypes().get(1).getId()), // embargo
+				settingRepo.findAllEmbargoTypes().get(1).getGuarantor() // embargo Guarantor
 				);
 
 		// FileUpload Step
@@ -293,33 +293,37 @@ public class BasicSubmissionTests extends AbstractSubmissionTests {
 		enableFields(FieldConfig.values());
 		disableFields(FieldConfig.STUDENT_BIRTH_YEAR);
 		disableFields(FieldConfig.COLLEGE);
+		disableFields(FieldConfig.DEPARTMENT);
+		disableFields(FieldConfig.PROGRAM);
+		disableFields(FieldConfig.MAJOR);
+		disableFields(FieldConfig.DOCUMENT_LANGUAGE);
 		disableFields(FieldConfig.UMI_RELEASE);
 		setAllowMultipleSubmissions(false);
 		
 		// clear out colleges, department, majors, programs, and languages
-		List<String> originalPrograms = new ArrayList<String>();
+		List<JpaProgramImpl> originalPrograms = new ArrayList<JpaProgramImpl>();
 		for (Program program : settingRepo.findAllPrograms()) {
-			originalPrograms.add(program.getName());
+			originalPrograms.add((JpaProgramImpl) program);
 			program.delete();
 		}
-		List<String> originalColleges = new ArrayList<String>();
+		List<JpaCollegeImpl> originalColleges = new ArrayList<JpaCollegeImpl>();
 		for (College college : settingRepo.findAllColleges()) {
-			originalColleges.add(college.getName());
+			originalColleges.add((JpaCollegeImpl) college);
 			college.delete();
 		}
-		List<String> originalDepartments = new ArrayList<String>();
+		List<JpaDepartmentImpl> originalDepartments = new ArrayList<JpaDepartmentImpl>();
 		for (Department department : settingRepo.findAllDepartments()) {
-			originalDepartments.add(department.getName());
+			originalDepartments.add((JpaDepartmentImpl) department);
 			department.delete();
 		}
-		List<String> originalMajors = new ArrayList<String>();
+		List<JpaMajorImpl> originalMajors = new ArrayList<JpaMajorImpl>();
 		for (Major major : settingRepo.findAllMajors()) {
-			originalMajors.add(major.getName());
+			originalMajors.add((JpaMajorImpl) major);
 			major.delete();
 		}
-		List<String> originalLanguages = new ArrayList<String>();
+		List<JpaLanguageImpl> originalLanguages = new ArrayList<JpaLanguageImpl>();
 		for (Language language : settingRepo.findAllLanguages()) {
-			originalLanguages.add(language.getName());
+			originalLanguages.add((JpaLanguageImpl) language);
 			language.delete();
 		}
 		
@@ -333,18 +337,13 @@ public class BasicSubmissionTests extends AbstractSubmissionTests {
 		// Get our URLs
 		final String INDEX_URL = Router.reverse("Application.index").url;
 		final String LIST_URL = Router.reverse("Student.submissionList").url;
-		final String PERSONAL_INFO_URL = Router.reverse("submit.PersonalInfo.personalInfo").url;
-
 
 		// View the homepage
 		Response response = GET(INDEX_URL);
 		assertIsOk(response);
 		assertContentMatch("Start your submission",response); // the start button is there.
 		assertContentMatch(LIST_URL,response); // and it's url.
-
-		response = GET(LIST_URL);
-		assertEquals(PERSONAL_INFO_URL,response.getHeader("Location"));
-
+		
 		// PersonalInfo step
 		personalInfo(
 				null, // firstName
@@ -396,7 +395,8 @@ public class BasicSubmissionTests extends AbstractSubmissionTests {
 				committee, // committee
 				"advisor@noreply.org", // committeeEmail
 				"chapter #2 has published material", // publishedMaterial
-				String.valueOf(settingRepo.findAllEmbargoTypes().get(1).getId()) // embargo
+				String.valueOf(settingRepo.findAllEmbargoTypes().get(1).getId()), // embargo
+				settingRepo.findAllEmbargoTypes().get(1).getGuarantor() // embargo Guarantor
 				);
 
 		// FileUpload Step
@@ -405,139 +405,27 @@ public class BasicSubmissionTests extends AbstractSubmissionTests {
 		// Finaly, confirm
 		confirm("cdanes@gmail.com","advisor@noreply.org");
 
-		// Restore all Colleges, Departments, and Majors
+		// Restore all Programs, Colleges, Departments, Majors, and Languages
 		JPA.em().getTransaction().commit();
 		JPA.em().clear();
 		JPA.em().getTransaction().begin();
 		
-		// clear out colleges, department, majors
-		int i = 0;
-		for (String name : originalPrograms) {
-			Program program = settingRepo.createProgram(name);
-			program.setDisplayOrder(i++);
-			program.save();
+		for (JpaProgramImpl originalProgram : originalPrograms) {
+			originalProgram.merge().save();
 		}
-		for (String name : originalColleges) {
-			College college = settingRepo.createCollege(name);
-			college.setDisplayOrder(i++);
-			college.save();
+		for (JpaCollegeImpl originalCollege : originalColleges) {
+			originalCollege.merge().save();
 		}
-		for (String name : originalDepartments) {
-			Department department = settingRepo.createDepartment(name);
-			department.setDisplayOrder(i++);
-			department.save();
+		for (JpaDepartmentImpl originalDepartment : originalDepartments) {
+			originalDepartment.merge().save();
 		}
-		for (String name : originalMajors) {
-			Major major = settingRepo.createMajor(name);
-			major.setDisplayOrder(i++);
-			major.save();
+		for (JpaMajorImpl originalMajor : originalMajors) {
+			originalMajor.merge().save();
 		}
-		for (String name : originalLanguages) {
-			Language language = settingRepo.createLanguage(name);
-			language.setDisplayOrder(i++);
-			language.save();
+		for (JpaLanguageImpl originalLanguage : originalLanguages) {
+			originalLanguage.merge().save();
 		}
-	}
-	
-
-	/**
-	 * Test a delaying the advisor email
-	 */
-	@Test
-	public void testFullSubmissionWithoutAdvisorEmail() throws IOException, InterruptedException {    
-
-		// Turn off any of the extra parameters
-		enableFields(FieldConfig.values());
-		disableFields(FieldConfig.STUDENT_BIRTH_YEAR);
-		disableFields(FieldConfig.COLLEGE);
-		disableFields(FieldConfig.UMI_RELEASE);
-		setAllowMultipleSubmissions(false);
-		setDelayAdvisorEmail(true);
-		
-		JPA.em().getTransaction().commit();
-		JPA.em().clear();
-		JPA.em().getTransaction().begin();
-
-		// Login as the student Clair Danes
-		LOGIN("cdanes@gmail.com");
-
-		// Get our URLs
-		final String INDEX_URL = Router.reverse("Application.index").url;
-		final String LIST_URL = Router.reverse("Student.submissionList").url;
-		final String PERSONAL_INFO_URL = Router.reverse("submit.PersonalInfo.personalInfo").url;
-
-
-		// View the homepage
-		Response response = GET(INDEX_URL);
-		assertIsOk(response);
-		assertContentMatch("Start your submission",response); // the start button is there.
-		assertContentMatch(LIST_URL,response); // and it's url.
-
-		response = GET(LIST_URL);
-		assertEquals(PERSONAL_INFO_URL,response.getHeader("Location"));
-
-		// PersonalInfo step
-		personalInfo(
-				null, // firstName
-				"middle", // middleName
-				null, // lastName
-				null, // birthYear
-				null, // program
-				null, // college
-				settingRepo.findAllDepartments().get(0).getName(), // department 
-				settingRepo.findAllDegrees().get(0).getName(), // degree
-				settingRepo.findAllMajors().get(0).getName(), // major 
-				"555-1212", // permPhone
-				"2222 Fake Street", // permAddress 
-				"advisor@noreply.org", // permEmail
-				"555-1212 ex2", // currentPhone 
-				"2222 Fake Street APT 11" //currentAddress
-				);	
-
-		// License Step
-		license();
-
-		// DocumentInfo Step
-		List<Map<String,String>> committee = new ArrayList<Map<String,String>>();
-		Map<String,String> member1 = new HashMap<String,String>();
-		member1.put("firstName", "Bob");
-		member1.put("lastName", "Jones");
-		member1.put("chairFlag", "true");
-		Map<String,String> member2 = new HashMap<String,String>();
-		member2.put("firstName", "John");
-		member2.put("middleName", "Jack");
-		member2.put("lastName", "Leggett");
-		committee.add(member1);
-		committee.add(member2);
-
-		documentInfo(
-				"Clair Danes Thesis on Testing", // title
-				String.valueOf(settingRepo.findAllGraduationMonths().get(0).getMonth()), // degreeMonth 
-				String.valueOf(Calendar.getInstance().get(Calendar.YEAR)), // degreeYear 
-				String.valueOf(settingRepo.findAllProgramMonths().get(0).getMonth()), // programMonth 
-				String.valueOf(Calendar.getInstance().get(Calendar.YEAR)), // programYear 
-				"12/12/2012", // defenseDate
-				settingRepo.findAllDocumentTypes().get(0).getName(), // docType
-				"This is really cool work!", // abstractText 
-				"one; two; three;", // keywords
-				"Agriculture, Plant Pathology", // primary subject
-				"Agriculture, Animal Pathology", // secondary subject
-				"Agriculture, Food Science and Technology", // tertiary subject
-				"en", // language
-				committee, // committee
-				"advisor@noreply.org", // committeeEmail
-				"chapter #2 has published material", // publishedMaterial
-				String.valueOf(settingRepo.findAllEmbargoTypes().get(1).getId()) // embargo
-				);
-
-		// FileUpload Step
-		fileUpload("SamplePrimaryDocument.pdf", "SampleSupplementalDocument.doc", "SampleSupplementalDocument.xls");
-
-		// Finaly, confirm
-		confirm("cdanes@gmail.com","!advisor@noreply.org");
-
-		// the cleanup will make sure the submission gets deleted.
-	}
+	}	
 	
 	/**
 	 * Test weather multiple submissions are allowed.
@@ -675,17 +563,12 @@ public class BasicSubmissionTests extends AbstractSubmissionTests {
 		// Get our URLs
 		final String INDEX_URL = Router.reverse("Application.index").url;
 		final String LIST_URL = Router.reverse("Student.submissionList").url;
-		final String PERSONAL_INFO_URL = Router.reverse("submit.PersonalInfo.personalInfo").url;
-
 
 		// View the homepage
 		Response response = GET(INDEX_URL);
 		assertIsOk(response);
 		assertContentMatch("Start your submission",response); // the start button is there.
 		assertContentMatch(LIST_URL,response); // and it's url.
-
-		response = GET(LIST_URL);
-		assertEquals(PERSONAL_INFO_URL,response.getHeader("Location"));
 
 		// PersonalInfo step
 		personalInfo(
@@ -737,7 +620,8 @@ public class BasicSubmissionTests extends AbstractSubmissionTests {
 				committee, // committee
 				"advisor@noreply.org", // committeeEmail
 				"chapter #2 has published material", // publishedMaterial
-				String.valueOf(settingRepo.findAllEmbargoTypes().get(1).getId()) // embargo
+				String.valueOf(settingRepo.findAllEmbargoTypes().get(1).getId()), // embargo
+				settingRepo.findAllEmbargoTypes().get(1).getGuarantor() // embargo Guarantor
 				);
 
 		
@@ -810,17 +694,12 @@ public class BasicSubmissionTests extends AbstractSubmissionTests {
 		// Get our URLs
 		final String INDEX_URL = Router.reverse("Application.index").url;
 		final String LIST_URL = Router.reverse("Student.submissionList").url;
-		final String PERSONAL_INFO_URL = Router.reverse("submit.PersonalInfo.personalInfo").url;
-
 
 		// View the homepage
 		Response response = GET(INDEX_URL);
 		assertIsOk(response);
 		assertContentMatch("Start your submission",response); // the start button is there.
 		assertContentMatch(LIST_URL,response); // and it's url.
-
-		response = GET(LIST_URL);
-		assertEquals(PERSONAL_INFO_URL,response.getHeader("Location"));
 
 		// PersonalInfo step
 		personalInfo(
@@ -863,7 +742,8 @@ public class BasicSubmissionTests extends AbstractSubmissionTests {
 				committee, // committee
 				null, // committeeEmail
 				null, // publishedMaterial
-				null // embargo
+				null, // embargo
+				null // embargo Guarantor
 				);
 
 		// FileUpload Step
@@ -897,17 +777,12 @@ public class BasicSubmissionTests extends AbstractSubmissionTests {
 		// Get our URLs
 		final String INDEX_URL = Router.reverse("Application.index").url;
 		final String LIST_URL = Router.reverse("Student.submissionList").url;
-		final String PERSONAL_INFO_URL = Router.reverse("submit.PersonalInfo.personalInfo").url;
-
 
 		// View the homepage
 		Response response = GET(INDEX_URL);
 		assertIsOk(response);
 		assertContentMatch("Start your submission",response); // the start button is there.
 		assertContentMatch(LIST_URL,response); // and it's url.
-
-		response = GET(LIST_URL);
-		assertEquals(PERSONAL_INFO_URL,response.getHeader("Location"));
 
 		// PersonalInfo step
 		personalInfo(
@@ -950,7 +825,8 @@ public class BasicSubmissionTests extends AbstractSubmissionTests {
 				committee, // committee
 				null, // committeeEmail
 				null, // publishedMaterial
-				null // embargo
+				null, // embargo
+				null // embargo Guarantor
 				);
 
 		// FileUpload Step

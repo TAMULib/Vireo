@@ -24,6 +24,7 @@ import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.util.NumericUtils;
 import org.tdl.vireo.model.AbstractModel;
 import org.tdl.vireo.model.ActionLog;
+import org.tdl.vireo.model.CustomActionDefinition;
 import org.tdl.vireo.model.EmbargoType;
 import org.tdl.vireo.model.Person;
 import org.tdl.vireo.model.Submission;
@@ -113,7 +114,7 @@ public class LuceneSearcherImpl implements Searcher {
 		SORT_TYPES[SearchOrder.APPROVAL_DATE.ordinal()] = SortField.LONG;
 		SORT_TYPES[SearchOrder.COMMITTEE_APPROVAL_DATE.ordinal()] = SortField.LONG;
 		SORT_TYPES[SearchOrder.COMMITTEE_EMBARGO_APPROVAL_DATE.ordinal()] = SortField.LONG;
-		SORT_TYPES[SearchOrder.CUSTOM_ACTIONS.ordinal()] = SortField.INT;
+		SORT_TYPES[SearchOrder.CUSTOM_ACTIONS.ordinal()] = SortField.STRING;
 		SORT_TYPES[SearchOrder.LAST_EVENT_TIME.ordinal()] = SortField.LONG;
 	}
 	
@@ -185,6 +186,8 @@ public class LuceneSearcherImpl implements Searcher {
 					sortedIds.add(Long.valueOf(doc.get("subId")));
 				}
 				
+				searcher.close();
+				
 				List<Submission> results = subRepo.findSubmissions(sortedIds);
 				Collections.sort(results,new ModelComparator(sortedIds));
 				
@@ -233,6 +236,8 @@ public class LuceneSearcherImpl implements Searcher {
 					sortedIds.add(Long.valueOf(doc.get("logId")));
 				}
 				
+				searcher.close();
+				
 				List<ActionLog> results = subRepo.findActionLogs(sortedIds);
 				Collections.sort(results,new ModelComparator(sortedIds));
 
@@ -274,7 +279,9 @@ public class LuceneSearcherImpl implements Searcher {
 					Document doc = searcher.doc(topDocs.scoreDocs[i].doc);
 					sortedIds[i] = Long.valueOf(doc.get("subId")).longValue();
 				}
-
+				
+				searcher.close();
+				
 				return sortedIds;
 				
 			} finally {
@@ -315,7 +322,8 @@ public class LuceneSearcherImpl implements Searcher {
 					Document doc = searcher.doc(topDocs.scoreDocs[i].doc);
 					sortedIds[i] = Long.valueOf(doc.get("logId")).longValue();
 				}
-
+				searcher.close();
+				
 				return sortedIds;
 				
 			} finally {
@@ -531,6 +539,14 @@ public class LuceneSearcherImpl implements Searcher {
 			else
 				andQuery.add(NumericRangeQuery.newLongRange("lastEventTime", startTime, endTime, true,true),Occur.MUST);
 
+		}
+		// Custom Action Filter
+		if (filter.getCustomActions().size() > 0) {
+			BooleanQuery orQuery = new BooleanQuery();
+			for(CustomActionDefinition customAction : filter.getCustomActions()) {
+				orQuery.add(new TermQuery(new Term("customAction", customAction.getLabel())), Occur.SHOULD);
+			}			
+			andQuery.add(orQuery,Occur.MUST);
 		}
 	}
 	

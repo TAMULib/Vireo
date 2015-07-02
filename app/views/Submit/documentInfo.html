@@ -1,20 +1,25 @@
 #{extends 'Submit/submitStep.html' /}
-#{set title:'Document Info' /}
+#{set title:'Vireo Thesis and Dissertaion Submital System - Submission - Document Information' /}
 #{set 'moreStyles'}
-<link href="@{'/public/stylesheets/datepicker.css'}" rel="stylesheet" type="text/css">
+<link href="@{'/public/stylesheets/jquery-ui.css'}" rel="stylesheet" type="text/css">
 <link href="@{'/public/stylesheets/multiselect.css'}" rel="stylesheet" type="text/css">
 #{/set}
 #{set 'moreScripts'}
-<script src="@{'/public/javascripts/bootstrap-datepicker.js'}" type="text/javascript" charset="${_response_encoding}"></script>
 <script src="@{'/public/javascripts/jquery-ui-multiselect-1.13.js'}" type="text/javascript" charset="${_response_encoding}"></script>
 <script type="text/javascript" >
 jQuery(document).ready(function(){	
 	if(jQuery.browser.msie){
 		if(parseInt(jQuery.browser.version, 10) != 7 && parseInt(jQuery.browser.version, 10) != 8){
-			jQuery(".datepicker").datepicker();
+			jQuery(".datepicker").datepicker({
+				showOtherMonths: true,
+				selectOtherMonths: true
+			});
 		}
 	} else {
-		jQuery(".datepicker").datepicker();
+		jQuery(".datepicker").datepicker({
+			showOtherMonths: true,
+			selectOtherMonths: true
+		});
 	}
 	
 	/**
@@ -62,24 +67,53 @@ jQuery(document).ready(function(){
 	// Install the multiselect for committee member roles
     jQuery(".multiselect").multiselect({
         header: false,
+        multiple: true,
         selectedList: 1,
         noneSelectedText: "<em>&nbsp;... no role selected</em>"
     });
 	#{/if}
     
     #{ifEnabled PUBLISHED_MATERIAL }
-    // Install the slide out for publishedMaterialFlag
-    jQuery("#publishedMaterialFlag").change(function() {
-    	var $div = jQuery("#publishedMaterial").closest(".control-group");
-    	if (jQuery("#publishedMaterialFlag").is(":checked")) {
-    		if ($div.is(":hidden"))
-    		   $div.slideToggle();	
-    	} else {
-            if ($div.is(":visible"))
-                $div.slideToggle();  
-    	}
-    });
+	    // Install the slide out for publishedMaterialFlag
+	    jQuery("#publishedMaterialFlag").change(function() {
+	    	var $div = jQuery("#publishedMaterial").closest(".control-group");
+	    	if (jQuery("#publishedMaterialFlag").is(":checked")) {
+	    		if ($div.is(":hidden"))
+	    		   $div.slideToggle();	
+	    	} else {
+	            if ($div.is(":visible"))
+	                $div.slideToggle();  
+	    	}
+	    });
     #{/ifEnabled}
+
+
+ /*The feature to hide additional embargos by default has been removed*/
+ //    jQuery("#additional-embargos-btn").on("click", function(e) {
+ //    	e.preventDefault();
+ //    	jQuery(this).fadeOut(300, function() {
+ //    		jQuery(".embargo-type-additional").fadeIn(300);
+ //    	});
+ //    });
+
+ //    jQuery(".embargo-radio:checked").each(function() {
+	// 	var embargoSet = $(this).attr("data-embargoSet");
+	// 	$("#embargo-"+embargoSet).show();    			
+	// });
+
+ //    var allEmbargoSectionsUsed = jQuery(".embargo-type-additional .embargo-radio:checked").length == jQuery(".embargo-type-additional").length;
+ //    var allEmbargoSectionsReq =  jQuery(".embargo-type-additional").length == jQuery(".embargoReq").length;
+    
+ //    if(allEmbargoSectionsUsed || allEmbargoSectionsReq)
+ //    	jQuery("#additional-embargos-btn").hide();
+
+ //    if(jQuery("#embargo-DEFAULT").length == 0) {
+ //    	jQuery(".embargo-type-additional").first().show();
+ //    	if(jQuery(".embargo-type-additional").length = 1) jQuery("#additional-embargos-btn").hide();     	
+ //    }
+
+ //    jQuery(".embargoReq").show();
+
 });
 </script>
 #{/set}
@@ -89,8 +123,15 @@ jQuery(document).ready(function(){
 	<h3 class="span11">Document Information</h3>
 </div>
 <br />
+<div id="stickyNotes" class="span3">
+     #{list items:stickies, as:'sticky'}
+       <div class="sticky-top"></div>
+       <div class="sticky-bottom">#{verbatim}${sticky}#{/verbatim}</div>
+    #{/list}
+</div>
 <div class="row">
 <div class="span7">
+<h4>Instructions:</h4>
 <p>In this step you describe your thesis or dissertation. Please make sure that the information entered below matches the information contained in your document.</p>
 <br/>
 #{ifErrors}
@@ -101,7 +142,7 @@ jQuery(document).ready(function(){
 </ul>
 #{/ifErrors}
 <br/>
-	<form action="@{submit.DocumentInfo.documentInfo(subId)}" method="post" class="form-inline">
+	<form action="@{submit.DocumentInfo.documentInfo(sub.getId())}" method="post" class="form-inline">
 	<input type="hidden" name="step" value="documentInfo"/>
 
 	#{ifEnabled [DOCUMENT_TITLE,GRADUATION_DATE,DEFENSE_DATE,DOCUMENT_TYPE,DOCUMENT_ABSTRACT,DOCUMENT_KEYWORDS,DOCUMENT_SUBJECTS,DOCUMENT_LANGUAGE]}
@@ -112,7 +153,7 @@ jQuery(document).ready(function(){
 			<label class="control-label" for="title"><span class="required-star">*</span> #{fieldLabel DOCUMENT_TITLE /}:</label>
 			<div class="controls">
 				<input type="text" class="span4" id="title" name="title" value="${title}">
-				<a href="#" class="tooltip-icon" rel="tooltip" title="#{fieldHelp DOCUMENT_TITLE /}"><i class="icon-info-sign"></i></a>
+				<span class="tooltip-icon" title="#{fieldHelp DOCUMENT_TITLE /}"><i class="icon-info-sign"></i></span>
 			</div>
 		</div>
 		#{/ifEnabled}
@@ -120,19 +161,21 @@ jQuery(document).ready(function(){
 		<div class="control-group #{errorClass 'degreeMonth'/} #{errorClass 'degreeYear'/} #{fieldClass GRADUATION_DATE /}">
 			<label class="control-label" for="degreeDate"><span class="required-star">*</span> #{fieldLabel GRADUATION_DATE /}:</label>
 			<div class="controls row">
+				<label for="degreeMonth" class="help-block additional">Degree Month:</label>
 				<select class="span2" id="degreeMonth" name="degreeMonth">
                     <option #{if null == degreeMonth }selected="true"#{/if} value="">...choose</option>
 				    #{list items:settingRepo.findAllGraduationMonths(), as:'month'}
 				    <option #{if null != degreeMonth && String.valueOf(month.getMonth()).equals(degreeMonth) }selected="true"#{/if} value="${month.getMonth()}">${month.getMonthName()}</option>
 				    #{/list}
 				</select>
+				<label for="degreeYear" class="help-block additional">Degree Year:</label>
 				<select class="span2" id="degreeYear" name="degreeYear">
                     <option #{if null == degreeYear }selected="true"#{/if} value="">...choose</option>
 				    #{list degreeYears, as:'year'}
 				    <option #{if null != degreeYear && String.valueOf(year).equals(degreeYear)}selected="true"#{/if} value="${year}">${year}</option>
 				    #{/list}
 				</select>
-				<a href="#" class="tooltip-icon" rel="tooltip" title="#{fieldHelp GRADUATION_DATE /}"><i class="icon-info-sign"></i></a>
+				<span class="tooltip-icon" title="#{fieldHelp GRADUATION_DATE /}"><i class="icon-info-sign"></i></span>
 			</div>
 		</div>
 		#{/ifEnabled}
@@ -161,7 +204,7 @@ jQuery(document).ready(function(){
 			<label class="control-label" for="defenseDate"><span class="required-star">*</span> #{fieldLabel DEFENSE_DATE /}:</label>
 			<div class="controls row">
 				<input type="text" name="defenseDate" id="defenseDate" class="span4 datepicker" value="${defenseDate?.format('MM/dd/yyyy')}" placeholder="MM/DD/YYYY" />
-				<a href="#" class="tooltip-icon" rel="tooltip" title="#{fieldHelp DEFENSE_DATE /}"><i class="icon-info-sign"></i></a>
+				<span class="tooltip-icon" title="#{fieldHelp DEFENSE_DATE /}"><i class="icon-info-sign"></i></span>
 			</div>			
 		</div>
 		#{/ifEnabled}
@@ -175,7 +218,7 @@ jQuery(document).ready(function(){
 	                    <option #{if null != type && docType.equals(type)}selected="true"#{/if} value="${type}">${type}</option>
 	                #{/list}
 	            </select>
-	            <a href="#" class="tooltip-icon" rel="tooltip" title="#{fieldHelp DOCUMENT_TYPE /}"><i class="icon-info-sign"></i></a>
+	            <span class="tooltip-icon" title="#{fieldHelp DOCUMENT_TYPE /}"><i class="icon-info-sign"></i></span>
 			</div>
 		</div>
 		#{/ifEnabled}
@@ -184,7 +227,7 @@ jQuery(document).ready(function(){
 			<label class="control-label" for="abstractText"><span class="required-star">*</span> #{fieldLabel DOCUMENT_ABSTRACT /}:</label>
 			<div class="controls">
 				<textarea class="span4" id="abstractText" name="abstractText">${abstractText}</textarea>
-				<a href="#" class="tooltip-icon" rel="tooltip" title="#{fieldHelp DOCUMENT_ABSTRACT /}"><i class="icon-info-sign"></i></a>
+				<span class="tooltip-icon" title="#{fieldHelp DOCUMENT_ABSTRACT /}"><i class="icon-info-sign"></i></span>
 			</div>
 		</div>
 		#{/ifEnabled}
@@ -193,7 +236,7 @@ jQuery(document).ready(function(){
 			<label class="control-label" for="keywords"><span class="required-star">*</span> #{fieldLabel DOCUMENT_KEYWORDS /}:</label>
 			<div class="controls">
 				<textarea class="span4" id="keywords" name="keywords" placeholder="Keyword one;  Keyword two">${keywords}</textarea>
-				<a href="#" class="tooltip-icon" rel="tooltip" title="#{fieldHelp DOCUMENT_KEYWORDS /}"><i class="icon-info-sign"></i></a>
+				<span class="tooltip-icon" title="#{fieldHelp DOCUMENT_KEYWORDS /}"><i class="icon-info-sign"></i></span>
 			</div>
 		</div>
 		#{/ifEnabled}
@@ -203,25 +246,26 @@ jQuery(document).ready(function(){
             <label class="control-label" for="subjects"><span class="required-star">*</span> #{fieldLabel DOCUMENT_SUBJECTS /}:</label>
             <div class="controls">
             
-                <div class="help-block primary">Primary:</div>
-                <select name="subject-primary" class="span4">
+				<label for="subject-primary" class="help-block primary">Primary Subject:</label>
+				<select id="subject-primary" name="subject-primary" class="span4">
                     <option #{if subjectPrimary == null}selected="true"#{/if} value="">...choose #{ifRequired DOCUMENT_SUBJECTS}(required)#{/ifRequired}</option>
                     #{list items:subjects, as:'subject'}
                     <option #{if subjectPrimary == subject.getDescription()}selected="true"#{/if} value="${subject.getDescription()}">${subject.getDescription()}</option>
                     #{/list}
                 </select>
-                <a href="#" class="tooltip-icon" rel="tooltip" title="#{fieldHelp DOCUMENT_SUBJECTS /}"><i class="icon-info-sign"></i></a>
+                <span class="tooltip-icon" title="#{fieldHelp DOCUMENT_SUBJECTS /}"><i class="icon-info-sign"></i></span>
                 
 	            
-	            <div class="help-block additional">Additional:</div>
-                <select name="subject-secondary" class="span4">
+				<label for="subject-secondary" class="help-block additional">Additional Subject:</label>
+				<select id="subject-secondary" name="subject-secondary" class="span4">
                     <option #{if subjectSecondary == null}selected="true"#{/if} value="">...choose (optional)</option>
                     #{list items:subjects, as:'subject'}
                     <option #{if subjectSecondary == subject.getDescription()}selected="true"#{/if} value="${subject.getDescription()}">${subject.getDescription()}</option>
                     #{/list}
                 </select>
                 
-                <select name="subject-tertiary" class="span4">
+				<label for="subject-tertiary" class="help-block additional">Additional Subject:</label>
+				<select id="subject-tertiary" name="subject-tertiary" class="span4">
                     <option #{if subjectTertiary == null}selected="true"#{/if} value="">...choose (optional)</option>
                     #{list items:subjects, as:'subject'}
                     <option #{if subjectTertiary == subject.getDescription()}selected="true"#{/if} value="${subject.getDescription()}">${subject.getDescription()}</option>
@@ -246,7 +290,7 @@ jQuery(document).ready(function(){
 			                    <option #{if null != language && docLanguage.equals(language.getName())}selected="true"#{/if} value="${language.getName()}">${language.getLocale().getDisplayName()}</option>
 			                #{/list}
 		            	</select>
-		            	<a href="#" class="tooltip-icon" rel="tooltip" title="#{fieldHelp DOCUMENT_LANGUAGE /}"><i class="icon-info-sign"></i></a>
+				<span class="tooltip-icon" title="#{fieldHelp DOCUMENT_LANGUAGE /}"><i class="icon-info-sign"></i></span>
 		            #{/else}
 	            #{/ifRequired}
 	            #{else}
@@ -256,7 +300,7 @@ jQuery(document).ready(function(){
 	                    <option #{if null != language && docLanguage.equals(language.getName())}selected="true"#{/if} value="${language.getName()}">${language.getLocale().getDisplayName()}</option>
 	                #{/list}
 	            </select>
-	            <a href="#" class="tooltip-icon" rel="tooltip" title="#{fieldHelp DOCUMENT_LANGUAGE /}"><i class="icon-info-sign"></i></a>
+	            <span class="tooltip-icon" title="#{fieldHelp DOCUMENT_LANGUAGE /}"><i class="icon-info-sign"></i></span>
 	            #{/else}	            
 			</div>
 		</div>
@@ -285,11 +329,11 @@ jQuery(document).ready(function(){
                     currentRoles = committee.get(i-1).roles;
                 }
             }%
-            <table class="committee-member #{ifError "committee"}error#{/ifError}">
+            <table role="presentation" class="committee-member #{ifError "committee"}error#{/ifError}">
                     <tr>
-                        <td><label class="span2">First Name</label></td>
-                        <td><label class="span1">MI</label></td>
-                        <td><label class="span2">Last Name</label></td>
+                        <td><label for="committeeFirstName${i}" class="span2">First Name</label></td>
+                        <td><label for="committeeMiddleName${i}" class="span1">MI</label></td>
+                        <td><label for="committeeLastName${i}" class="span2">Last Name</label></td>
                     </tr>
                     <tr> 
                         <td><input type="text" class="input-medium" id="committeeFirstName${i}" name="committeeFirstName${i}" value="${firstName}"></td>
@@ -298,7 +342,7 @@ jQuery(document).ready(function(){
                     </tr>
                     #{if availableRoles.size() > 0}
                     <tr class="committee-role-row">
-                        <td class="role-label">Role${availableRoles.pluralize()}: </td>
+                        <td class="role-label"><label for="committeeRoles${i}">Role${availableRoles.pluralize()}:</label></td>
                         <td colspan="2">
                         
                             #{if availableRoles.size() == 1}
@@ -334,8 +378,7 @@ jQuery(document).ready(function(){
 			<label class="control-label" for="chairEmail"><span class="required-star">*</span> #{fieldLabel COMMITTEE_CONTACT_EMAIL /}:</label>
 			<div class="controls">
 				<input type="text" class="span4" id="chairEmail" name="chairEmail" value="${chairEmail}">
-				<a href="#" class="tooltip-icon" rel="tooltip" title="#{fieldHelp COMMITTEE_CONTACT_EMAIL /}"><i class="icon-info-sign">				
-				</i></a>
+				<span class="tooltip-icon" title="#{fieldHelp COMMITTEE_CONTACT_EMAIL /}"><i class="icon-info-sign"></i></span>
 			</div>
 		</div>
 	</fieldset>
@@ -343,7 +386,7 @@ jQuery(document).ready(function(){
 	
 	#{ifEnabled PUBLISHED_MATERIAL }
     <fieldset class="form-horizontal">
-        <legend>#{ifRequired PUBLISHED_MATERIAL}<strong>#{fieldLabel PUBLISHED_MATERIAL /}</strong>#{/ifRequired}#{else}#{fieldLabel PUBLISHED_MATERIAL /}#{/else}</legend>
+        #{ifRequired PUBLISHED_MATERIAL}<legend class="strong">#{fieldLabel PUBLISHED_MATERIAL /}</legend>#{/ifRequired}#{else}<legend>#{fieldLabel PUBLISHED_MATERIAL /}</legend>#{/else}
         <div class="control-group #{errorClass 'publishedMaterial'/} #{fieldClass PUBLISHED_MATERIAL /}">
             <label class="control-label" for="publishedMaterialFlag"><span class="required-star">*</span> #{fieldLabel PUBLISHED_MATERIAL /}:</label>
             <div class="controls">
@@ -364,33 +407,86 @@ jQuery(document).ready(function(){
         #{/if}             
     </fieldset>
     #{/ifEnabled}
+
+
+    %{
+		def activeEmbargosMap = new java.util.LinkedHashMap<org.tdl.vireo.constant.FieldConfig, org.tdl.vireo.model.EmbargoGuarantor>();
+	}%
 	
-	#{ifEnabled EMBARGO_TYPE }
+    #{list org.tdl.vireo.model.EmbargoGuarantor.values(), as: 'embargoSet'}
+				
+		%{
+			def EMBARGO_TYPE = EMBARGO_TYPE;
+		}%
+
+		
+		#{list org.tdl.vireo.constant.FieldConfig.values(), as: 'field'}
+			
+			%{
+				def currentEmbargoSet = ["EMBARGO_TYPE_",embargoSet].join("");
+
+				if(field.name() == currentEmbargoSet.toString()) {
+					EMBARGO_TYPE = field;
+				}	
+           }%
+
+		#{/list}
+
+		#{ifEnabled EMBARGO_TYPE}
+			%{
+				activeEmbargosMap.put(EMBARGO_TYPE, embargoSet); 
+			}%
+		#{/ifEnabled}
+	#{/list}
+
+	#{if activeEmbargosMap.size() > 0}
 	<fieldset class="form-horizontal">
-		<legend>#{ifRequired EMBARGO_TYPE}<strong>#{fieldLabel EMBARGO_TYPE /}</strong>#{/ifRequired}#{else}#{fieldLabel EMBARGO_TYPE /}#{/else}</legend>
-		<p>#{fieldHelp EMBARGO_TYPE /}</p>
-                #{list embargoTypes, as: 'et'}
-                    <div class="control-group #{errorClass 'embargo' /}">
-                        <label class="control-label">${et.getName()}:</label>
-                        <div class="controls">
-                            <label class="radio"> 
-                                <input type="radio" id="embargo" name="embargo" selected="selected" value="${et.getId()}" #{if embargo == et.getId().toString()} checked=true #{/if}>&nbsp;&nbsp;${et.getDescription()}
-                            </label>
-                        </div>
-                    </div>
-                #{/list}                
+		<legend>Embargo Options</legend>
+		<div id="embargo-sets">	
+
+			#{list items:activeEmbargosMap.keySet(), as: 'EMBARGO_TYPE'}
+				
+				%{
+					def embargoErrorClass = ["embargo-",activeEmbargosMap.get(EMBARGO_TYPE).toString()].join("")
+				}%
+				#{if (activeEmbargosMap.get(EMBARGO_TYPE) != org.tdl.vireo.model.EmbargoGuarantor.PROQUEST || sub.getUMIRelease())}
+					<div id="embargo-${activeEmbargosMap.get(EMBARGO_TYPE).toString()}" 
+					class="embargo-gaurentor-set  
+					#{if activeEmbargosMap.get(EMBARGO_TYPE).toString() != 'DEFAULT'} embargo-type-additional #{/if} 
+					#{ifRequired EMBARGO_TYPE}#{if activeEmbargosMap.get(EMBARGO_TYPE) != org.tdl.vireo.model.EmbargoGuarantor.DEFAULT}embargoReq#{/if}#{/ifRequired}">
+					
+					<h4 class="#{errorClass embargoErrorClass /}">#{ifRequired EMBARGO_TYPE}* #{/ifRequired}#{fieldLabel EMBARGO_TYPE /}</h4>
+					<p>#{fieldHelp EMBARGO_TYPE /}</p>
+					#{list embargoTypes, as: 'et'}
+		                #{if et.getGuarantor().toString() == activeEmbargosMap.get(EMBARGO_TYPE).toString()}
+		                <div class="control-group">
+		                    <label class="control-label">${et.getName()}:</label>
+		                    <div class="controls">
+		                        <label class="radio">
+						<input type="radio" id="embargo_${et_index}" class="embargo-radio" name="embargo-${activeEmbargosMap.get(EMBARGO_TYPE).toString()}" selected="selected"  data-embargoSet="${activeEmbargosMap.get(EMBARGO_TYPE).toString()}"  value="${et.getId()}" 
+							#{list embargos, as: 'selectedEmbargoId'}
+								#{if selectedEmbargoId == et.getId().toString()} checked=true #{/if}
+							#{/list}
+						>&nbsp;&nbsp;${et.getDescription()}
+		                        </label>
+		                    </div>
+		                </div>
+		                #{/if}
+		            #{/list}
+				</div>
+				#{/if}
+			#{/list}
+		</div>	
 	</fieldset>
-	#{/ifEnabled}
+	#{/if}
+
+	<!--The feature to hide additional embargos by default has been removed-->
+	<!--<a href="#" id="additional-embargos-btn">Additional Embargos</a>-->
 	
 	<div class="span10 center">
 		<input type="submit" name="submit_next" value="Save and Continue >>" class="btn btn-primary">
 	</div>
 	</form>
 </div>
-<div id="stickyNotes" class="span3">
-     #{list items:stickies, as:'sticky'}
-       <div class="sticky-top"></div>
-       <div class="sticky-bottom">#{verbatim}${sticky}#{/verbatim}</div>
-    #{/list}
 </div>
-</div>
+	

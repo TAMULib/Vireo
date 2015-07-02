@@ -25,6 +25,7 @@ import org.tdl.vireo.model.College;
 import org.tdl.vireo.model.CommitteeMember;
 import org.tdl.vireo.model.Configuration;
 import org.tdl.vireo.model.Department;
+import org.tdl.vireo.model.EmbargoGuarantor;
 import org.tdl.vireo.model.Major;
 import org.tdl.vireo.model.NameFormat;
 import org.tdl.vireo.model.Person;
@@ -44,7 +45,6 @@ import play.modules.spring.Spring;
 import play.mvc.Http.Response;
 import play.mvc.Router;
 import controllers.AbstractVireoFunctionalTest;
-
 import static org.tdl.vireo.constant.AppConfig.*;
 
 
@@ -124,13 +124,6 @@ public abstract class AbstractSubmissionTests extends AbstractVireoFunctionalTes
 			originalSettings.put(SUBMISSIONS_OPEN,submissionsOpen.getValue());
 		}
 		
-		Configuration delayAdvisorEmail = settingRepo.findConfigurationByName(EMAIL_DELAY_SENDING_ADVISOR_REQUEST);
-		if (delayAdvisorEmail == null) {
-			originalSettings.put(EMAIL_DELAY_SENDING_ADVISOR_REQUEST, null);
-		} else {
-			originalSettings.put(EMAIL_DELAY_SENDING_ADVISOR_REQUEST,delayAdvisorEmail.getValue());
-		}
-		
 		// Turn off authentication for the test thread
 		context.turnOffAuthorization();
 		
@@ -180,15 +173,6 @@ public abstract class AbstractSubmissionTests extends AbstractVireoFunctionalTes
 	 */
 	public void setSubmissionsOpen(boolean value) {
 		setConfiguration(SUBMISSIONS_OPEN, value ? "true" : null);
-	}
-	
-	/**
-	 * Set whether to send the advisor email
-	 * 
-	 * @param value open or closed.
-	 */
-	public void setDelayAdvisorEmail(boolean value) {
-		setConfiguration(EMAIL_DELAY_SENDING_ADVISOR_REQUEST, value ? "true" : null);
 	}
 	
 	/**
@@ -279,6 +263,14 @@ public abstract class AbstractSubmissionTests extends AbstractVireoFunctionalTes
 		
 		// Get the form without posting any data first
 		Response response = GET(PERSONAL_INFO_URL);
+		assertNotNull(response.getHeader("Location"));
+		int lastSlash = response.getHeader("Location").indexOf('/', 8);
+		String part1 = response.getHeader("Location").substring(0, 8);
+		String part2 = response.getHeader("Location").substring(lastSlash, response.getHeader("Location").length());
+		assertEquals("/submit/", part1);
+		assertEquals("/personalInfo", part2);
+		response = GET(response.getHeader("Location"));
+		
 		assertIsOk(response);
 		assertContentMatch("Verify Your Information",response);
 		
@@ -500,12 +492,13 @@ public abstract class AbstractSubmissionTests extends AbstractVireoFunctionalTes
 	 *            The committee contact email.
 	 * @param embargo
 	 *            The embargo settings.
+	 * @param embargoGuarantor 
 	 * @param umi
 	 *            UMI release flag.
 	 */
 	public void documentInfo(String title, String degreeMonth, String degreeYear, String programMonth, String programYear, String defenseDate, String docType, String abstractText, String keywords,
 			String subjectPrimary, String subjectSecondary, String subjectTertiary, String language, List<Map<String,String>> committee, String chairEmail, 
-			String publishedMaterial, String embargo)  {
+			String publishedMaterial, String embargo, EmbargoGuarantor embargoGuarantor)  {
 
 		// Get our URL
 		Map<String,Object> routeArgs = new HashMap<String,Object>();
@@ -548,7 +541,8 @@ public abstract class AbstractSubmissionTests extends AbstractVireoFunctionalTes
 			params.put("publishedMaterial", publishedMaterial);
 		}
 		if (embargo != null)
-			params.put("embargo", embargo);		
+			if (embargoGuarantor != null)
+				params.put("embargo-"+embargoGuarantor.name(), embargo);
 		for (int i = 0; i < committee.size(); i++) {
 			Map<String,String> member = committee.get(i);
 
@@ -605,7 +599,7 @@ public abstract class AbstractSubmissionTests extends AbstractVireoFunctionalTes
 		if (publishedMaterial != null)
 			assertEquals(publishedMaterial, sub.getPublishedMaterial());
 		if (embargo != null)
-			assertEquals(Long.valueOf(embargo), sub.getEmbargoType().getId());		
+			assertEquals(Long.valueOf(embargo), sub.getEmbargoTypeByGuarantor(embargoGuarantor).getId());		
 		
 		assertEquals(committee.size(), sub.getCommitteeMembers().size());
 	}

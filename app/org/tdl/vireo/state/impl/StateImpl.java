@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.BeanNameAware;
+import org.tdl.vireo.model.EmbargoGuarantor;
 import org.tdl.vireo.model.Submission;
 import org.tdl.vireo.state.State;
 
@@ -22,6 +23,7 @@ public class StateImpl implements State, BeanNameAware {
 	/** Injected properties **/
 	public String beanName;
 	public String displayName = "Unknown";
+	public boolean inWorkflow = false;
 	public boolean inProgress = false;
 	public boolean active = false;
 	public boolean archived = false;
@@ -57,6 +59,18 @@ public class StateImpl implements State, BeanNameAware {
 	 */
 	public void setDisplayName(String displayName) {
 		this.displayName = displayName;
+	}
+	
+	@Override
+	public boolean isInWorkflow() {
+		return inWorkflow;
+	}
+	
+	/**
+	 * @param archived Whether this state is considered archived.
+	 */
+	public void setInWorkflow(boolean inWorkflow) {
+		this.inWorkflow = inWorkflow;
 	}
 
 	@Override
@@ -159,8 +173,8 @@ public class StateImpl implements State, BeanNameAware {
 	public List<State> getTransitions(Submission submission) {
 		
 		boolean embargoed = false;
-		if (submission.getEmbargoType() != null) {
-			Integer duration = submission.getEmbargoType().getDuration();
+		if (submission.getEmbargoTypeByGuarantor(EmbargoGuarantor.DEFAULT) != null) {
+			Integer duration = submission.getEmbargoTypeByGuarantor(EmbargoGuarantor.DEFAULT).getDuration();
 			
 			// Null duration means it is indefinitely embargoed.
 			// A duration of anything greater than zero is defined embargo period.

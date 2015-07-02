@@ -18,6 +18,33 @@ body {
 	min-width:1025px;
 }
 
+div#alert-area {
+	position: fixed;
+	right: 2%;
+	top: 25%;
+	z-index: 1;
+}
+
+optgroup {
+  background-color: #666;
+  color: white;
+  font-weight: bolder;
+  display: block;
+}
+
+optgroup.active {
+  background-color: #585;
+}
+
+optgroup.inactive {
+  background-color: #855;
+}
+
+option {
+  color: #666;
+  background-color: #FFF;
+}
+
 /*****************
 FONTS COLORS ETC
 *****************/
@@ -173,7 +200,18 @@ div.btn-group[data-toggle=buttons-radio] button.active {
 	background:top right no-repeat #ffffff;
 }
 
+th.td-icon {
+	white-space: nowrap
+}
 
+td.td-icon {
+	text-align: center;
+	vertical-align: middle
+}
+
+.discListItem {
+	list-style-type: disc
+}
 
 /*****************
 LAYOUT
@@ -290,6 +328,10 @@ LAYOUT
 	clear:left;
 }
 
+#saved-filters-left-column > ul > li {
+	margin-left: 10px;
+}
+
 #right-column{
 	clear:right;
 	margin:0 20px 0 255px;
@@ -304,26 +346,34 @@ LAYOUT
 	height:35px;
 }
 
+.emailHeaders,
 .submissionAvailability{
 	width:600px;
 	margin:20px 0;
 }
 
-.submissionAvailability li, #committeeMemberadditionSettings li {
+#committeeMemberadditionSettings li,
+.emailHeaders li,
+.submissionAvailability li{
 	padding:10px 0;
 	height: 25px;
 	width: 600px;
 }
 
+.emailHeaders li#emailFrom,
+.emailHeaders li#emailReplyTo,
 .submissionAvailability li#currentSemester {
     height: 43px;
 }
 
+.emailHeaders .info,
 .submissionAvailability .info {
     margin-top: -10px;
 }
 
-.submissionAvailability label, #committeeMemberadditionSettings label {
+#committeeMemberadditionSettings label,
+.emailHeaders label,
+.submissionAvailability label{
 	font-size:1.2em;
 	float:left;
 	text-align:right;
@@ -334,7 +384,14 @@ LAYOUT
 	width: 44%;
 }
 
-.submissionAvailability span,#committeeMemberadditionSettings span{
+.submissionAvailability span,
+#committeeMemberadditionSettings span{
+.emailHeaders label {
+	width:15%;	
+}
+
+.emailHeaders span,
+.submissionAvailability span{
 	float:left;
 	padding-left:10px;
 	clear:right;
@@ -515,6 +572,11 @@ EDIT HOLDERS & BOXES
 	margin-right:15px;
 }
 
+.workflow-list .edit-box{
+	width:25%;
+	margin-right:0px;
+}
+
 .edit-box li{
 	clear:left;
 }
@@ -587,6 +649,13 @@ EDIT HOLDERS & BOXES
 	margin: 0px;
 }
 
+.icon-globe,
+.icon-user,
+.icon-play,
+.icon-pause {
+	
+}
+
 .icon-pencil,
 .icon-minus,
 .icon-plus,
@@ -621,7 +690,55 @@ EDIT HOLDERS & BOXES
     
 }
 
-#subjects ul {
+#emabrgos label {
+	display: inline;
+}
+
+#addEmbargoSelect {
+	display:none;
+	list-style:none;
+}
+
+#addEmbargoSelect i:first-child {
+	display: block;
+}
+
+#add_new_embargo {
+	margin: 5px 0px; 
+	list-style:none;
+}
+
+.remove_new_embargo {
+	margin-left: 10px;
+}
+
+#confirmEmbargoRemove {
+	display:none; 
+	margin-left:20px;
+}
+
+#addEmbargoSelect .icon-remove:hover,
+#addEmbargoSelect .icon-ok:hover {
+	cursor:pointer;
+}
+
+#action-list span > i.icon-remove:hover,
+#action-list span > i.icon-ok:hover {
+	cursor: pointer;
+}
+#add_new_embargo {
+	list-style: none;
+}
+
+.edit-box-holder .embargo i:hover {
+	cursor: pointer;
+}
+
+.edit-box-holder #embargos ul {
+	display: inline-block;
+}
+
+.edit ul {
     margin-top: -17px;
     margin-left: 30px;
 }
@@ -643,6 +760,10 @@ div.modal li {
 
 .fade.modal{
 	top:-60%;
+}
+
+.dropdown-menu {
+	z-index: 1100;
 }
 
 @media (min-height: 800px) and (max-height: 999px) {
@@ -671,6 +792,10 @@ div.modal li {
 	}
 }
 
+#packager-extra-label, #batch-export-extra-controls,
+#packager-extra-saved-filters-label, #batch-export-extra-saved-filters-controls {
+	margin-top: 5px;
+}
 
 /**********************
 COLUMN SORTING

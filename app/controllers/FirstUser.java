@@ -7,19 +7,24 @@ import java.util.Map;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 
-import org.tdl.vireo.email.SystemEmailTemplateService;
-import org.tdl.vireo.model.CommitteeMemberRoleType;
 import org.tdl.vireo.model.DegreeLevel;
+import org.tdl.vireo.model.EmbargoGuarantor;
+import org.tdl.vireo.model.EmbargoType;
 import org.tdl.vireo.model.Person;
 import org.tdl.vireo.model.RoleType;
+import org.tdl.vireo.model.SettingsRepository;
+import org.tdl.vireo.model.jpa.JpaSettingsRepositoryImpl;
 import org.tdl.vireo.search.Indexer;
 import org.tdl.vireo.security.AuthenticationMethod;
 
+import play.Logger;
+import play.jobs.Job;
+import play.jobs.OnApplicationStart;
 import play.modules.spring.Spring;
 
 public class FirstUser extends AbstractVireoController {
 	
-	public static SystemEmailTemplateService systemEmailService = Spring.getBeanOfType(SystemEmailTemplateService.class);
+	//public static SystemEmailTemplateService systemEmailService = Spring.getBeanOfType(SystemEmailTemplateService.class);
 	public static Indexer indexer = Spring.getBeanOfType(Indexer.class);
 	
 	public static void createUser() {
@@ -56,14 +61,6 @@ public class FirstUser extends AbstractVireoController {
 				session.put("firstName", person.getFirstName());
 				session.put("lastName", person.getLastName());
 				session.put("displayName", person.getDisplayName());
-				
-				//Generate System Email Templates
-				systemEmailService.generateAllSystemEmailTemplates();
-				
-				// Setup Embargos
-				for(EmbargoArray embargoDefinition : EMBARGO_DEFINTITIONS) {
-					settingRepo.createEmbargoType(embargoDefinition.name, embargoDefinition.description, embargoDefinition.duration, embargoDefinition.active).save();
-				}
 				
 				// Setup default Committee Member Role Types
 				for(String roleType : COMMITTEE_MEMBER_ROLE_TYPES_DEFINITIONS) {
@@ -164,42 +161,4 @@ public class FirstUser extends AbstractVireoController {
 	 */
 	
 	private static final String[] COMMITTEE_MEMBER_ROLE_TYPES_DEFINITIONS = {"Chair"};
-	
-	/**
-	 * Initial Embargo Types to create
-	 */
-	
-	private static final EmbargoArray[] EMBARGO_DEFINTITIONS = {
-		new EmbargoArray("None", "The work will be published after approval.", 0, true),
-		new EmbargoArray("Journal Hold",
-				"The work will be delayed for publication by one year because of a restriction from publication in an academic journal.", 
-				12,
-				true),
-		new EmbargoArray("Patent Hold",
-				"The work will be delayed for publication by two years because of patent related activities.",
-				24,
-				true
-				),
-	    new EmbargoArray("Other Embargo Period",
-	    		"The work will be delayed for publication by an indefinite amount of time.",
-	    		null,
-	    		true)
-	};
-	
-	private static class EmbargoArray{
-		
-		String name;
-		String description;
-		Integer duration;
-		boolean active;
-		
-		EmbargoArray(String name, String description, Integer duration, boolean active) {
-			this.name = name;
-			this.description = description;
-			this.duration = duration;
-			this.active = active;
-		}
-	}
-	
-	
 }

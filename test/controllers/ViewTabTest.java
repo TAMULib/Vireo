@@ -42,6 +42,8 @@ import play.mvc.Scope.Session;
  * Test the methods of the view tab.
  * 
  * @author Micah Cooper
+ * @author <a href="mailto:gad.krumholz@austin.utexas.edu">Gad Krumholz</a>
+ * @author James Creel (http://www.jamescreel.net)
  *
  */
 public class ViewTabTest extends AbstractVireoFunctionalTest {
@@ -52,6 +54,13 @@ public class ViewTabTest extends AbstractVireoFunctionalTest {
 	public static SettingsRepository settingRepo = Spring.getBeanOfType(SettingsRepository.class);
 	public static StateManager stateManager = Spring.getBeanOfType(StateManager.class);
 	
+	/**
+	 * Create a fake Session since ThreadLocal Session.current() doesn't work from within FunctionalTest
+	 */
+	public ViewTabTest() {
+	    Session.current.set(new Session());
+    }
+
 	/**
 	 * Simple test to make sure we can view a blank document in the viewTab
 	 * without generating errors.
@@ -341,7 +350,7 @@ public class ViewTabTest extends AbstractVireoFunctionalTest {
 		State state = stateManager.getState("InReview");
 		submission.setState(state);
 		EmbargoType embargo = settingRepo.findAllEmbargoTypes().get(0);
-		submission.setEmbargoType(embargo);
+		submission.addEmbargoType(embargo);
 		submission.save();
 		Long id = submission.getId();
 		
@@ -536,10 +545,13 @@ public class ViewTabTest extends AbstractVireoFunctionalTest {
 		String UPDATE_URL = Router.reverse("ViewTab.view").url;
 		
 		Map<String,String> params = new HashMap<String,String>();
+		params.put("primary_recipients", "Student, Librarians, bob@bob.com");
+		params.put("cc_recipients", "Advisor, ted@ted.com");
 		params.put("subId", id.toString());
 		params.put("subject", "The subject");
 		params.put("comment", "This is the comment.");
 		params.put("visibility", "public");
+		params.put("status_change", "true");
 		params.put("addActionLogComment", "true");
 		
 		Response response = POST(UPDATE_URL,params);
@@ -547,7 +559,8 @@ public class ViewTabTest extends AbstractVireoFunctionalTest {
 		
 		submission = subRepo.findSubmission(id);
 		assertTrue(subRepo.findActionLog(submission).size()>numActionLogs);
-		assertEquals("The subject: This is the comment.", subRepo.findActionLog(submission).get(0).getEntry());
+		assertEquals("Submission status changed to 'Needs Correction'", subRepo.findActionLog(submission).get(0).getEntry());
+		assertEquals(submission.getState(),stateManager.getState("NeedsCorrection"));
 		
 		submission.delete();
 		
@@ -602,7 +615,7 @@ public class ViewTabTest extends AbstractVireoFunctionalTest {
 		
 		assertEquals(submission.getAssignee().getCurrentEmailAddress(), "bthornton@gmail.com");
 		
-		CustomActionDefinition actionDef = settingRepo.createCustomActionDefinition("Passed Classes").save();
+		CustomActionDefinition actionDef = settingRepo.createCustomActionDefinition("Passed Classes", false).save();
 		
 		Long actionId = actionDef.getId();
 		
@@ -659,6 +672,7 @@ public class ViewTabTest extends AbstractVireoFunctionalTest {
 		params.put("subId", id.toString());
 		params.put("uploadType", "additional");
 		params.put("attachmentType", "SUPPLEMENTAL");
+		params.put("status_change", "true");
 		params.put("addFile", "true");
 		
 		Map<String,File> files = new HashMap<String,File>();
@@ -677,6 +691,8 @@ public class ViewTabTest extends AbstractVireoFunctionalTest {
 		submission = subRepo.findSubmission(id);
 		
 		assertNotNull(submission.getSupplementalDocuments().get(0));
+		assertEquals(submission.getState(),stateManager.getState("NeedsCorrection"));
+		
 		Attachment attachment = submission.getSupplementalDocuments().get(0);
 		
 		attachment.delete();		
@@ -726,6 +742,7 @@ public class ViewTabTest extends AbstractVireoFunctionalTest {
 		params = new HashMap<String,String>();
 		params.put("subId", id.toString());
 		params.put("uploadType", "primary");
+		params.put("status_change", "true");
 		params.put("addFile", "true");
 		
 		files = new HashMap<String,File>();
@@ -740,6 +757,7 @@ public class ViewTabTest extends AbstractVireoFunctionalTest {
 		submission = subRepo.findSubmission(id);
 		assertEquals("PRIMARY-DOCUMENT.pdf",submission.getPrimaryDocument().getName());
 		assertEquals("PRIMARY-DOCUMENT-archived-on-"+JpaAttachmentImpl.dateFormat.format(new Date())+".pdf",submission.getAttachmentsByType(AttachmentType.ARCHIVED).get(0).getName());
+		assertEquals(submission.getState(),stateManager.getState("NeedsCorrection"));
 		
 		submission.delete();
 		
@@ -934,6 +952,7 @@ public class ViewTabTest extends AbstractVireoFunctionalTest {
 		String fileName = submission.getAttachments().get(0).getName();
 		
 		Map<String,Object> routeArgs = new HashMap<String,Object>();
+		routeArgs.put("subId", id.toString());
 		routeArgs.put("id", fileId.toString());
 		routeArgs.put("name", fileName);
 		

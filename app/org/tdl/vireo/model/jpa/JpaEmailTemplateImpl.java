@@ -3,6 +3,7 @@ package org.tdl.vireo.model.jpa;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 import org.tdl.vireo.model.EmailTemplate;
 
@@ -12,13 +13,13 @@ import org.tdl.vireo.model.EmailTemplate;
  * @author <a href="http://www.scottphillips.com">Scott Phillips</a>
  */
 @Entity
-@Table(name = "email_template")
+@Table(name = "email_template", uniqueConstraints={@UniqueConstraint(columnNames = { "name", "systemRequired" })})
 public class JpaEmailTemplateImpl extends JpaAbstractModel<JpaEmailTemplateImpl> implements EmailTemplate {
 
 	@Column(nullable = false)
 	public int displayOrder;
 
-	@Column(nullable = false, unique = true, length=255) 
+	@Column(nullable = false, length=255) 
 	public String name;
 	
 	@Column(nullable = false, length=32768) // 2^15
@@ -27,7 +28,7 @@ public class JpaEmailTemplateImpl extends JpaAbstractModel<JpaEmailTemplateImpl>
 	@Column(nullable = false, length=32768) // 2^15
 	public String message;
 	
-	@Column(nullable = false)
+	@Column(nullable = false, columnDefinition="BOOLEAN DEFAULT false")
 	public Boolean systemRequired;
 
 	/**
@@ -107,7 +108,7 @@ public class JpaEmailTemplateImpl extends JpaAbstractModel<JpaEmailTemplateImpl>
 			return;
 		
 		if (isSystemRequired())
-			throw new IllegalStateException("Unable to rename the email template '"+name+"' because it is required by the system.");
+			throw new IllegalStateException("Unable to rename the email template '"+name+"' because it is required by the system. Please make a copy of it and modify that one instead.");
 		
 		this.name = name;
 	}
@@ -126,6 +127,9 @@ public class JpaEmailTemplateImpl extends JpaAbstractModel<JpaEmailTemplateImpl>
 		
 		assertManager();
 		
+		if (isSystemRequired())
+			throw new IllegalStateException("Unable to modify the email template '"+name+"' because it is required by the system. Please make a copy of it and modify that one instead.");
+		
 		this.subject = subject;
 	}
 
@@ -141,6 +145,9 @@ public class JpaEmailTemplateImpl extends JpaAbstractModel<JpaEmailTemplateImpl>
 			throw new IllegalArgumentException("Message is required");
 		
 		assertManager();
+		
+		if (isSystemRequired())
+			throw new IllegalStateException("Unable to modify the email template '"+name+"' because it is required by the system. Please make a copy of it and modify that one instead.");
 		
 		this.message = message;
 	}

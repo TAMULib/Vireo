@@ -301,6 +301,7 @@ public class ApplicationSettingsTabTest extends AbstractVireoFunctionalTest {
 		// Add a new custom action
 		Map<String,String> params = new HashMap<String,String>();
 		params.put("name","New \"Custom\" action");
+		params.put("isStudentVisible", "true");
 		Response response = POST(ADD_URL,params);
 		assertContentMatch("\"success\": \"true\"", response);
 		
@@ -317,12 +318,15 @@ public class ApplicationSettingsTabTest extends AbstractVireoFunctionalTest {
 		JPA.em().clear();
 		JPA.em().getTransaction().begin();
 		assertNotNull(settingRepo.findCustomActionDefinition(id));
+		assertEquals("New \"Custom\" action",settingRepo.findCustomActionDefinition(id).getLabel());
+		assertEquals(true, settingRepo.findCustomActionDefinition(id).isStudentVisible());
 		
 		
 		// Now edit the custom action
 		params.clear();
 		params.put("actionId","action_"+id);
 		params.put("name", "Changed Label");
+		params.put("level", "false");
 		response = POST(EDIT_URL,params);
 		
 		// Verify the action was updated in the database.
@@ -331,6 +335,7 @@ public class ApplicationSettingsTabTest extends AbstractVireoFunctionalTest {
 		JPA.em().clear();
 		JPA.em().getTransaction().begin();
 		assertEquals("Changed Label",settingRepo.findCustomActionDefinition(id).getLabel());
+		assertEquals(false, settingRepo.findCustomActionDefinition(id).isStudentVisible());
 		
 		// Now remove the custom action
 		params.clear();
@@ -356,8 +361,8 @@ public class ApplicationSettingsTabTest extends AbstractVireoFunctionalTest {
 		
 		
 		// Create two custom actions:
-		CustomActionDefinition action1 = settingRepo.createCustomActionDefinition("test one").save();
-		CustomActionDefinition action2 = settingRepo.createCustomActionDefinition("test two").save();
+		CustomActionDefinition action1 = settingRepo.createCustomActionDefinition("test one", false).save();
+		CustomActionDefinition action2 = settingRepo.createCustomActionDefinition("test two", false).save();
 		JPA.em().getTransaction().commit();
 		JPA.em().clear();
 		JPA.em().getTransaction().begin();
@@ -534,6 +539,7 @@ public class ApplicationSettingsTabTest extends AbstractVireoFunctionalTest {
 		params.put("packager","DSpaceMETS");
 		params.put("depositor","Sword1Deposit");
 		params.put("repository","http://localhost:8082/servicedocument");
+		params.put("timeout", "60");
 		params.put("username","testUser");
 		params.put("password","testPassword");
 		params.put("onBehalfOf","");
@@ -634,6 +640,7 @@ public class ApplicationSettingsTabTest extends AbstractVireoFunctionalTest {
 		params.put("packager","DSpaceMETS");
 		params.put("depositor","Sword1Deposit");
 		params.put("repository","http://localhost:8082/servicedocument");
+		params.put("timeout", "60");
 		params.put("username","testUser");
 		params.put("password","testPassword");
 		params.put("onBehalfOf","");

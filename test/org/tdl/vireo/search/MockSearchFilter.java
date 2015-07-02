@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.tdl.vireo.model.ActionLog;
+import org.tdl.vireo.model.CustomActionDefinition;
 import org.tdl.vireo.model.EmbargoType;
 import org.tdl.vireo.model.Person;
 import org.tdl.vireo.model.Submission;
@@ -32,9 +33,11 @@ public class MockSearchFilter implements SearchFilter {
 	public List<String> colleges = new ArrayList<String>();
 	public List<String> majors = new ArrayList<String>();
 	public List<String> documentTypes = new ArrayList<String>();
+	public List<SearchOrder> columns = new ArrayList<SearchOrder>();
 	public Boolean umiRelease = null;
 	public Date rangeStart = null;
 	public Date rangeEnd = null;
+	public List<CustomActionDefinition> customActions = new ArrayList<CustomActionDefinition>();
 	
 	@Override
 	public List<Submission> getIncludedSubmissions() {
@@ -325,4 +328,29 @@ public class MockSearchFilter implements SearchFilter {
 	public void setDateRangeEnd(Date end) {
 		rangeEnd = end;
 	}
+	
+	@Override
+	public List<SearchOrder> getColumns() {
+	    return this.columns;
+	}
+	
+	@Override
+	public void setColumns(List<SearchOrder> columns) {
+	    this.columns = columns;	    
+	}
+
+	@Override
+    public List<CustomActionDefinition> getCustomActions() {
+	    return customActions;
+    }
+
+	@Override
+    public void addCustomAction(CustomActionDefinition customAction) {
+	    customActions.add(customAction);
+    }
+	
+	@Override
+    public void removeCustomAction(CustomActionDefinition customAction) {
+	    customActions.remove(customAction);
+    }
 }

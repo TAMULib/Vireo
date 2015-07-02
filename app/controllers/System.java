@@ -1,11 +1,11 @@
 package controllers;
 
+import java.io.File;
 import java.lang.reflect.Method;
 import java.util.Date;
 import java.util.List;
 
 import org.tdl.vireo.email.EmailService;
-import org.tdl.vireo.email.SystemEmailTemplateService;
 import org.tdl.vireo.email.VireoEmail;
 import org.tdl.vireo.error.ErrorLog;
 import org.tdl.vireo.error.ErrorReport;
@@ -40,7 +40,6 @@ public class System extends AbstractVireoController {
 	// Spring dependencies indjected.
 	public static Indexer indexer = Spring.getBeanOfType(Indexer.class);
 	public static EmailService emailService = Spring.getBeanOfType(EmailService.class);
-	public static SystemEmailTemplateService templateService = Spring.getBeanOfType(SystemEmailTemplateService.class);
 	public static SettingsRepository settingRepo = Spring.getBeanOfType(SettingsRepository.class);
 	public static JobManager jobManager = Spring.getBeanOfType(JobManager.class);
 	public static ErrorLog errorLog = Spring.getBeanOfType(ErrorLog.class);
@@ -87,8 +86,8 @@ public class System extends AbstractVireoController {
 		String logLevel = Play.configuration.getProperty("application.log","n/a");
 		String db = Play.configuration.getProperty("db","n/a");
 		String appPath = Play.applicationPath.getPath();
-		String attachmentsPath = Play.configuration.getProperty("attachments.path","n/a");
-		String indexPath = Play.configuration.getProperty("index.path","n/a");
+		String attachmentsPath = appPath + File.separator + Play.configuration.getProperty("attachments.path","n/a");
+		String indexPath = appPath + File.separator + Play.configuration.getProperty("index.path","n/a");
 
 
 		// Mail Information
@@ -185,9 +184,7 @@ public class System extends AbstractVireoController {
 	@Security(RoleType.ADMINISTRATOR)
 	public static void testEmail(String email) {
 		
-		templateService.generateAllSystemEmailTemplates();
 		EmailTemplate template = settingRepo.findEmailTemplateByName(TEST_EMAIL_TEMPLATE);
-		
 		
 		VireoEmail vireoEmail = emailService.createEmail();
 		vireoEmail.addTo(email);

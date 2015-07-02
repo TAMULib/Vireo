@@ -48,7 +48,8 @@ import play.vfs.VirtualFile;
  * 
  * @author <a href="http://www.scottphillips.com">Scott Phillips</a>
  * @author Micah Cooper
- * @author Jeremy Huff
+ * @author <a href="mailto:huff@library.tamu.edu">Jeremy Huff</a>
+ * @author <a href=mailto:gad.krumholz@austin.utexas.edu>Gad Krumholz</a>
  */
 public class TemplatePackagerImpl extends AbstractPackagerImpl {
 		
@@ -228,6 +229,10 @@ public class TemplatePackagerImpl extends AbstractPackagerImpl {
 		templateArguments = arguments;
 	}
 	
+	@Override
+    public String getExportServiceBeanName() {
+        return "ExportService";
+    }
 	
 	@Override
 	public ExportPackage generatePackage(Submission submission) {
@@ -288,7 +293,7 @@ public class TemplatePackagerImpl extends AbstractPackagerImpl {
 					ZipOutputStream zos = new ZipOutputStream(fos);
 					
 					// Copy the manifest
-					File manifestFile = new File(Play.tmpDir + File.pathSeparator + manifestName);
+					File manifestFile = File.createTempFile(manifestName, null);
 					FileUtils.writeStringToFile(manifestFile, manifest);
 					
 					ZipEntry ze = new ZipEntry(manifestName);
@@ -333,17 +338,16 @@ public class TemplatePackagerImpl extends AbstractPackagerImpl {
 								
 								// Check for custom directory structure set in spring.
 								Boolean hasDir = false;
-								
+								String dirName = null;
 								if(attachmentAttributes.get(attachment.getType().name()).get("directory")!=null) {
-									String dirName = (String) attachmentAttributes.get(attachment.getType().name()).get("directory");
+									dirName = (String) attachmentAttributes.get(attachment.getType().name()).get("directory");
 									dirName = dirName.replace("{FILE_NAME}", shortFileName);
 									dirName = StringVariableReplacement.applyParameterSubstitution(dirName, parameters);
-									exportFile = new File(Play.tmpDir + File.pathSeparator + dirName,fileName);
 									fileName = dirName + fileName;
 									hasDir = true;
-								} else {
-									exportFile = new File(Play.tmpDir + File.pathSeparator + fileName);
 								}
+								
+								exportFile = File.createTempFile(fileName, null);
 																
 								FileUtils.copyFile(
 										attachment.getFile(),
@@ -361,8 +365,8 @@ public class TemplatePackagerImpl extends AbstractPackagerImpl {
 								zos.closeEntry();
 								
 								//cleaning up either temp directory or temp files
-								if(hasDir) {
-									FileUtils.deleteDirectory(exportFile.getParentFile());
+								if(hasDir && dirName != null) {
+									FileUtils.deleteDirectory(new File(dirName));
 								} else {
 									exportFile.delete();
 								}				

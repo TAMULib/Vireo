@@ -1,5 +1,7 @@
 package org.tdl.vireo.model;
 
+import java.util.List;
+
 
 /**
  * This is a simple mock embargo type class that may be useful for testing. Feel
@@ -19,6 +21,9 @@ public class MockEmbargoType extends AbstractMock implements EmbargoType {
 	public String description;
 	public Integer duration;
 	public boolean active;
+	public boolean systemRequired;
+	public EmbargoGuarantor guarantor = EmbargoGuarantor.DEFAULT;
+	public List<Submission> submissions;
 
 	@Override
 	public MockEmbargoType save() {
@@ -94,5 +99,29 @@ public class MockEmbargoType extends AbstractMock implements EmbargoType {
 	public void setActive(boolean active) {
 		this.active = active;
 	}
+	
+	@Override
+    public boolean isSystemRequired() {
+		return systemRequired;
+    }
 
+	@Override
+    public void setSystemRequired(boolean required) {
+	    this.systemRequired = required;
+    }
+	
+	@Override
+	public EmbargoGuarantor getGuarantor() {
+		return guarantor;
+	}
+	
+	@Override
+	public void setGuarantor(EmbargoGuarantor guarantor) {
+		this.guarantor = guarantor;
+	}
+	
+	@Override
+	public List<Submission> getSubmissions() {
+		return submissions;
+	}
 }

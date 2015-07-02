@@ -91,7 +91,7 @@ public interface Submission extends AbstractModel {
 	 * @param orcidString
 	 *            The ORCID identifier of the student who authored this submission.
 	 */
-	public void setOrcid(String orcidString);	
+	public void setOrcid(String orcidString);
 	
 	/**
 	 * @param format
@@ -208,14 +208,29 @@ public interface Submission extends AbstractModel {
 	 * @return The type of embargo for this submission. Either requested or
 	 *         approved.
 	 */
-	public EmbargoType getEmbargoType();
+	public List<EmbargoType> getEmbargoTypes();
 
 	/**
 	 * 
 	 * @param embargo The new embargo type.
 	 */
-	public void setEmbargoType(EmbargoType embargo);
+	public void addEmbargoType(EmbargoType embargo);
 
+	/**
+	 * 
+	 * @param embargo The new embargo type.
+	 */
+	public void removeEmbargoType(EmbargoType embargo);	
+	
+	/**
+	 * 
+	 * @param guarantor The guarantor of the embargo.
+	 * 
+	 * @return The type of embargo for this submission, affiliated with
+	 * the specifed guarantor.
+	 */
+	public EmbargoType getEmbargoTypeByGuarantor(EmbargoGuarantor guarantor);
+	
 	/**
 	 * 
 	 * @return The attachment who's type is PRIMARY.
@@ -420,6 +435,18 @@ public interface Submission extends AbstractModel {
 
 	/**
 	 * 
+	 * @return - The department id that will award this degree
+	 */
+	public Long getDepartmentId();
+	
+	/**
+	 * 
+	 * @param id - the department id that will award this degree
+	 */
+	public void setDepartmentId(Long id);
+	
+	/**
+	 * 
 	 * @return The college that will award this degree.
 	 */
 	public String getCollege();	
@@ -432,6 +459,18 @@ public interface Submission extends AbstractModel {
 	
 	/**
 	 * 
+	 * @return - The college id that will award this degree
+	 */
+	public Long getCollegeId();
+	
+	/**
+	 * 
+	 * @param id - the college id that will award this degree
+	 */
+	public void setCollegeId(Long id);
+	
+	/**
+	 * 
 	 * @return The program associated with the submission
 	 */
 	public String getProgram();
@@ -441,6 +480,18 @@ public interface Submission extends AbstractModel {
 	 * @param program The program associated with the submission
 	 */
 	public void setProgram(String program);
+	
+	/**
+	 * 
+	 * @return - The program id that will award this degree
+	 */
+	public Long getProgramId();
+	
+	/**
+	 * 
+	 * @param id - the program id that will award this degree
+	 */
+	public void setProgramId(Long id);
 
 	/**
 	 * 

@@ -28,6 +28,7 @@ import org.tdl.vireo.model.CommitteeMember;
 import org.tdl.vireo.model.CommitteeMemberRoleType;
 import org.tdl.vireo.model.Configuration;
 import org.tdl.vireo.model.DocumentType;
+import org.tdl.vireo.model.EmbargoGuarantor;
 import org.tdl.vireo.model.EmbargoType;
 import org.tdl.vireo.model.GraduationMonth;
 import org.tdl.vireo.model.ProgramMonth;
@@ -38,9 +39,7 @@ import org.tdl.vireo.model.Submission;
 import org.tdl.vireo.proquest.ProquestSubject;
 
 import play.Logger;
-
 import au.com.bytecode.opencsv.CSVReader;
-
 import controllers.Security;
 
 /**
@@ -114,8 +113,17 @@ public class DocumentInfo extends AbstractSubmitStep {
 		if (!publishedMaterialFlag)
 			publishedMaterial = null;
 		String chairEmail = params.get("chairEmail");
-		String embargo = params.get("embargo");
-
+		
+		
+		
+		List<String> embargos = new ArrayList<String>();
+		for(EmbargoGuarantor gaurantor : EmbargoGuarantor.values() ) {
+			String embargoString = params.get("embargo-"+gaurantor.name()); 
+			
+			if(embargoString != null && embargoString.trim().length() != 0)
+				embargos.add(embargoString);
+		}
+				
 		List<TransientMember> committee = parseCommitteeMembers();
 
 		if ("documentInfo".equals(params.get("step"))) {
@@ -211,11 +219,13 @@ public class DocumentInfo extends AbstractSubmitStep {
 			}
 			
 			if (isFieldEnabled(EMBARGO_TYPE)) {
-				try {
-					sub.setEmbargoType(settingRepo.findEmbargoType(Long.parseLong(embargo)));
-				} catch (RuntimeException re){
-					if (isFieldRequired(EMBARGO_TYPE))
-						validation.addError("embargo", "Please select a valid embargo option");
+				for(String embargo : embargos) {
+					try {
+						sub.addEmbargoType(settingRepo.findEmbargoType(Long.parseLong(embargo)));	
+					} catch (RuntimeException re){
+						if (isFieldRequired(EMBARGO_TYPE))
+							validation.addError("embargo", "Please select a valid embargo option");
+					}
 				}
 			}			
 	
@@ -283,8 +293,17 @@ public class DocumentInfo extends AbstractSubmitStep {
 			if (isFieldEnabled(PUBLISHED_MATERIAL))
 				publishedMaterial = sub.getPublishedMaterial();
 			
-			if (isFieldEnabled(EMBARGO_TYPE) && sub.getEmbargoType() != null)
-				embargo = sub.getEmbargoType().getId().toString();
+			for(EmbargoGuarantor eg : EmbargoGuarantor.values()) {
+				
+				String fieldName = eg.name().equals("DEFAULT") ? "EMBARGO_TYPE" : "EMBARGO_TYPE_"+eg.name();
+				
+				FieldConfig field = FieldConfig.valueOf(fieldName);
+								
+				if (isFieldEnabled(field) && sub.getEmbargoTypeByGuarantor(eg) != null) {
+					embargos.add(sub.getEmbargoTypeByGuarantor(eg).getId().toString());
+				}
+			}
+			
 		}
 		
 		// Verify the form if we are submitting or if jumping from the confirm step.
@@ -353,12 +372,10 @@ public class DocumentInfo extends AbstractSubmitStep {
 		
 		if (publishedMaterial != null)
 			publishedMaterialFlag = true;
-				
-		renderTemplate("Submit/documentInfo.html", subId, stickies,
-
+		renderTemplate("Submit/documentInfo.html", subId, sub, stickies,
 				title, degreeMonth, degreeYear, programMonth, programYear, defenseDate, docType, abstractText, keywords, 
 				subjectPrimary, subjectSecondary, subjectTertiary, docLanguage, committeeSlots, 
-				committee, chairEmail, publishedMaterialFlag, publishedMaterial, embargo);
+				committee, chairEmail, publishedMaterialFlag, publishedMaterial, embargos);
 	}
 
 	/**
@@ -455,10 +472,18 @@ public class DocumentInfo extends AbstractSubmitStep {
 			}
 		}
 		
-		// Embargo
-		if (isFieldRequired(EMBARGO_TYPE) && sub.getEmbargoType() == null)
-			validation.addError("embargo", "Please choose an embargo option");
-
+		// Embargo		
+		for(EmbargoGuarantor eg : EmbargoGuarantor.values()) {
+			
+			String fieldName = eg.name().equals("DEFAULT") ? "EMBARGO_TYPE" : "EMBARGO_TYPE_"+eg.name();		
+			FieldConfig field = FieldConfig.valueOf(fieldName);
+						
+			if (isFieldRequired(field) && sub.getEmbargoTypeByGuarantor(eg) == null) {
+				if(eg != EmbargoGuarantor.PROQUEST || sub.getUMIRelease())
+					validation.addError("embargo-"+eg.name(), "Please choose a "+eg.name().toLowerCase()+" embargo option");
+			}
+		}
+		
 		// Check if we've added any new errors. If so return false;
 		if (numberOfErrorsBefore == validation.errors().size()) 
 			return true;
@@ -826,11 +851,6 @@ public class DocumentInfo extends AbstractSubmitStep {
 		return true;
 	}
 
-	
-	
-	
-	
-	
 	
 	/**
 	 * Simple data structure to keep committee members while being processed.

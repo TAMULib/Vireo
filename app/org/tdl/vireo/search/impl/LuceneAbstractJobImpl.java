@@ -20,6 +20,7 @@ import org.tdl.vireo.model.CommitteeMember;
 import org.tdl.vireo.model.CustomActionValue;
 import org.tdl.vireo.model.NameFormat;
 import org.tdl.vireo.model.Submission;
+import org.tdl.vireo.model.EmbargoType;
 
 import play.Logger;
 import play.jobs.Job;
@@ -240,11 +241,12 @@ public abstract class LuceneAbstractJobImpl extends Job {
 		String major = sub.getMajor();
 		searchText.append(department).append(" ").append(program).append(" ").append(college).append(" ").append(major).append(" ");
 		
-		String embargo = null;
-		if (sub.getEmbargoType() != null) {
-			embargo = sub.getEmbargoType().getName();
-			searchText.append(embargo).append(" ");
+		String embargos = "";
+		if (sub.getEmbargoTypes().size() > 0) {
+			for(EmbargoType embargo : sub.getEmbargoTypes())
+			embargos += embargo.getName() + " ";			
 		}
+		searchText.append(embargos).append(" ");
 		
 		String degree = sub.getDegree();
 		String documentType = sub.getDocumentType();
@@ -326,11 +328,11 @@ public abstract class LuceneAbstractJobImpl extends Job {
 			umiRelease = "no";
 		}
 		
-		int customActions = 0;
-		for (CustomActionValue action : sub.getCustomActions()) {
-			if (action.getValue())
-				customActions++;
+		String customActions = "";
+		for (CustomActionValue customActionValue : sub.getCustomActions()) {
+			customActions += customActionValue.getDefinition().getLabel() + " ";
 		}
+		searchText.append(customActions).append(" ");
 		
 		String degreeLevel = null;
 		if (sub.getDegreeLevel() != null)
@@ -346,7 +348,7 @@ public abstract class LuceneAbstractJobImpl extends Job {
 		String lastEventEntry = null;
 		Date lastEventTime = null;
 		
-		String orcid = sub.getOrcid();
+		String orcid = sub.getSubmitter().getOrcid();
 		
 		List<ActionLog> logs = indexer.subRepo.findActionLog(sub);
 		if (logs.size() > 0) {
@@ -389,8 +391,11 @@ public abstract class LuceneAbstractJobImpl extends Job {
 		if (major != null)
 		doc.add(new Field("major",major,Field.Store.NO,Index.NOT_ANALYZED));
 		
-		if (embargo != null)
-		doc.add(new Field("embargo",embargo,Field.Store.NO,Index.NOT_ANALYZED));
+		if (embargos != null) {
+			for (EmbargoType embargo : sub.getEmbargoTypes()) {
+				doc.add(new Field("embargo",embargo.getName(), Field.Store.NO,Index.NOT_ANALYZED));
+			}
+		}
 		
 		if (degree != null)
 		doc.add(new Field("degree",degree,Field.Store.NO,Index.NOT_ANALYZED));
@@ -452,8 +457,10 @@ public abstract class LuceneAbstractJobImpl extends Job {
 		if (umiRelease != null)
 		doc.add(new Field("umiRelease",umiRelease,Field.Store.NO,Index.NOT_ANALYZED));
 		
-		doc.add(new NumericField("customActions",Field.Store.NO,true).setIntValue(customActions));
-
+		for (CustomActionValue customActionValue : sub.getCustomActions()) {
+			doc.add(new Field("customAction",customActionValue.getDefinition().getLabel(), Field.Store.NO,Index.NOT_ANALYZED));
+		}
+		
 		if (degreeLevel != null)
 		doc.add(new Field("degreeLevel",degreeLevel,Field.Store.NO,Index.NOT_ANALYZED));
 		
@@ -533,8 +540,11 @@ public abstract class LuceneAbstractJobImpl extends Job {
 			if (major != null)
 			doc.add(new Field("major",major,Field.Store.NO,Index.NOT_ANALYZED));
 			
-			if (embargo != null)
-			doc.add(new Field("embargo",embargo,Field.Store.NO,Index.NOT_ANALYZED));
+			if (embargos != null) {
+				for (EmbargoType embargo : sub.getEmbargoTypes()) {
+					doc.add(new Field("embargo",embargo.getName(), Field.Store.NO,Index.NOT_ANALYZED));
+				}
+			}
 			
 			if (degree != null)
 			doc.add(new Field("degree",degree,Field.Store.NO,Index.NOT_ANALYZED));
@@ -593,7 +603,9 @@ public abstract class LuceneAbstractJobImpl extends Job {
 			if (umiRelease != null)
 			doc.add(new Field("umiRelease",umiRelease,Field.Store.NO,Index.NOT_ANALYZED));
 			
-			doc.add(new NumericField("customActions",Field.Store.NO,true).setIntValue(customActions));
+			for (CustomActionValue customActionValue : sub.getCustomActions()) {
+				doc.add(new Field("customAction",customActionValue.getDefinition().getLabel(), Field.Store.NO,Index.NOT_ANALYZED));
+			}
 			
 			if (degreeLevel != null)
 			doc.add(new Field("degreeLevel",degreeLevel,Field.Store.NO,Index.NOT_ANALYZED));

@@ -8,6 +8,7 @@ import java.util.Map;
 
 import javax.mail.internet.InternetAddress;
 
+import org.tdl.vireo.constant.AppConfig;
 import org.tdl.vireo.constant.AppPref;
 import org.tdl.vireo.email.VireoEmail;
 import org.tdl.vireo.model.EmailTemplate;
@@ -15,12 +16,14 @@ import org.tdl.vireo.model.NameFormat;
 import org.tdl.vireo.model.Person;
 import org.tdl.vireo.model.PersonRepository;
 import org.tdl.vireo.model.Preference;
+import org.tdl.vireo.model.SettingsRepository;
 import org.tdl.vireo.model.Submission;
 import org.tdl.vireo.model.SubmissionRepository;
 import org.tdl.vireo.security.SecurityContext;
 import org.tdl.vireo.services.StringVariableReplacement;
 
 import play.Play;
+import play.modules.spring.Spring;
 import play.mvc.Router;
 import play.mvc.Router.ActionDefinition;
 
@@ -32,6 +35,7 @@ import play.mvc.Router.ActionDefinition;
 public class VireoEmailImpl implements VireoEmail {
 
 	// Spring dependencies
+	public SettingsRepository settingRepo;
 	public PersonRepository personRepo;
 	public SubmissionRepository subRepo;
 
@@ -63,19 +67,15 @@ public class VireoEmailImpl implements VireoEmail {
 	 * @param subRepo
 	 *            The submisison repository.
 	 */
-	protected VireoEmailImpl(SecurityContext context, PersonRepository personRepo, SubmissionRepository subRepo) {
-	
-		// Check our play requirements
-		if (Play.configuration.getProperty("mail.from") == null ||
-			Play.configuration.getProperty("mail.replyto") == null)
-			throw new IllegalArgumentException("The configuration parameters \"mail.from\" and \"mail.replyto\" are required for sending email and must be defined in the application.conf");
+	protected VireoEmailImpl(SecurityContext context, PersonRepository personRepo, SubmissionRepository subRepo, SettingsRepository settingRepo) {
 		
+		this.settingRepo = settingRepo;
 		this.personRepo = personRepo;
 		this.subRepo = subRepo;
-	
+
 		// Set the default from address
-		this.setFrom(Play.configuration.getProperty("mail.from"));
-		this.setReplyTo(Play.configuration.getProperty("mail.replyto"));
+		this.setFrom(settingRepo.getConfigValue(AppConfig.EMAIL_FROM));
+	 	this.setReplyTo(settingRepo.getConfigValue(AppConfig.EMAIL_REPLY_TO));
 		
 		// Check to see if the current person want's to be CC'ed
 		Person person = context.getPerson();
@@ -192,22 +192,49 @@ public class VireoEmailImpl implements VireoEmail {
 	public InternetAddress getFrom() {
 		return _from;
 	}
-
+	
+	
+	/**
+	 * Set the from address.
+	 * 
+	 * @param email
+	 *            An email address
+	 */
 	@Override
 	public void setFrom(String email) {
 		setFrom(email, null);
 	}
 
+	/**
+	 * Set the from address.
+	 * 
+	 * @param email
+	 *            An email address
+	 * @param name
+	 *            A descriptive name.
+	 */
 	@Override
 	public void setFrom(String email, String name) {
 		setFrom(createAddress(email, name));
 	}
 
+	/**
+	 * Set the new from address
+	 * 
+	 * @param person
+	 *            The person object.
+	 */
 	@Override
 	public void setFrom(Person person) {
 		setFrom(createAddress(person));
 	}
 	
+	/**
+	 * Set the from address
+	 * 
+	 * @param address
+	 *            The address
+	 */
 	@Override
 	public void setFrom(InternetAddress address) {
 		_from = validateAddress(address);
@@ -302,17 +329,29 @@ public class VireoEmailImpl implements VireoEmail {
 		}
 		
 		// Build a default success message
-		String recipients = "";
+		String TOrecipients = "";
 		for (InternetAddress address : to) {
-			if (recipients.length() != 0)
-				recipients += ", ";
+			if (TOrecipients.length() != 0)
+				TOrecipients += ", ";
 			if (address.getPersonal() != null)
-				recipients += address.getPersonal();
+				TOrecipients += address.getPersonal();
 			else
-				recipients += address.getAddress();
+				TOrecipients += address.getAddress();
 		}
-		
-		return String.format("Email sent to %1s; %2s: '%3s'",recipients,subject,message);
+		String CCrecipients = "";
+		for (InternetAddress address : cc) {
+			if (CCrecipients.length() != 0)
+				CCrecipients += ", ";
+			if (address.getPersonal() != null)
+				CCrecipients += address.getPersonal();
+			else
+				CCrecipients += address.getAddress();
+		}
+		String ccString = "";
+		if ( CCrecipients.length() > 0) {
+			ccString = String.format(" and cc to: [ %1s ]", CCrecipients);
+		}
+		return String.format("Email sent to: [ %1s ]" + ccString + "; %2s: '%3s'",TOrecipients,subject,message);
 		
 	}
 

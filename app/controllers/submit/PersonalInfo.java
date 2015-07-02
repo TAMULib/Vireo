@@ -1,23 +1,35 @@
 package controllers.submit;
 
-import static org.tdl.vireo.constant.AppConfig.*;
-import static org.tdl.vireo.constant.FieldConfig.*;
+import static org.tdl.vireo.constant.AppConfig.SUBMIT_PERSONAL_INFO_STICKIES;
+import static org.tdl.vireo.constant.FieldConfig.COLLEGE;
+import static org.tdl.vireo.constant.FieldConfig.CURRENT_PHONE_NUMBER;
+import static org.tdl.vireo.constant.FieldConfig.CURRENT_POSTAL_ADDRESS;
+import static org.tdl.vireo.constant.FieldConfig.DEGREE;
+import static org.tdl.vireo.constant.FieldConfig.DEPARTMENT;
+import static org.tdl.vireo.constant.FieldConfig.MAJOR;
+import static org.tdl.vireo.constant.FieldConfig.PERMANENT_EMAIL_ADDRESS;
+import static org.tdl.vireo.constant.FieldConfig.PERMANENT_PHONE_NUMBER;
+import static org.tdl.vireo.constant.FieldConfig.PERMANENT_POSTAL_ADDRESS;
+import static org.tdl.vireo.constant.FieldConfig.PROGRAM;
+import static org.tdl.vireo.constant.FieldConfig.STUDENT_BIRTH_YEAR;
+import static org.tdl.vireo.constant.FieldConfig.STUDENT_FIRST_NAME;
+import static org.tdl.vireo.constant.FieldConfig.STUDENT_LAST_NAME;
+import static org.tdl.vireo.constant.FieldConfig.STUDENT_MIDDLE_NAME;
+import static org.tdl.vireo.constant.FieldConfig.STUDENT_ORCID;
 
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 
 import org.tdl.vireo.constant.AppConfig;
-import org.tdl.vireo.constant.FieldConfig;
 import org.tdl.vireo.model.College;
-import org.tdl.vireo.model.Configuration;
 import org.tdl.vireo.model.Degree;
 import org.tdl.vireo.model.Department;
 import org.tdl.vireo.model.Major;
@@ -28,10 +40,13 @@ import org.tdl.vireo.model.RoleType;
 import org.tdl.vireo.model.Submission;
 import org.tdl.vireo.services.Utilities;
 
-import au.com.bytecode.opencsv.CSVReader;
 import play.Logger;
 import play.Play;
+import play.mvc.Router;
+import play.mvc.Router.ActionDefinition;
+import au.com.bytecode.opencsv.CSVReader;
 import controllers.Application;
+import controllers.Application.SubmissionStatus;
 import controllers.Security;
 
 /**
@@ -74,18 +89,10 @@ public class PersonalInfo extends AbstractSubmitStep {
 		Submission sub;
 		// Check if this is a new submission.
 		if (subId == null) {
-			// Do we allow multiple submissions?
-			boolean allowMultiple = settingRepo.getConfigBoolean(ALLOW_MULTIPLE_SUBMISSIONS);
-			
-			if (!allowMultiple) {
-				// Check if this user already has another submission open.
-				List<Submission> otherSubmissions = subRepo.findSubmission(context.getPerson());
-				
-				for (Submission otherSubmission : otherSubmissions) {
-					if (otherSubmission.getState().isActive() || otherSubmission.getState().isInProgress()) {
-						error("Multiple submissions are not allowed, and the submitter already has another submission.");
-					}
-				}
+			SubmissionStatus subStatus = new SubmissionStatus();
+			// if we don't allow multiple submissions and we already submitted once before
+			if (!subStatus.getAllowMultiple() && subStatus.getHasSubmissions()) {
+				error("Multiple submissions are not allowed, and the submitter already has another submission.");
 			}
 			// Create a submission with default data on it.
 			sub = subRepo.createSubmission(submitter);
@@ -107,8 +114,6 @@ public class PersonalInfo extends AbstractSubmitStep {
 				sub.setDegree(submitter.getCurrentDegree());
 			if (isFieldEnabled(MAJOR))
 				sub.setMajor(submitter.getCurrentMajor());
-			if (isFieldEnabled(STUDENT_ORCID))
-				sub.setOrcid(submitter.getOrcid());
 			sub.save();
 			subId = sub.getId();
 			Logger.info("%s (%d: %s) has started submission #%d.",
@@ -117,6 +122,11 @@ public class PersonalInfo extends AbstractSubmitStep {
 					submitter.getEmail(),
 					sub.getId());
 			
+			// make sure we redirect to the new submission's personalInfo page so we don't re-create new submissions on page refreshes
+			Map<String,Object> routeArgs = new HashMap<String,Object>();
+			routeArgs.put("subId", sub.getId());
+			ActionDefinition newSub = Router.reverse("submit.PersonalInfo.personalInfo", routeArgs);
+			redirect(newSub.url);
 			
 		} else {
 			// Retrieve the existing submission
@@ -241,11 +251,26 @@ public class PersonalInfo extends AbstractSubmitStep {
 			if (isFieldEnabled(STUDENT_ORCID)) {
 				// Don't set the ORCiD if it's formatted incorrect.
 				if(orcid != null && orcid.trim().length() > 0) {
-					if(Utilities.validateOrcidFormat(Utilities.formatOrcidAsDashedId(orcid)))
+					if(Utilities.validateOrcidFormat(Utilities.formatOrcidAsDashedId(orcid))) {
+						// Verify the ORCID id by pinging their API
+						boolean orcidVerify = true;
+						if (settingRepo.getConfigBoolean(AppConfig.ORCID_VALIDATION)) {
+							if (settingRepo.getConfigBoolean(AppConfig.ORCID_AUTHENTICATION))
+								orcidVerify = Utilities.verifyOrcid(orcid, sub.getStudentFirstName(), sub.getStudentLastName());
+							else
+								orcidVerify = Utilities.verifyOrcid(orcid);
+						}
+						if (!orcidVerify) {
+							if (settingRepo.getConfigBoolean(AppConfig.ORCID_AUTHENTICATION))
+								validation.addError("orcid","The given ORCiD could not be either validated or authenticated.");
+							else
+								validation.addError("orcid","The given ORCiD could not be validated.");
+						}
 						sub.setOrcid(orcid);
-					else
+					}
+					else {
 						validation.addError("orcid","Your ORCiD must be formatted XXXX-XXXX-XXXX-XXXX");
-						
+					}						
 				} else {
 					sub.setOrcid(orcid);
 				}
@@ -367,8 +392,41 @@ public class PersonalInfo extends AbstractSubmitStep {
 		}
 		
 		String grantor = settingRepo.getConfigValue(AppConfig.GRANTOR,"Unknown Institution");
+		
+		// Get a list of disabled Degree+Majors for this user
+		List<Submission> submissions = subRepo.findSubmission(submitter);
+		// helper class to keep degree/major pairs
+		class DegMaj{
+			public String degree;
+			public String major;
+			// overriden to get .contains() to work with this object type
+			@Override
+			public boolean equals(Object obj) {
+			    if(obj instanceof DegMaj) {
+			    	DegMaj myObj = (DegMaj)obj;
+			    	if(this.degree != null && this.degree.equals(myObj.degree) && this.major != null && this.major.equals(myObj.major)) {
+			    		return true;
+			    	} else if (this.degree == myObj.degree && this.major == myObj.major) {
+			    		return true;
+			    	}
+			    }
+			    return false;
+			}
+		}
+		List<DegMaj> disabledDegMaj = new ArrayList<DegMaj>();
+		for(Submission submission : submissions) {
+			DegMaj temp = new DegMaj();
+			temp.degree = submission.getDegree(); 
+			temp.major = submission.getMajor();
+			// only add it if it's not already in the list and if it's not the one for the current submission
+			if(!disabledDegMaj.contains(temp) && (sub.getDegree() != null && sub.getMajor() != null) && !(sub.getDegree().equals(temp.degree) && sub.getMajor().equals(temp.major))) {
+				disabledDegMaj.add(temp);
+			} else if (!disabledDegMaj.contains(temp) && (sub.getDegree() == null || sub.getMajor() == null)) {
+				disabledDegMaj.add(temp);
+			}
+		}
 
-		renderTemplate("Submit/personalInfo.html",submitter, subId, disabledFields, stickies,
+		renderTemplate("Submit/personalInfo.html",submitter, subId, disabledFields, stickies, disabledDegMaj,
 
 				// Form data
 				firstName, middleName, lastName, orcid, birthYear, grantor, program, college, department, 
@@ -403,7 +461,7 @@ public class PersonalInfo extends AbstractSubmitStep {
 		}
 		if (isFieldRequired(STUDENT_MIDDLE_NAME) && isEmpty(sub.getStudentMiddleName()))
 			validation.addError("middleName","Your middle name is required");
-		
+
 		//ORCiD
 		if (isFieldRequired(STUDENT_ORCID) && isEmpty(sub.getOrcid()))
 			validation.addError("orcid","Your ORCiD is required");
@@ -445,7 +503,7 @@ public class PersonalInfo extends AbstractSubmitStep {
 		// Major
 		if (sub.getMajor() != null && !isValidMajor(sub.getMajor()))
 			validation.addError("major","The major selected is not valid");
-		if (isFieldRequired(COLLEGE) && isEmpty(sub.getMajor())) 
+		if (isFieldRequired(MAJOR) && isEmpty(sub.getMajor())) 
 			validation.addError("major","Major is required");
 		
 		// Permanent Phone

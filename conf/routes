@@ -22,6 +22,7 @@ GET     /profile                                Authentication.profile
 ### Advisor URL
 *       /advisor/{token}/review                 Advisor.review
 *       /advisor/{token}/file/{attachmentId}/{name}	Advisor.viewAttachment
+*       /advisor/{token}/reviewJSON             Advisor.reviewJSON
 
 ### New Submissions
 *       /submit/{subId}/personalInfo            submit.PersonalInfo.personalInfo
@@ -37,6 +38,10 @@ GET     /profile                                Authentication.profile
 *		/submit/{subId}/view					Student.submissionView
 *       /submit/{subId}/corrections             Student.correctionsComplete
 *       /submit/{subId}/delete                  Student.submissionDelete
+POST    /submit/{subId}/addMessage				Student.submissionAddMessageJSON
+POST    /submit/{subId}/uploadPrimaryDocument	Student.submissionUploadPrimaryDocumentJSON
+POST    /submit/{subId}/uploadAdditionalDocument Student.submissionUploadAdditionalDocumentJSON
+POST    /submit/{subId}/removeAdditionalDocuments Student.submissionRemoveAdditionalDocumentsJSON
 
 GET     /submit/{subId}/file/{attachmentId}/{name} Student.viewAttachment
 
@@ -56,11 +61,10 @@ POST	/admin/list/batch/assign				FilterTab.batchAssign
 POST	/admin/list/batch/comment				FilterTab.batchComment
 
 ### View Tab
-*       /admin/view/?                           ViewTab.view
-GET		/admin/view/{subId}						ViewTab.view
 POST	/admin/view/sendAdvisorEmail			ViewTab.sendAdvisorEmail
 POST	/admin/view/update						ViewTab.updateJSON
 POST	/admin/view/updateGraduationDate		ViewTab.updateGraduationDateJSON
+POST	/admin/view/updateEmbargos			ViewTab.embargoJSON
 POST	/admin/view/updateCommitteeMember		ViewTab.updateCommitteeMemberJSON
 POST	/admin/view/addCommitteeMember			ViewTab.addCommitteeMemberJSON
 POST	/admin/view/removeCommitteeMember		ViewTab.removeCommitteeMemberJSON
@@ -72,7 +76,9 @@ POST	/admin/view/changeAssignedTo			ViewTab.changeAssignedTo
 POST	/admin/view/changeSubmissionDate		ViewTab.changeSubmissionDate
 POST	/admin/view/retrieveTemplate			ViewTab.retrieveTemplateJSON
 POST	/admin/view/updateCustomAction			ViewTab.updateCustomActionsJSON
-GET		/admin/view/viewFile/{id}/{name}		ViewTab.viewFile
+*		/admin/view/{subId}						ViewTab.view
+GET		/admin/view/{subId}/viewFile/{id}/{name} ViewTab.viewFile
+*       /admin/view/?                           ViewTab.view
 
 ### Settings Tab
 GET     /admin/settings/?                       SettingsTab.settingsRedirect
@@ -89,10 +95,10 @@ POST    /admin/settings/configurable/update     settings.ConfigurableSettingsTab
 POST	/admin/settings/updateProfile			SettingsTab.updateProfileJSON
 POST    /admin/settings/user/update             settings.UserPreferencesTab.updateUserPreferencesJSON
 POST    /admin/settings/applications/update     settings.ApplicationSettingsTab.updateApplicationSettingsJSON
+POST    /admin/settings/email/update     		settings.EmailSettingsTab.updateEmailSettingsJSON
 POST    /admin/settings/submission/update       settings.SubmissionSettingsTab.updateSubmissionSettingsJSON
 POST    /admin/settings/themes/update           settings.ThemeSettingsTab.updateThemeSettingsJSON
 POST	/admin/settings/themes/uploadLogos		settings.ThemeSettingsTab.uploadLogos
-POST    /admin/settings/email/update            settings.EmailSettingsTab.updateEmailSettingsJSON
 
 ### Settings tab - Actions
 POST    /admin/settings/actions/add             settings.ApplicationSettingsTab.addCustomActionJSON
@@ -115,6 +121,12 @@ POST    /admin/settings/members/update          settings.ApplicationSettingsTab.
 POST    /admin/settings/submission/sticky       settings.SubmissionSettingsTab.updateStickySettingsJSON
 GET     /admin/settings/submission/reset        settings.SubmissionSettingsTab.resetSettings
 
+### Settings tab - Workflow Email Rules
+POST    /admin/settings/email/rules/add         settings.EmailSettingsTab.addEditEmailWorkflowRuleJSON
+POST    /admin/settings/email/rules/remove      settings.EmailSettingsTab.removeEmailWorkflowRuleJSON
+POST    /admin/settings/email/rules/enable      settings.EmailSettingsTab.enableEmailWorkflowRuleJSON
+POST    /admin/settings/email/rules/disable     settings.EmailSettingsTab.disableEmailWorkflowRuleJSON
+
 ### Settings tab - Email Templates
 POST    /admin/settings/templates/add           settings.EmailSettingsTab.addEmailTemplateJSON
 POST    /admin/settings/templates/retrieve      settings.EmailSettingsTab.retrieveEmailTemplateJSON
@@ -130,8 +142,7 @@ GET     /admin/settings/embargos/removeAll      settings.ConfigurableSettingsTab
 GET     /admin/settings/embargos/alphabetize    settings.ConfigurableSettingsTab.alphabetizeAllEmbargoTypes
 
 ## Settings tab - Colleges
-POST    /admin/settings/colleges/add            settings.ConfigurableSettingsTab.addCollegeJSON
-POST    /admin/settings/colleges/edit           settings.ConfigurableSettingsTab.editCollegeJSON
+POST    /admin/settings/colleges/edit           settings.ConfigurableSettingsTab.addEditCollegeJSON
 POST    /admin/settings/colleges/remove         settings.ConfigurableSettingsTab.removeCollegeJSON
 POST    /admin/settings/colleges/reorder        settings.ConfigurableSettingsTab.reorderCollegesJSON
 GET     /admin/settings/colleges/removeAll      settings.ConfigurableSettingsTab.removeAllColleges
@@ -139,20 +150,25 @@ GET     /admin/settings/colleges/alphabetize    settings.ConfigurableSettingsTab
 
 
 ## Settings tab - Programs
-POST    /admin/settings/programs/add            settings.ConfigurableSettingsTab.addProgramJSON
-POST    /admin/settings/programs/edit           settings.ConfigurableSettingsTab.editProgramJSON
+POST    /admin/settings/programs/edit           settings.ConfigurableSettingsTab.addEditProgramJSON
 POST    /admin/settings/programs/remove         settings.ConfigurableSettingsTab.removeProgramJSON
 POST    /admin/settings/programs/reorder        settings.ConfigurableSettingsTab.reorderProgramsJSON
 GET     /admin/settings/programs/removeAll      settings.ConfigurableSettingsTab.removeAllPrograms
 GET     /admin/settings/programs/alphabetize    settings.ConfigurableSettingsTab.alphabetizeAllPrograms
 
 ## Settings tab - Departments
-POST    /admin/settings/departments/add         settings.ConfigurableSettingsTab.addDepartmentJSON
-POST    /admin/settings/departments/edit        settings.ConfigurableSettingsTab.editDepartmentJSON
+POST    /admin/settings/departments/edit        settings.ConfigurableSettingsTab.addEditDepartmentJSON
 POST    /admin/settings/departments/remove      settings.ConfigurableSettingsTab.removeDepartmentJSON
 POST    /admin/settings/departments/reorder     settings.ConfigurableSettingsTab.reorderDepartmentsJSON
 GET     /admin/settings/departments/removeAll   settings.ConfigurableSettingsTab.removeAllDepartments
 GET     /admin/settings/departments/alphabetize settings.ConfigurableSettingsTab.alphabetizeAllDepartments
+
+## Settings tab - Administrative Groups
+POST    /admin/settings/adminGroups/edit        settings.ConfigurableSettingsTab.addEditAdministrativeGroupJSON
+POST    /admin/settings/adminGroups/remove      settings.ConfigurableSettingsTab.removeAdministrativeGroupJSON
+POST    /admin/settings/adminGroups/reorder     settings.ConfigurableSettingsTab.reorderAdministrativeGroupsJSON
+GET     /admin/settings/adminGroups/removeAll   settings.ConfigurableSettingsTab.removeAllAdministrativeGroups
+GET     /admin/settings/adminGroups/alphabetize settings.ConfigurableSettingsTab.alphabetizeAllAdministrativeGroups
 
 ## Settings tab - Majors
 POST    /admin/settings/majors/add              settings.ConfigurableSettingsTab.addMajorJSON

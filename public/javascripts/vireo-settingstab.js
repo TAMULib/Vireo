@@ -26,11 +26,25 @@
  * @param level
  *            The object's degree level (as an integere, and optional)
  */
-function displaySortableItem(type, editable, $element, id, name, level) {
-		
+function displaySortableItem(type, editable, $element, id, name, level, custom) {
+	
 	if (
-	    type == "action" ||
-	    type == "college" ||
+		type == "action"
+	   ) {
+		
+		if (editable) {
+			$element.replaceWith("<li id='" + id + "'><span class='editing'><input type='text' value='"+name+"' placeholder='"+name+"' id=\"name\"/>" +
+					"<label class=\"control-label\" for=\"add-action-isStudentVisible\">Is Student Visible</label>" +
+					"<div class=\"controls\">" +
+                    "<input type=\"checkbox\" "+(level ? "checked=\"checked\"" : "")+" placeholder=\"" + (level ? "true" : "") + "\" class=\"input-large\" id=\"add-action-isstudentvisible\"/>" +
+                    "<p class=\"help-block\">Is this action visible to the student?</p>" +
+                    "</div>" +
+                	"<i class='icon-remove'></i><i class='icon-ok'></i></span></li>");
+		} else {
+			$element.replaceWith("<li id='" + id + "'><a class='"+type+"-editable' href='#'><em class='icon-pencil'></em> " + name + (level ? " <em class=\"icon-globe\"></em>" : " <em class=\"icon-user\"></em>") + "</a></li>");
+		}
+		
+	} else if (
 	    type == "program" ||
 	    type == "department" ||
 	    type == "major" ||
@@ -45,6 +59,16 @@ function displaySortableItem(type, editable, $element, id, name, level) {
 			$element.replaceWith("<li id='" + id + "'><a class='"+type+"-editable' href='#'><em class='icon-pencil'></em> " + name + "</a></li>");
 		}
 	
+	} else if(
+		type == "college" 
+	) {
+
+		if (editable) {
+			$element.replaceWith("<li id='" + id + "'><span class='editing'><input type='text' value='"+name+"' placeholder='"+name+"'/><i class='icon-remove'></i><i class='icon-ok'></i></span></li>");
+		} else {
+			$element.replaceWith("<li id='" + id + "'><a class='"+type+"-editable' href='#'><em class='icon-pencil'></em> " + name + "</a></li>");
+		}
+
 	} else if (
 		type == "degree" ||
 		type == "documentType" ||
@@ -100,7 +124,7 @@ function displaySortableItem(type, editable, $element, id, name, level) {
 			$element.attr('id',id);
 			$element.html(
 					 "<div class='editing'>"+
-					 "   <span>" + name + "</span>" +
+					 "   <span>" + name + "</span>" + custom +
 					 "   <form class='form-horizontal' style='display: none;'>"+
 					 "       <fieldset>"+
 					 "           <div class='control-group'>"+
@@ -123,6 +147,7 @@ function displaySortableItem(type, editable, $element, id, name, level) {
 					 "           </div>"+
 					 "           <div class='control-group'>"+
 					 "               <div class='controls'>"+
+					 "                   <button id='edit-emailTemplate-copy' class='btn btn-primary'>Copy</button>"+
 					 "                   <button id='edit-emailTemplate-save' class='btn btn-primary'>Save</button>"+
 					 "                   <button id='edit-emailTemplate-delete' class='btn'>Delete</button>"+
 					 "                   <button id='edit-emailTemplate-cancel' class='btn'>Cancel</button>"+
@@ -144,10 +169,10 @@ function displaySortableItem(type, editable, $element, id, name, level) {
 			
 			if ($element.attr('id')) {
 				$element.find("form").slideToggle(null,function() {
-					$element.replaceWith("<li id='" + id + "'><a class='"+type+"-editable' href='#'><em class='icon-pencil'></em> " + name + "</a></li>");				
+					$element.replaceWith("<li id='" + id + "'><a class='"+type+"-editable' href='#'><em class='icon-pencil'></em> " + name + "</a>"+custom+"</li>");				
 				});
 			} else {
-				$element.replaceWith("<li id='" + id + "'><a class='"+type+"-editable' href='#'><em class='icon-pencil'></em> " + name + "</a></li>");
+				$element.replaceWith("<li id='" + id + "'><a class='"+type+"-editable' href='#'><em class='icon-pencil'></em> " + name + "</a>"+custom+"</li>");
 			}
 		}
 		
@@ -177,7 +202,17 @@ function swapToEditable(element) {
 	var type = id.substring(0,id.indexOf("_"));
 	
 	if (
-		type == "action" ||
+		type == "action"
+	   ) {
+		// Make the field editable
+		var name = jQuery.trim($element.find("a."+type+"-editable").text());
+		var isStudentVisible = ($element.find("em.icon-globe").length > 0);
+		while (name.indexOf("'") > -1) {
+			name = name.replace("'","&#39;");
+		}
+		
+		displaySortableItem(type, true, $element, id, name, isStudentVisible);
+	} else if (
 		type == "college" ||
 		type == "program" ||
 		type == "department" ||
@@ -220,8 +255,9 @@ function swapToEditable(element) {
 	  ) {
 		// Make the field editable
 		var name = jQuery.trim($element.find("a."+type+"-editable").text());
+		var custom = jQuery.trim($element.find("strong.custom_system_email_template")[0].outerHTML);
 		
-		displaySortableItem(type, true, $element, id, name);		
+		displaySortableItem(type, true, $element, id, name, undefined, custom);		
 	}
 }
 
@@ -244,7 +280,14 @@ function swapFromEditable(element) {
 
 	
 	if (
-		type == "action" ||
+		type == "action"
+	   ) {
+		// Make the field editable
+		var name = $element.find("input#name").attr("placeholder");
+		var isStudentVisible = $element.find("input#add-action-isstudentvisible").attr("placeholder");
+		
+		displaySortableItem(type, false, $element, id, name, isStudentVisible);
+	} else if (
 		type == "college" ||
 		type == "program" ||
 		type == "department" ||
@@ -267,10 +310,11 @@ function swapFromEditable(element) {
 	} else if (
 			type == "emailTemplate"
 	  ) {
-		// Make the field editable
+		// Make the field non-editable
 		var name = jQuery.trim($element.find("div.editing span").text());
+		var custom = jQuery.trim($element.find("strong.custom_system_email_template")[0].outerHTML);
 		
-		displaySortableItem(type, false, $element, id, name);		
+		displaySortableItem(type, false, $element, id, name, undefined, custom);		
 	}
 
 }
@@ -344,7 +388,10 @@ function sortableSaveEditHandler(type,jsonURL) {
 
 		var id = jQuery(this).closest("li").attr('id');
 		var name = jQuery(this).closest("li").find("input").val();
-		var level = jQuery(this).closest("li").find("select").val(); 
+		var level = jQuery(this).closest("li").find("select").val();
+		if(type == "action") {
+			level = jQuery(this).closest("li").find("input#add-action-isstudentvisible").prop("checked");
+		}
 		jQuery("#"+type+"-list").addClass("waiting");
 
 		var successCallback = function(data) {
@@ -367,7 +414,7 @@ function sortableSaveEditHandler(type,jsonURL) {
 		var data = {};
 		data[type+'Id'] = id;
 		data["name"] = name;
-		if (level)
+		if (typeof(level) != "undefined")
 			data["level"] = level;
 				
 		jQuery.ajax({
@@ -515,10 +562,15 @@ function saveAddActionHandler(type, jsonURL) {
 				jQuery("#add-"+type+"-subject").closest('.control-group').removeClass("error");
 			if (jQuery("#add-"+type+"-message").length > 0)
 				jQuery("#add-"+type+"-message").closest('.control-group').removeClass("error");
+			if(type == "action") {
+				jQuery("#add-action-isstudentvisible").closest('.control-group').removeClass("error");
+			}
+			
 			clearAlert(type+"-add");
 			
 			var $newElement = jQuery("<li/>").appendTo(jQuery("#"+type+"-list"));
-			displaySortableItem(type,false,$newElement, type+"_"+data.id, data.name, data.level);
+			syncTemplateWithWorkflowRules(data);
+			displaySortableItem(type,false,$newElement, type+"_"+data.id, data.name, data.level, data.custom);
 
 			jQuery("#add-"+type+"-dialog").slideToggle();
 			if (jQuery("#"+type+"-remove").length > 0)
@@ -526,6 +578,9 @@ function saveAddActionHandler(type, jsonURL) {
 			jQuery("#add-"+type+"-name").val("");
 			if (jQuery("#add-"+type+"-level").length > 0)
 				jQuery("#add-"+type+"-level").val("-1");
+			if(type == "action") {
+				jQuery("#add-action-isstudentvisible").attr('checked', false);
+			}
 			jQuery("#add-"+type+"-dialog .control-group").removeClass("error");
 		}
 
@@ -541,6 +596,10 @@ function saveAddActionHandler(type, jsonURL) {
 			if (jQuery("#add-"+type+"-message").length > 0)
 				jQuery("#add-"+type+"-message").closest('.control-group').addClass("error");
 			
+			if(type == "action") {
+				jQuery("#add-action-isstudentvisible").closest('.control-group').addClass("error");
+			}
+			
 			displayAlert(type+"-add","Unable to add "+type, message);
 		}
 
@@ -549,12 +608,19 @@ function saveAddActionHandler(type, jsonURL) {
 		data.name = jQuery("#add-"+type+"-name").val();
 		if (jQuery("#add-"+type+"-level").length > 0)
 			data.level = jQuery("#add-"+type+"-level").val();
+
+		if (jQuery("#add-"+type+"-emails").length > 0)
+			data.emails = jQuery("#add-"+type+"-emails").val();
 		
 		if (jQuery("#add-"+type+"-subject").length > 0)
 			data.subject = jQuery("#add-"+type+"-subject").val();
 		
 		if (jQuery("#add-"+type+"-message").length > 0)
 			data.message = jQuery("#add-"+type+"-message").val();
+		
+		if(type == "action") {
+			data.isStudentVisible = jQuery("#add-action-isstudentvisible").prop('checked');
+		}
 
 		jQuery.ajax({
 			url : jsonURL,
@@ -579,7 +645,7 @@ function saveAddActionHandler(type, jsonURL) {
 }
 
 /**
- * Handler for the cancel button when adding an action. This will clear out the
+ * Handler for the cancel button when adding an action. This will  out the
  * form and fadeout dialog form.
  * 
  * @param type
@@ -612,6 +678,23 @@ function cancelAddActionHandler(type) {
 
 }
 
+function copyActionHandler(type) {
+	return function() {
+		if (jQuery("#add-"+type+"-dialog").is(":hidden")) 
+			jQuery("#add-"+type+"-dialog").slideToggle();
+		
+		if (jQuery("#bulk-add-"+type+"-dialog").is(":visible")) 
+			jQuery("#bulk-add-"+type+"-dialog").slideToggle();
+		var $element = jQuery(this).closest("li");
+		jQuery("#add-"+type+"-name").val($element.find("#edit-"+type+"-name").val());
+		jQuery("#add-"+type+"-level").val($element.find("#edit-"+type+"-level").val());
+		jQuery("#add-"+type+"-subject").val($element.find("#edit-"+type+"-subject").val());
+		jQuery("#add-"+type+"-message").val($element.find("#edit-"+type+"-message").val());
+				
+		jQuery("#add-"+type+"-dialog .control-group").removeClass("error");
+		return false;
+	}
+}
 
 /**
  * Retrieve an email template from the server and fill in it's editable fields.
@@ -639,7 +722,11 @@ function retrieveEmailTemplateHandler(jsonURL) {
 
 			if (data.system) {
 				jQuery("#"+id+" #edit-emailTemplate-name").attr("disabled","true");
-				jQuery("#"+id+" #edit-emailTemplate-name").attr("title","System defined templates may not be renamed or deleted.");
+				jQuery("#"+id+" #edit-emailTemplate-subject").attr("disabled","true");
+				jQuery("#"+id+" #edit-emailTemplate-message").attr("disabled","true");
+				jQuery("#"+id+" #edit-emailTemplate-save").attr("disabled","true");
+								
+				jQuery("#"+id+" #edit-emailTemplate-name").attr("title","System defined templates may not be modified or deleted.");
 				
 				jQuery("#"+id+" form fieldset").prepend("<div class='control-group warning'><label class='control-label'><p><strong>System Template</strong></p></label><div class='controls'><p id='system-warning' class='help-inline'></p></div></div>");
 				if (data.name == "SYSTEM Initial Submission") {
@@ -653,7 +740,7 @@ function retrieveEmailTemplateHandler(jsonURL) {
 				} else {
 					jQuery("#"+id+" #system-warning").html("This system defined template.");
 				}
-				jQuery("#"+id+" #system-warning").append(" The template may not be renamed or deleted.");
+				jQuery("#"+id+" #system-warning").append(" The template may not be modified or deleted.");
 				
 				
 				jQuery("#"+id+" #edit-emailTemplate-delete").addClass("disabled","true");
@@ -751,6 +838,633 @@ function removeEmailTemplateHandler(jsonURL) {
 }
 
 /**
+ * Handles the ui interactions for the workflow email rules
+ * 
+ * @param jsonURL
+ *            The url where templates may be saved.
+ * @returns A Callback function
+ */
+function workflowEmailRuleHandler($this, $select, options) {
+
+	$select.html("");	
+	
+	var message = options.length > 0 ? "Choose a "+$this.children("option:selected").text() : "No " +$this.children("option:selected").text()+ " added"
+	$select.html("")
+	$select.html("<option value=''>"+message+"</option>");
+
+	jQuery(options).each(function(key, val) {
+		var option = "<option value="+val.id+">"+val.name+"</option>"
+		$select.append(option);
+	});
+}
+
+/**
+ * Create a workflow email rule
+ * 
+ * @param jsonURL
+ *            The url where templates may be saved.
+ * @returns A Callback function
+ */
+function createWorkflowEmailRuleHandler(jsonURL) {
+	return function() {
+		var state = $(this).attr("data-state");
+		console.log(state);
+		var id = "#"+ state + "-workflow-add";
+		var $element = $(id);
+		var $targetElem = $("#"+state+"-workflow-list");
+
+		var reqData = new Object;
+		reqData.state = state;
+		reqData.conditionCategory = ""
+		reqData.conditionIDString = ""
+		reqData.recipientType = ""
+		reqData.templateString = ""
+		$targetElem.addClass("waiting");
+		
+		var successCallback = function(data) {
+			
+			$targetElem.removeClass("waiting");
+
+			var newRow = "<tr id='"+data.state+"-"+data.id+"'>"
++   "<td class=\"td-icon\">"+(data.isSystem ? "<em class=\"icon-globe\"></em>" : "<em class=\"icon-user\"></em>")+"</td>"
++	"<td><span class='"+data.state+"-"+data.id+"-condition' style='display: none;'>if</span></td>" 
++	"<td class='edit-box'>" 
++		"<ul class='unstyled'>" 
++			"<li class='edit'>" 
++				"<span id='"+data.state+"-"+data.id+"-conditionCategory' class='select' data-state='"+data.state+"' data-id='"+data.id+"' data-rulefieldname='conditionCategory'><i class='icon-pencil'></i> none</span>"
++			"</li>"
++		"</ul>" 
++	"</td>"
++	"<td>"
++	"<span class='"+data.state+"-"+data.id+"-condition' style='display: none;'>=</span>"
++	"</td>"
++	"<td class='edit-box'>" 
++		"<ul class='unstyled "+data.state+"-"+data.id+"-condition' style='display: none;'>"
++			"<li class='edit'>" 
++				"<span id='"+data.state+"-"+data.id+"-condition' class='empty autocomplete' data-id='"+data.id+"' data-state='"+data.state+"' data-rulefieldname='condition'>" 
++					"<i class='icon-pencil'></i> none" 											
++				"</span>" 
++			"</li>" 
++		"</ul>" 
++	"</td>" 
++	"<td><span class='"+data.state+"-"+data.id+"-condition' style='display: none;''>then </span>email</td>" 
++	"<td class='edit-box'>" 
++		"<ul class='unstyled'>" 
++			"<li class='edit'>" 
++				"<span id='"+data.state+"-"+data.id+"-template' class='empty select' data-id='"+data.id+"' data-state='"+data.state+"' data-rulefieldname='templateString'>" 
++					"<i class='icon-pencil'></i>   none"											
++				"</span>"
++			"</li>" 
++		"</ul>" 
++	"</td>" 
++	"<td class='edit-box'>" 
++		"<ul class='unstyled'>" 
++			"<li class='edit'>" 
++				"<span id='"+data.state+"-"+data.id+"-recipientType' class='empty select' data-id='"+data.id+"' data-state='"+data.state+"' data-rulefieldname='recipientType'>" 
++					"<i class='icon-pencil'></i>   none"											
++				"</span>"
++			"</li>" 
++		"</ul>" 
++	"</td>"
++	"<td class=\"td-icon\">"
++		"<a href='#' class='removeRule' data-id='"+data.id+"'><em class='icon-trash'></em>"
++	"</a></td>"
++   "<td class=\"td-icon\"><a href=\"#\" " + (data.isDisabled ? "class=\"enableRule\"" : "class=\"disableRule\"") + "data-id=\""+data.id+"\"><em class=\"icon-"+ (data.isDisabled ? "play" : "pause")+"\"></em></a></td>"
++ "</tr>"
+
+			$targetElem.append(newRow);
+
+
+			return false;
+		}
+
+		var failureCallback = function(message) {
+			$targetElem.removeClass("waiting");
+			return false;
+		}
+
+		
+		jQuery.ajax({
+			url : jsonURL,
+			data : {
+				id: null,
+				stateString: state,
+				conditionCategory: reqData.conditionCategory,
+				conditionIDString: reqData.conditionIDString,
+				recipientString: reqData.recipientString,
+				templateString: reqData.templateString
+			},
+			dataType : 'json',
+			type : 'POST',
+			success : function(data) {
+				console.log(data);
+				if (data.success) {
+					successCallback(data);
+				} else {
+					failureCallback(data.message)
+				}
+			},
+			error : function(e) {
+				console.log(e);
+				failureCallback("Unable to communicate with the server.");
+			}
+
+		});
+
+		return false;
+	};
+}
+
+/**
+ * Remove a workflow email rule
+ * 
+ * @param jsonURL
+ *            The url where templates may be saved.
+ * @returns A Callback function
+ */
+function removeWorkflowEmailRuleHandler(jsonURL) {
+	return function() {
+		
+		$this = $(this);
+
+		$this.html("confirm remove?");
+
+		
+		$this.click(function() {
+			
+			var backupHTML = $this.html();
+			$this.html("");	
+			$this.parents("tr").addClass("waiting");
+
+			successCallback = function() {
+				$this.parents("tr").fadeOut(300);
+			}
+
+			var failureCallback = function(message) {
+				$this.html(backupHTML);	
+				$this.parents("tr").removeClass("waiting");
+				return false;
+			}
+			
+			jQuery.ajax({
+				url : jsonURL,
+				data : {
+					ruleID: $this.attr('data-id')
+				},
+				dataType : 'json',
+				type : 'POST',
+				success : function(data) {
+
+					if (data.success) {
+						successCallback(data);
+					} else {
+						failureCallback(data.message)
+					}
+
+				},
+				error : function(e) {
+					console.log(e);
+					failureCallback("Unable to communicate with the server.");
+				}
+			});
+
+		});
+		
+
+		return false;
+	}
+}
+
+/**
+ * Toggle a workflow email rule being disabled
+ * 
+ * @param jsonURL
+ *            The url where templates may be saved.
+ * @returns A Callback function
+ */
+function toggleWorkflowEmailRuleHandler(jsonURL, disable) {
+	return function() {
+		
+		$this = $(this);
+		$this.html("confirm "+(disable ? "disable" : "enable")+"?");
+
+		
+		$this.click(function() {
+			var backupHTML = $this.html();
+			$this.html("");	
+			$this.parents("tr").addClass("waiting");
+
+			successCallback = function() {
+				$this.parents("tr").removeClass("waiting");
+				$this.parents("td").html((disable ? "<a href=\"#\" class=\"enableRule\" data-id=\""+$this.attr('data-id')+"\"><em class=\"icon-play\"></em></a>" : "<a href=\"#\" class=\"disableRule\" data-id=\""+$this.attr('data-id')+"\"><em class=\"icon-pause\"></em></a>"));
+			}
+
+			var failureCallback = function(message) {
+				if(backupHTML.length > 0) {
+					$this.parents("tr").removeClass("waiting");
+					$this.parents("td").html((disable ? "<a href=\"#\" class=\"disableRule\" data-id=\""+$this.attr('data-id')+"\"><em class=\"icon-pause\"></em></a>" : "<a href=\"#\" class=\"enableRule\" data-id=\""+$this.attr('data-id')+"\"><em class=\"icon-play\"></em></a>"));
+					displayAlert("emailWorkflowRule-toggle","Unable to toggle email workflow rule: ", message);
+				}
+				return false;
+			}
+			
+			jQuery.ajax({
+				url : jsonURL,
+				data : {
+					ruleID: $this.attr('data-id')
+				},
+				dataType : 'json',
+				type : 'POST',
+				success : function(data) {
+
+					if (data.success) {
+						successCallback(data);
+					} else {
+						failureCallback(data.message)
+					}
+
+				},
+				error : function(e) {
+					console.log(e);
+					failureCallback("Unable to communicate with the server.");
+				}
+			});
+
+		});
+		
+
+		return false;
+	}
+}
+
+/**
+ * Swap to input field function
+ */
+function swapToInputHandler(){	
+	return function(event) {
+		if(jQuery(this).closest(".editing").length == 0) {
+			jQuery(".icon-remove").click();
+
+			//Clean up
+			jQuery(".tooltip").remove();
+			jQuery(this).find(".tooltip-icon").remove();
+			jQuery("#backup").remove()
+
+			var editItem = jQuery(this);
+			
+			var value = jQuery.trim(escapeQuotes(editItem.text()));
+						
+			var checkValue = value.replace(/\t/g,"");
+			checkValue = checkValue.replace(/\n/g,"");
+			checkValue = checkValue.replace(/\r/g,"");
+			checkValue = checkValue.replace(" ","");
+			
+			if(checkValue=="none" || checkValue=="null" || checkValue == ""){
+				value="";
+				jQuery("body").append('<div id="backup"></div>');
+			} else {
+				//Make back up info			
+				jQuery("body").append('<div id="backup">'+editItem.html()+'</div>');
+			} 
+
+			if(editItem.hasClass("select")) {
+				var divID = editItem.attr("data-state")+'-workflowRule-'+editItem.attr("data-ruleFieldName");
+
+				var selectObj = jQuery("#"+divID+" select");
+				selectObj.attr("data-id", editItem.attr("data-id"));
+				selectObj.attr("data-state", editItem.attr("data-state"));
+				selectObj.attr("data-ruleFieldName", editItem.attr("data-ruleFieldName"));
+
+				//Select Drop Downs
+				var selectCode = '<div id="'+divID+'" class="editing select" >';
+				selectCode += jQuery("#"+divID).html();
+				selectCode += '<br /><i class="icon-remove" title="cancel"></i>&nbsp<i class="icon-ok" title="commit"></i></div>';
+				editItem.replaceWith(selectCode);
+				// if we're selecting recipientType, make sure to split string value
+				if(editItem.attr("data-ruleFieldName") == "recipientType" && value.indexOf('(') != -1) {
+					var newValue = value.substr(0, value.indexOf('(')-1);
+					jQuery("#"+divID+" .field option").each(function(){
+						if(jQuery(this).text()==newValue){
+							jQuery(this).attr("selected","selected");
+						} else {
+							jQuery(this).attr("selected", null);
+						}
+					});
+				} else {
+					jQuery("#"+divID+" .field option").each(function(){
+						if(jQuery(this).text()==value){
+							jQuery(this).attr("selected","selected");
+						}  else {
+							jQuery(this).attr("selected", null);
+						}
+					});
+				}
+				// if we're selecting AdminGroup as recipientType we need to dynamically add a new <select> with all of the jsDataObjects.adminGroupsArray as <options>
+				if(editItem.attr("data-ruleFieldName") == "recipientType") {
+					var div = jQuery("#"+divID);
+					var select = div.find(".field");
+					var addRemoveAdminGroup = function(obj) {
+						if(this instanceof Window != true) {
+							obj = this;
+						}
+						var selectedOption = $(obj).find("option:selected").val();
+						var newDivId = editItem.attr("data-state")+"-workflowRule-adminGroup";
+						if(selectedOption == "AdminGroup") {
+							var newSelectObj = jQuery("#"+newDivId+" select");
+							newSelectObj.attr("id", newDivId+"-select");
+							var newSelect = jQuery("#"+ newDivId).html();
+							select.after(newSelect);
+							var newValue = value.substring(value.indexOf('(')+1, value.indexOf(')'));
+							jQuery("#"+newDivId+"-select option").each(function(){
+								if(jQuery(this).text()==newValue){
+									jQuery(this).attr("selected","selected");
+								}
+							});
+						} else {
+							div.find("#"+newDivId+"-select").remove();
+						}
+					};
+					// set the on change listener
+					select.on("change", addRemoveAdminGroup);
+					// if we're editing, we need to set the default selected option
+					addRemoveAdminGroup(select);
+				}
+
+				
+			} else if(editItem.hasClass("autocomplete")) {
+
+				jQuery("#"+editItem.attr("data-state")+"-workflowRule-"+editItem.attr("data-ruleFieldName")+" input").attr("data-id", editItem.attr("data-id"));
+				jQuery("#"+editItem.attr("data-state")+"-workflowRule-"+editItem.attr("data-ruleFieldName")+" input").attr("data-state", editItem.attr("data-state"));
+				jQuery("#"+editItem.attr("data-state")+"-workflowRule-"+editItem.attr("data-ruleFieldName")+" input").attr("data-ruleFieldName", editItem.attr("data-ruleFieldName"));
+
+
+
+				// Autocomplete fields
+				var selectCode = '<div id="'+editItem.attr("data-state")+'-workflowRule-'+editItem.attr("data-ruleFieldName")+'" class="editing autocomplete">';
+				selectCode += jQuery("#"+editItem.attr("data-state")+"-workflowRule-"+editItem.attr("data-ruleFieldName")).html();
+				selectCode += '<br /><i class="icon-remove" title="cancel"></i>&nbsp<i class="icon-ok" title="commit"></i></div>';
+				editItem.replaceWith(selectCode);
+				
+				jQuery("#"+editItem.attr("id")+" .field").val(value);
+
+				var $categoryElem = $("#"+editItem.attr("id")+"Category");
+
+				switch($categoryElem.text().trim()) {
+				    case "College":
+				        $("#"+editItem.attr("data-state")+"-workflowRule-condition input").attr("data-source",$("#Submitted-workflowRule-condition input").attr("data-Colleges"));
+				        break;
+				    case "Department":
+				        $("#"+editItem.attr("data-state")+"-workflowRule-condition input").attr("data-source",$("#Submitted-workflowRule-condition input").attr("data-Departments"));
+				        break;
+				    case "Program":
+				        $("#"+editItem.attr("data-state")+"-workflowRule-condition input").attr("data-source",$("#Submitted-workflowRule-condition input").attr("data-Programs"));
+				        break;
+				    default:
+				        break;
+				}
+				
+			} else {
+				//Make back up info			
+				jQuery("body").append('<div id="backup">'+editItem.html()+'</div>')
+				
+				if (editItem.attr("data-primary"))
+					jQuery("#backup").attr("data-primary",editItem.attr("data-primary"));
+				if (editItem.attr("data-secondary"))
+					jQuery("#backup").attr("data-secondary",editItem.attr("data-secondary"));
+				if (editItem.attr("data-tertiary"))
+					jQuery("#backup").attr("data-tertiary",editItem.attr("data-tertiary"));
+			}
+
+			if(editItem.hasClass("autocomplete")) { 
+				// Autocomplete fields
+				var selectCode = '<div id="'+editItem.attr("id")+'" class="editing autocomplete" data-id="'+editItem.attr("data-id")+'" data-state="'+editItem.attr("data-state")+'" data-ruleFieldName="'+editItem.attr("data-ruleFieldName")+' data-oldID="'+$(this).attr("id")+'">';
+				selectCode += jQuery("#"+editItem.attr("id")+"Options").html();
+				selectCode += '<br /><i class="icon-remove" title="cancel"></i>&nbsp<i class="icon-ok" title="commit"></i></div>';
+				editItem.replaceWith(selectCode);
+				
+				jQuery("#"+editItem.attr("id")+" .field").val(value);
+				
+			} else {
+				//Input Fields				
+				editItem.replaceWith('<div id="'+editItem.attr("id")+'" class="editing"><input class="field" type="text" value="'+value+'" data-id="'+editItem.attr("data-id")+'" data-state="'+editItem.attr("data-state")+'" data-ruleFieldName="'+editItem.attr("data-ruleFieldName")+'" /><br /><i class="icon-remove" title="cancel"></i>&nbsp<i class="icon-ok" title="commit"></i></div>');
+			}			
+
+			event.stopPropagation();
+		}
+	}
+}
+
+/**
+ * This function cancels the currently edited field
+ * and replaces the content with a backup stored in 
+ * a hidden div (#backup)
+ */
+function cancelEditingHandler(){
+	return function() {
+		$this = jQuery(".icon-remove");
+		if($this.closest(".add").length){
+			jQuery(".add").remove();
+		} else {
+			var classValue = '';
+			var fieldItem;
+			if(jQuery(".editing").hasClass("select")){
+				classValue = classValue + 'select ';
+				fieldItem = jQuery(".editing select");
+			} else if(jQuery(".editing").hasClass("autocomplete")) { 
+				classValue = classValue + ' autocomplete';
+				fieldItem = jQuery(".editing input");
+			} else {		
+				fieldItem = jQuery(".editing input");
+			}
+
+			var id=fieldItem.attr(fieldItem.attr("data-state")+"-"+fieldItem.attr("data-id")+"-"+fieldItem.attr("data-ruleFieldName"));
+			
+			var currentValue = jQuery("#backup").html();
+			
+			if(!currentValue){
+				currentValue = '<i class="icon-pencil"></i> none';
+				classValue += " empty ";
+			}
+			
+			
+			jQuery(".editing").replaceWith('<span id="'+id+'" class="'+classValue+'" data-state="'+fieldItem.attr("data-state")+'" data-id="'+fieldItem.attr("data-id")+'" data-ruleFieldName="'+fieldItem.attr("data-ruleFieldName")+'">'+currentValue+'</span>');
+			
+		}
+		jQuery("#backup").remove();
+	}
+}
+
+/**
+ * This function commits changes for the currently
+ * edited field.
+ * 
+ * @param eventTarget (The reference element)
+ * @param jsonURL (The method to update generic items)
+ * @param graduationURL (The method to update graduation semester)
+ * @param committeeURL (The method to update committee members)
+ * @param subId (The submission id)
+ */
+function commitChangesHandler(eventTarget, jsonURL){
+	var classValue = "";
+	var ruleField;
+	if(jQuery(".editing").hasClass("select")){
+		classValue = classValue + 'select ';
+		$ruleField = jQuery(".editing select");
+	} else if(jQuery(".editing").hasClass("autocomplete")){
+		classValue = classValue + 'autocomplete ';
+		$ruleField = jQuery(".editing input");
+	} else {
+		$ruleField = jQuery(".editing input");
+	}
+	
+	var parent = eventTarget.parent();
+	
+	var ruleFieldName = $($ruleField[0]).attr("data-ruleFieldName");
+	var theValue = $($ruleField[0]).val();
+	
+	var id = $($ruleField[0]).attr("data-id");
+	var attrID = $($ruleField[0]).attr("data-state") +"-"+ $($ruleField[0]).attr("data-id") +"-"+ $($ruleField[0]).attr("data-ruleFieldName");
+	var stateString = $($ruleField[0]).attr("data-state");
+	var conditionCategory = "";
+	var conditionIDString = "";
+	var recipientString = "";
+	var templateString = "";
+	var templateStringCustom = "";
+
+
+	var currentConditionCategory = $("#"+attrID+"Category").text().trim().toLowerCase()+"sArray";
+
+	var adminGroupId = null;
+
+	switch(ruleFieldName) {
+	    case "conditionCategory":
+	        conditionCategory = theValue;
+	        break;
+	    case "condition":
+	        conditionString = theValue;
+	        $(jsDataObjects[currentConditionCategory]).each(function(key, condition) {
+	        	if(condition.name == theValue)
+	        		conditionIDString = condition.id;
+	        });
+	        break;
+	    case "recipientType":
+	        recipientString = theValue;
+	        // if recipientType is AdminGroup, set the adminGroupId too
+	        if(recipientString == "AdminGroup") {
+				adminGroupId = parseInt($($ruleField[1]).find("option:selected").val());
+	        }
+	        break;
+	    case "templateString":
+	        templateString = theValue;
+	        templateStringCustom = $ruleField.find("option:selected").html();
+	        break;
+	    default:
+	        break;
+	}
+
+	jQuery(".editing").replaceWith('<div class="'+attrID+' progress progress-striped active"><div class="bar" style="width:100%"></div></div>');
+	
+	var reqObj = {
+		stateString: stateString,
+		id: id,
+		conditionCategory: conditionCategory,
+		conditionIDString: conditionIDString,
+		recipientString: recipientString,
+		templateString: templateString
+	}
+	
+	// only pass adminGroup to ajax if it's set
+	if(adminGroupId != null) {
+		reqObj.AdminGroupId = adminGroupId;
+	}
+
+	jQuery.ajax({
+		url:jsonURL,
+		data: reqObj,
+		dataType:'json',
+		type:'POST',
+		
+		success:function(data){
+			
+			if(data.success) {
+
+				jQuery("div."+attrID).replaceWith('<span id="'+attrID+'" class="'+classValue+'" data-state="'+$($ruleField[0]).attr("data-state")+'" data-id="'+$($ruleField[0]).attr("data-id")+'" data-ruleFieldName="'+ruleFieldName+'"><i class="icon-pencil"></i> '+(ruleFieldName != "templateString" ? data[ruleFieldName] : templateStringCustom.length > data[ruleFieldName].length ? data[ruleFieldName] + "<strong class=\"custom_system_email_template\"> (*)</strong>" : data[ruleFieldName])+'</span>');
+
+				if(data.conditionCategory != "Always" && data.conditionCategory != "none" && data.conditionCategory != "") { //this condition is satisfied when selcting college, department or program
+					
+					$(jsDataObjects[data.conditionCategory.trim().toLowerCase()+"sArray"]).each(function() {//this sets the calue of 
+						if(this.id == data[ruleFieldName]){
+							$("#"+attrID).html("<i class='icon-pencil'></i> "+this.name);
+						}
+					});
+
+					if(data.condition == "null") $("#"+attrID.replace("Category", "")).html("<i class='icon-pencil'></i> none");
+
+
+					var $hiddenAutoComplete = jQuery("#"+$($ruleField[0]).attr("data-state")+"-workflowRule-"+ruleFieldName);
+
+					$hiddenAutoComplete.attr("data-source", $hiddenAutoComplete.attr("data-"+data.conditionCategory));
+
+					if(data.conditionId != "") {
+						var $correspondingCodition = $(attrID.replace("Category", ""));
+						$correspondingCodition.html("i class='icon-pencil'></i> none");
+					}
+
+					switch(data.conditionCategory) {
+					    case "College":
+					    	$("#Submitted-workflowRule-condition input").attr("data-source",$("#Submitted-workflowRule-condition input").attr("data-colleges"));
+					        break;
+					    case "Department":
+					    	$("#Submitted-workflowRule-condition input").attr("data-source",$("#Submitted-workflowRule-condition input").attr("data-departments"));
+					        break;
+					    case "Program":
+					    	$("#Submitted-workflowRule-condition input").attr("data-source",$("#Submitted-workflowRule-condition input").attr("data-programs"));
+					        break;
+					    default:
+					        break;
+					}
+					$("."+data.state+"-"+data.id+"-condition").show();	
+				} else {
+					if(data.recipientType + data.templateString === "") //checks to make sure that template or recipient were not the fields being checked
+						$("."+data.state+"-"+data.id+"-condition").hide();					
+				}
+				// make sure we remove any old errors
+				$("#Submitted-"+data.id+"-condition-error").remove();
+			} else {
+				jQuery("div."+attrID).replaceWith('<span id="'+attrID+'" class="error '+classValue+'" data-state="'+$($ruleField[0]).attr("data-state")+'" data-id="'+$($ruleField[0]).attr("data-id")+'" data-ruleFieldName="'+$($ruleField[0]).attr("data-ruleFieldName")+'"><i class="icon-pencil"></i> Error! <a href="#" class="tooltip-icon" rel="tooltip" title="'+data.message+'"><div class="badge badge-important"><i class="icon-warning-sign icon-white"></i></div></a></span>');
+				jQuery('.tooltip-icon').tooltip();
+			}
+			//refreshAll();
+		},
+		error:function(){
+			jQuery("div."+attrID).replaceWith('<span id="'+attrID+'" class="error '+classValue+'" data-state="'+$($ruleField[0]).attr("data-state")+'" data-id="'+$($ruleField[0]).attr("data-id")+'" data-ruleFieldName="'+$($ruleField[0]).attr("data-ruleFieldName")+'">'+jQuery("#backup").html()+' <a href="#" class="tooltip-icon" rel="tooltip" title="There was an error with your request."><div class="badge badge-important"><i class="icon-warning-sign icon-white"></i></div></a></span>');
+			jQuery('.tooltip-icon').tooltip();
+		}
+		
+	});
+
+	jQuery("#backup").remove();
+}
+
+var DATA = null;
+var FOUND = false;
+function syncTemplateWithWorkflowRules(data) {
+	var workflowSelectDiv = $("div#Submitted-workflowRule-templateString");
+	DATA = data;
+	workflowSelectDiv.find("option").each(function(index, value){
+		var divId = parseInt($(value).val());
+		if(divId == DATA.id) {
+			value.text = DATA.name + (DATA.system ? "" : " (*)");
+			FOUND = true;
+		}
+	});
+	if(!FOUND) {
+		workflowSelectDiv.find("select").append("<option value=\"" + DATA.id + "\">" + DATA.name + (DATA.system ? "" : " (*)") + "</option>");
+	}
+}
+
+
+/**
  * Save an email template.
  * 
  * @param jsonURL
@@ -777,8 +1491,8 @@ function editEmailTemplateHandler(jsonURL) {
 			jQuery("#"+id+" .control-group").each( function() {
 				jQuery(this).removeClass("error");
 			});
-			
-			displaySortableItem('emailTemplate',false,$element, "emailTemplate_"+data.id, data.name);
+			syncTemplateWithWorkflowRules(data);
+			displaySortableItem('emailTemplate',false,$element, "emailTemplate_"+data.id, data.name, data.level, data.custom);
 		}
 
 		var failureCallback = function(message) {
@@ -849,7 +1563,7 @@ function myProfileHandler(jsonURL) {
 			jQuery("#my-profile").removeClass("waiting");
 			jQuery("#my-preferences").removeClass("waiting");
 
-			// Clear any previous errors
+			//  any previous errors
 			$this.parent("fieldset").removeClass("error");
 			clearAlert("profile-alert-"+field);
 
@@ -1199,115 +1913,9 @@ function memberUpdateHandler(htmlURL) {
  **********************************************************/
 
 
-/**
- * Handler for the email settings fields to save their state via ajax. This
- * method only supports the three toggleable settings at the top of the page,
- * not the templates further down, those are sortables.
- * 
- * 
- * @param jsonURL
- *            The JSON url to submit updates too.
- * @returns A Callback function
- */
-function emailSettingsHandler(jsonURL) {
-
-	return function () {
-		var $this = jQuery(this);
-		var field = $this.attr('name');
-		var value = $this.attr('checked');
-
-		$this.parent().addClass("waiting");
-
-		var successCallback = function(data) {
-			// Remove the ajax loading indicators & alerts
-			$this.parent().removeClass("waiting");
-			clearAlert("email-setting-"+field);
-		}
-
-		var failureCallback = function (message) {
-			$this.parent().removeClass("waiting");
-			displayAlert("email-setting-"+field,"Unable to update setting",message);
-		}
-
-		jQuery.ajax({
-			url:jsonURL,
-			data:{
-				'field': field,
-				'value': value
-			},
-			dataType:'json',
-			type:'POST',
-			success:function(data){
-				if (data.success) {
-					successCallback(data);
-				} else {
-					failureCallback(data.message)
-				}
-			},
-			error:function(){
-				failureCallback("Unable to communicate with the server.");
-			}
-
-		});  
-	};
-}
-
 /**********************************************************
  * Configurable Settings Tab (Embargos)
  **********************************************************/
-
-/**
- * Handler for the configurable settings field to save their state via ajax. This
- * method supports all the toggleable fields on this page, as well as submision
- * semester and submission instructions.
- * 
- * @param jsonURL The JSON url to submit updates too.
- * @returns A Callback function
- */
-function configurableSettingsHandler(jsonURL) {
-
-	return function () {
-		var $this = jQuery(this);
-		var field = $this.attr('name');
-		var value = $this.val();
-
-		$this.parent().addClass("waiting");
-
-		var successCallback = function(data) {
-			// Remove the ajax loading indicators & alerts
-			$this.parent().removeClass("waiting");
-			$this.removeClass("settings-error");
-			clearAlert("configurable-setting-"+field);
-		}
-
-		var failureCallback = function (message) {
-			$this.parent().removeClass("waiting");
-			$this.addClass("settings-error");
-			displayAlert("configurable-setting-"+field,"Unable to update setting",message);
-		}
-
-		jQuery.ajax({
-			url:jsonURL,
-			data:{
-				'field': field,
-				'value': value
-			},
-			dataType:'json',
-			type:'POST',
-			success:function(data){
-				if (data.success) {
-					successCallback(data);
-				} else {
-					failureCallback(data.message)
-				}
-			},
-			error:function(){
-				failureCallback("Unable to communicate with the server.");
-			}
-
-		});  
-	};
-}
 
 /**
  * Event handler to toggle the display of embargo type's duration between
@@ -1338,65 +1946,76 @@ function embargoDurationToggleHandler() {
  * 
  * @returns A Callback function
  */
-function embargoOpenDialogHandler() {
-	return function () {
+function embargoOpenDialogHandler(isNew, id) {
 
-		if (jQuery(this).closest("tr").length > 0) {
-			// Loading an existing type
-			var $row = jQuery(this).closest("tr"); 
-			jQuery("#embargoType-id").val($row.attr("id"));
-			jQuery("#embargoType-name").val(jQuery.trim($row.find(".embargoType-name-cell").text()));
-			jQuery("#embargoType-description").val(jQuery.trim($row.find(".embargoType-description-cell").text()));
+	if(isNew == null && typeof(isNew) == "undefined") {
+		isNew = false;
+	}
 
-			if ($row.find(".embargoType-active-cell").text().indexOf("Yes") > -1)
-				jQuery("#embargoType-active").attr("checked","true");
-			else
-				jQuery("#embargoType-active").attr("checked");
-
-			if ($row.find(".embargoType-duration-cell").text().indexOf("Indefinite") > -1) {
-				jQuery("#timeframe-indeterminate").attr("checked","true");
-				jQuery("#embargoType-months").val("");
-				jQuery("#embargoType-months").attr("disabled","true");
-				jQuery("#duration-group").hide();
-			} else {
-				jQuery("#timeframe-determinate").attr("checked","true");
-				jQuery("#embargoType-months").val(jQuery.trim($row.find(".embargoType-duration-cell").text()));
-				jQuery("#embargoType-months").attr("disabled",null);
-				jQuery("#duration-group").show();
+	if (!isNew) {
+		// Loading an existing type
+		var array_key = -1;
+		for(embargo in jsDataObjects.embargosArray) {
+			if(jsDataObjects.embargosArray[embargo].id == id) {
+				array_key = embargo;
 			}
-			
-			jQuery("#embargo-type-modal .modal-header h3").text("Edit Embargo Type");
-			jQuery("#embargo-type-modal .modal-footer #embargoType-save").val("Save Embargo");
-			jQuery("#embargoType-remove").show();
-
-
-		} else {
-			// Adding a new embargo type
-			jQuery("#embargoType-id").val("");
-			jQuery("#embargoType-name").val("");
-			jQuery("#embargoType-description").val("");
-			jQuery("#embargoType-active").attr("checked","true");
-			jQuery("#timeframe-determinate").attr("checked","true");
-			jQuery("#embargoType-months").val("");
-			jQuery("#embargoType-months").attr("disabled",null);
-			jQuery("#duration-group").show();
-			
-			jQuery("#embargo-type-modal .modal-header h3").text("Add Embargo Type");
-			jQuery("#embargo-type-modal .modal-footer #embargoType-save").val("Add Embargo");
-			jQuery("#embargoType-remove").hide();
-
+		}
+		if(array_key == -1) {
+			return;
 		}
 
-		// Clear out any previous errors
-		jQuery("#embargoType-errors").html("");
-		jQuery("#embargo-type-modal .control-group").each(function () {
-			jQuery(this).removeClass("error"); 
-		});
+		// get our embargo data from JS cache
+		var embargo = jsDataObjects.embargosArray[array_key];
+		jQuery("#embargoType-id").val(id);
+		jQuery("#embargoType-name").val(embargo.name);
+		jQuery("#embargoType-description").val(embargo.description);
+		jQuery('#embargoType-guarantor option[value="'+embargo.guarantor+'"]').attr("selected",true);
 
-		jQuery('#embargo-type-modal').modal('show');
+		if (embargo.active)
+			jQuery("#embargoType-active").attr("checked",true);
+		else
+			jQuery("#embargoType-active").attr("checked",false);
+
+		if (embargo.duration == null) {
+			jQuery("#timeframe-indeterminate").attr("checked",true);
+			jQuery("#embargoType-months").val("");
+			jQuery("#embargoType-months").attr("disabled",true);
+			jQuery("#duration-group").hide();
+		} else {
+			jQuery("#timeframe-determinate").attr("checked",true);
+			jQuery("#embargoType-months").val(embargo.duration);
+			jQuery("#embargoType-months").attr("disabled",false);
+			jQuery("#duration-group").show();
+		}
 
 
+		
+		jQuery("#embargo-type-modal .modal-header h3").text("Edit Embargo Type");
+		jQuery("#embargo-type-modal .modal-footer #embargoType-save").val("Save Embargo");
+		jQuery("#embargoType-remove").show();
+	} else {
+		// Adding a new embargo type
+		jQuery("#embargoType-id").val("");
+		jQuery("#embargoType-name").val("");
+		jQuery("#embargoType-description").val("");
+		jQuery("#embargoType-active").attr("checked",true);
+		jQuery("#timeframe-determinate").attr("checked",true);
+		jQuery("#embargoType-months").val("");
+		jQuery("#embargoType-months").attr("disabled",false);
+		jQuery("#duration-group").show();
+		
+		jQuery("#embargo-type-modal .modal-header h3").text("Add Embargo Type");
+		jQuery("#embargo-type-modal .modal-footer #embargoType-save").val("Add Embargo");
+		jQuery("#embargoType-remove").hide();
 	}
+
+	//  out any previous errors
+	jQuery("#embargoType-errors").html("");
+	jQuery("#embargo-type-modal .control-group").each(function () {
+		jQuery(this).removeClass("error"); 
+	});
+
+	jQuery('#embargo-type-modal').modal('show');
 }
 
 /**
@@ -1412,8 +2031,9 @@ function embargoSaveDialogHandler(jsonURL) {
 
 		var embargoTypeId = jQuery("#embargoType-id").val();
 		var name = jQuery("#embargoType-name").val();
+		var guarantor = jQuery("#embargoType-guarantor").val();
 		var description = jQuery("#embargoType-description").val();
-		var active = null;
+		var active = null;		
 		if (jQuery("#embargoType-active:checked").length > 0)
 			active = "true";
 
@@ -1439,29 +2059,55 @@ function embargoSaveDialogHandler(jsonURL) {
 				// Add a new row to the end of the list.
 				$row = jQuery( 
 						"<tr id='embargoType_"+data.id+"'>"+
+						"    <td class='td-icon embargoType-system-cell'><em class='icon-user'></em></td>"+
 						"    <td class='embargoType-name-cell'></td>"+
 						"    <td class='embargoType-description-cell'></td>"+
 						"    <td class='embargoType-active-cell'></td>"+
 						"    <td class='embargoType-duration-cell'></td>"+
-						"    <td class='embargoType-edit-cell'><a href='#'>Edit</a></td>" +
+						"    <td class='embargoType-edit-cell'><a data-id='"+data.id+"' href='javascript:void(0);'>Edit</a></td>" +
 						"</tr>"
-				).appendTo(jQuery("#embargoType-list"));
+				).appendTo(jQuery("#embargoType-"+data.guarantor+"-list"));
 			}
 
 			$row.find(".embargoType-name-cell").text(data.name);
 			$row.find(".embargoType-description-cell").text(data.description);
-			if (data.active == "true")
+			if (data.active == true)
 				$row.find(".embargoType-active-cell").text("Yes");
 			else
 				$row.find(".embargoType-active-cell").text("No");
 
-			if (data.months == "null")
+			if (data.months == null)
 				$row.find(".embargoType-duration-cell").text("Indefinite");
 			else
 				$row.find(".embargoType-duration-cell").text(data.months);
-
+						
 			jQuery('#embargo-type-modal').modal('hide');
-
+			
+			// update our embargo data for JS cache
+			var array_key = -1;
+			for(embargo in jsDataObjects.embargosArray) {
+				if(jsDataObjects.embargosArray[embargo].id == data.id) {
+					array_key = embargo;
+				}
+			}
+			// if we're a new embargo (that hasn't been cached yet)
+			if(array_key == -1) {
+				var embargo = {};
+				embargo.id = data.id;
+				embargo.name = data.name;
+				embargo.description = data.description;
+				embargo.duration = data.months;
+				embargo.guarantor = data.guarantor;
+				embargo.active = data.active;
+				jsDataObjects.embargosArray.push(embargo);
+			} else {
+				// set our embargo data for JS cache
+				jsDataObjects.embargosArray[array_key].name = data.name;
+				jsDataObjects.embargosArray[array_key].description = data.description;
+				jsDataObjects.embargosArray[array_key].duration = data.months;
+				jsDataObjects.embargosArray[array_key].guarantor = data.guarantor;
+				jsDataObjects.embargosArray[array_key].active = data.active;	
+			}			
 		}
 
 		var failureCallback = function (message) {
@@ -1484,7 +2130,8 @@ function embargoSaveDialogHandler(jsonURL) {
 				'name': name,
 				'description': description,
 				'months': months,
-				'active': active
+				'active': active,
+				'guarantor': guarantor
 			},
 			dataType:'json',
 			type:'POST',
@@ -1532,7 +2179,7 @@ function embargoRemoveDialogHandler(jsonURL) {
 			jQuery("#embargo-type-modal .control-group").each(function () {
 				jQuery(this).removeClass("error"); 
 			});
-			jQuery("#"+embargoTypeId).remove();
+			jQuery("#embargoType_"+embargoTypeId).remove();
 			
 			// Go back to the list
 			jQuery('#embargo-type-modal').modal('hide');
@@ -1591,23 +2238,1255 @@ function embargoRemoveDialogHandler(jsonURL) {
 var embargoSortableUpdateHandler = function(jsonURL) {
 	return function(event, ui) {
 
-		var list = jQuery("#embargoType-list").sortable('toArray').toString();
-		jQuery("#embargoType-list").addClass("waiting");
+		var list = [];
+		jQuery(".embargoType-sortable").each(function(){
+			var tl = jQuery(this).sortable('toArray');
+			jQuery(tl).each(function(){
+				list.push(this);
+			});
+		});
+		list = list.toString();
+		console.log(list);
+		jQuery(".embargoType-sortable").addClass("waiting");
 
 		var successCallback = function(data) {
 			// Remove the ajax loading indicators & alerts
 			clearAlert("embargoType-reorder");
-			jQuery("#embargoType-list").removeClass("waiting");
+			jQuery(".embargoType-sortable").removeClass("waiting");
 		}
 
 		var failureCallback = function(message) {
-			displayAlert("embargoType-reorder", "Unable to reorder " + type,
+			displayAlert("embargoType-reorder", "Unable to reorder embargo",
 					message);
-			jQuery("#embargoType-list").removeClass("waiting");
+			jQuery(".embargoType-sortable").removeClass("waiting");
 		}
 
 		var data = {};
 		data['embargoTypeIds'] = list;
+
+		jQuery.ajax({
+			url : jsonURL,
+			data : data,
+			dataType : 'json',
+			type : 'POST',
+			success : function(data) {
+				if (data.success) {
+					successCallback(data);
+				} else {
+					failureCallback(data.message)
+				}
+			},
+			error : function() {
+				failureCallback("Unable to communicate with the server.");
+			}
+
+		});
+	};
+}
+
+/**
+ * Open the college dialog box. This will work for opening an existing
+ * college, or adding a new college.
+ * 
+ * @returns A Callback function
+ */
+function collegeOpenDialogHandler(isNew, id) {
+	if(isNew == null && typeof(isNew) == "undefined") {
+		isNew = false;
+	}
+
+	if (!isNew) {
+		// Loading an existing type
+		var array_key = -1;
+		for(college in jsDataObjects.collegesArray) {
+			if(jsDataObjects.collegesArray[college].id == id) {
+				array_key = college;
+			}
+		}
+		if(array_key == -1) {
+			return;
+		}
+		// get our college data from JS cache
+		var college = jsDataObjects.collegesArray[array_key];
+		jQuery("#college-id").val(id);
+		jQuery("#college-name").val(college.name);
+		var emails_string = "";
+		var emails = college.emails;
+		$.each(emails, function(key, val) {
+			if (val.email != "") {
+				emails_string += val.email + ", ";
+			}
+		});
+
+		jQuery("#college-emails").val(emails_string.substring(0, emails_string.length-2));
+		
+		jQuery("#college-modal .modal-header h3").text("Edit College");
+		jQuery("#college-modal .modal-footer #college-save").val("Save College");
+		jQuery("#college-remove").show();
+	} else {
+		// Adding a new college
+		jQuery("#college-id").val("");
+		jQuery("#college-name").val("");
+		jQuery("#college-emails").val("");
+		
+		jQuery("#college-modal .modal-header h3").text("Add College");
+		jQuery("#college-modal .modal-footer #college-save").val("Add College");
+		jQuery("#college-remove").hide();
+
+	}
+
+	//  out any previous errors
+	jQuery("#college-errors").html("");
+	jQuery("#college-modal .control-group").each(function () {
+		jQuery(this).removeClass("error"); 
+	});
+
+	jQuery('#college-modal').modal('show');
+}
+
+/**
+ * Create or Edit an existing college. This callback function handles
+ * saving the college dialog box.
+ * 
+ * @param jsonURL
+ *            The url where colleges should be updated.
+ * @returns A Callback Function
+ */
+function collegeSaveDialogHandler(jsonURL) {
+	return function () {
+		var collegeId = jQuery("#college-id").val();
+		var name = jQuery("#college-name").val();
+		var emails = jQuery("#college-emails").val();
+		
+		jQuery("#college-modal").addClass("waiting");
+
+		var successCallback = function(data) {
+
+			// Remove the ajax loading indicators & alerts
+			jQuery("#college-modal").removeClass("waiting");
+			jQuery("#college-errors").html("");
+			jQuery("#college-modal .control-group").each(function () {
+				jQuery(this).removeClass("error"); 
+			});
+
+			var $row;
+			if (jQuery("#college_"+data.id).length > 0) {
+				// Look up the old row
+				$row = jQuery("#college_"+data.id);
+			} else {
+				// Add a new row to the end of the list.
+				$row = jQuery( 
+						"<tr id='college_"+data.id+"'>"+
+						"    <td class='college-name-cell'></td>"+
+						"    <td class='college-emails-cell'></td>"+
+						"    <td class='college-edit-cell'><a data-id='"+data.id+"' href='javascript:void(0);'>Edit</a></td>" +
+						"</tr>"
+				).appendTo(jQuery("#colleges-list"));
+			}
+
+			$row.find(".college-name-cell").text(data.name);
+			var emails_string = "";
+			var emails = data.emails;
+			$.each(emails, function(key, val) {
+				emails_string += val.email + ", ";
+			});
+			$row.find(".college-emails-cell").text(emails_string.substring(0, emails_string.length-2));
+			
+			jQuery('#college-modal').modal('hide');
+			// refresh local JS cache of collegesArray data
+			var array_key = -1;
+			// look for the array index of this college in the array
+			for(college in jsDataObjects.collegesArray) {
+				if(jsDataObjects.collegesArray[college].id == collegeId) {
+					array_key = college;
+				}
+			}
+			// if the index position was not found
+			if(array_key == -1) {
+				// add new data
+				jsDataObjects.collegesArray.push(data);
+			} else {
+				// change existing data
+				jsDataObjects.collegesArray[array_key] = data;
+			}
+		}
+
+		var failureCallback = function (message) {
+
+			// Add failure indicators
+			jQuery("#college-modal").removeClass("waiting");
+			jQuery("#college-modal .control-group").each(function () {
+				jQuery(this).addClass("error"); 
+			});
+
+			// Display the error
+			jQuery("#college-errors").html("<li><strong>Unable to save college</strong>: "+message);
+
+		}
+
+		jQuery.ajax({
+			url:jsonURL,
+			data:{
+				'collegeId':collegeId,
+				'name': name,
+				'emails': emails
+			},
+			dataType:'json',
+			type:'POST',
+			success:function(data){
+				if (data.success) {
+					successCallback(data);
+				} else {
+					failureCallback(data.message)
+				}
+			},
+			error:function(e){
+				console.log(e);
+				failureCallback("Unable to communicate with the server."+e);
+			}
+
+		});
+
+		return false;
+	}
+}
+
+/**
+ * Delete an existing college. This will confirm that this is what the user wants to do.
+ * 
+ * @param jsonURL
+ *            The url where colleges are deleted.
+ * @returns A Callback Function
+ */
+function collegeRemoveDialogHandler(jsonURL) {
+	return function () {
+
+		// Confirm before deleting
+		var really = confirm("Alert! All submissions which use this college will have their college settings deleted with no way to recover. Are you REALLY sure you want to delete this college?");
+		if (!really)
+			return false;
+		
+		var collegeId = jQuery("#college-id").val();
+		jQuery("#college-modal").addClass("waiting");
+		
+		var successCallback = function(data) {
+
+			// Remove the ajax loading indicators & alerts
+			jQuery("#college-modal").removeClass("waiting");
+			jQuery("#college-errors").html("");
+			jQuery("#college-modal .control-group").each(function () {
+				jQuery(this).removeClass("error"); 
+			});
+			jQuery("#college_"+collegeId).remove();
+			
+			// Go back to the list
+			jQuery('#college-modal').modal('hide');
+			
+			// refresh local JS cache of collegesArray data
+			var array_key = -1;
+			// look for the array index of this college in the array
+			for(college in jsDataObjects.collegesArray) {
+				if(jsDataObjects.collegesArray[college].id == collegeId) {
+					array_key = parseInt(college);
+				}
+			}
+			// if the index position was found
+			if(array_key != -1) {
+				// remove old data
+				var arrayBefore = jsDataObjects.collegesArray.slice(0, array_key);
+				var arrayAfter = new Array();
+				// avoid index out of bounds (in case we're removing last element in array)
+				if(array_key+1 < jsDataObjects.collegesArray.length) {
+					arrayAfter = jsDataObjects.collegesArray.slice(array_key+1, jsDataObjects.collegesArray.length);
+				}
+				var newArray = arrayBefore.concat(arrayAfter);
+				jsDataObjects.collegesArray = newArray;
+			}
+		}
+
+		var failureCallback = function (message) {
+
+			// Add failure indicators
+			jQuery("#college-modal").removeClass("waiting");
+			jQuery("#college-modal .control-group").each(function () {
+				jQuery(this).addClass("error"); 
+			});
+
+			// Display the error
+			jQuery("#college-errors").html("<li><strong>Unable to remove college</strong>: "+message);
+
+		}
+
+		jQuery.ajax({
+			url:jsonURL,
+			data:{
+				'collegeId': collegeId
+			},
+			dataType:'json',
+			type:'POST',
+			success:function(data){
+				if (data.success) {
+					successCallback(data);
+				} else {
+					failureCallback(data.message)
+				}
+			},
+			error:function(){
+				failureCallback("Unable to communicate with the server.");
+			}
+
+		});
+
+		return false;
+	}
+}
+
+/**
+ * Sortable update handler for colleges. This callback is called whenever
+ * re-sorts the list of colleges, saving the new order in the system.
+ * 
+ * @param jsonURL
+ *            The json url to update colleges order.
+ * @returns A Callback function
+ */
+var collegeSortableUpdateHandler = function(jsonURL) {
+	return function(event, ui) {
+
+		var list = jQuery("#colleges-list").sortable('toArray').toString();
+		jQuery("#colleges-list").addClass("waiting");
+
+		var successCallback = function(data) {
+			// Remove the ajax loading indicators & alerts
+			clearAlert("college-reorder");
+			jQuery("#colleges-list").removeClass("waiting");
+		}
+
+		var failureCallback = function(message) {
+			displayAlert("college-reorder", "Unable to reorder college",
+					message);
+			jQuery("#colleges-list").removeClass("waiting");
+		}
+
+		var data = {};
+		data['collegeIds'] = list;
+
+		jQuery.ajax({
+			url : jsonURL,
+			data : data,
+			dataType : 'json',
+			type : 'POST',
+			success : function(data) {
+				if (data.success) {
+					successCallback(data);
+				} else {
+					failureCallback(data.message)
+				}
+			},
+			error : function() {
+				failureCallback("Unable to communicate with the server.");
+			}
+
+		});
+	};
+}
+
+/**
+ * Open the program dialog box. This will work for opening an existing
+ * program, or adding a new program.
+ * 
+ * @returns A Callback function
+ */
+function programOpenDialogHandler(isNew, id) {
+	if(isNew == null && typeof(isNew) == "undefined") {
+		isNew = false;
+	}
+
+	if (!isNew) {
+		// Loading an existing type
+		var array_key = -1;
+		for(program in jsDataObjects.programsArray) {
+			if(jsDataObjects.programsArray[program].id == id) {
+				array_key = program;
+			}
+		}
+		if(array_key == -1) {
+			return;
+		}
+		// get our program data from JS cache
+		var program = jsDataObjects.programsArray[array_key];
+		jQuery("#program-id").val(id);
+		jQuery("#program-name").val(program.name);
+		var emails_string = "";
+		var emails = program.emails;
+		$.each(emails, function(key, val) {
+			if (val.email != "") {
+				emails_string += val.email + ", ";
+			}
+		});
+
+		jQuery("#program-emails").val(emails_string.substring(0, emails_string.length-2));
+		
+		jQuery("#program-modal .modal-header h3").text("Edit Program");
+		jQuery("#program-modal .modal-footer #program-save").val("Save Program");
+		jQuery("#program-remove").show();
+	} else {
+		// Adding a new college
+		jQuery("#program-id").val("");
+		jQuery("#program-name").val("");
+		jQuery("#program-emails").val("");
+		
+		jQuery("#program-modal .modal-header h3").text("Add Program");
+		jQuery("#program-modal .modal-footer #program-save").val("Add Program");
+		jQuery("#program-remove").hide();
+
+	}
+
+	//  out any previous errors
+	jQuery("#program-errors").html("");
+	jQuery("#program-modal .control-group").each(function () {
+		jQuery(this).removeClass("error"); 
+	});
+
+	jQuery('#program-modal').modal('show');
+}
+
+/**
+ * Create or Edit an existing program. This callback function handles
+ * saving the program dialog box.
+ * 
+ * @param jsonURL
+ *            The url where program should be updated.
+ * @returns A Callback Function
+ */
+function programSaveDialogHandler(jsonURL) {
+	return function () {
+		var programId = jQuery("#program-id").val();
+		var name = jQuery("#program-name").val();
+		var emails = jQuery("#program-emails").val();
+		
+		jQuery("#program-modal").addClass("waiting");
+
+		var successCallback = function(data) {
+
+			// Remove the ajax loading indicators & alerts
+			jQuery("#program-modal").removeClass("waiting");
+			jQuery("#program-errors").html("");
+			jQuery("#program-modal .control-group").each(function () {
+				jQuery(this).removeClass("error"); 
+			});
+
+			var $row;
+			if (jQuery("#program_"+data.id).length > 0) {
+				// Look up the old row
+				$row = jQuery("#program_"+data.id);
+			} else {
+				// Add a new row to the end of the list.
+				$row = jQuery( 
+						"<tr id='program_"+data.id+"'>"+
+						"    <td class='program-name-cell'></td>"+
+						"    <td class='program-emails-cell'></td>"+
+						"    <td class='program-edit-cell'><a data-id='"+data.id+"' href='javascript:void(0);'>Edit</a></td>" +
+						"</tr>"
+				).appendTo(jQuery("#programs-list"));
+			}
+
+			$row.find(".program-name-cell").text(data.name);
+			var emails_string = "";
+			var emails = data.emails;
+			$.each(emails, function(key, val) {
+				emails_string += val.email + ", ";
+			});
+			$row.find(".program-emails-cell").text(emails_string.substring(0, emails_string.length-2));
+			
+			jQuery('#program-modal').modal('hide');
+			// refresh local JS cache of programsArray data
+			var array_key = -1;
+			// look for the array index of this program in the array
+			for(program in jsDataObjects.programsArray) {
+				if(jsDataObjects.programsArray[program].id == programId) {
+					array_key = program;
+				}
+			}
+			// if the index position was not found
+			if(array_key == -1) {
+				// add new data
+				jsDataObjects.programsArray.push(data);
+			} else {
+				// change existing data
+				jsDataObjects.programsArray[array_key] = data;
+			}
+		}
+
+		var failureCallback = function (message) {
+
+			// Add failure indicators
+			jQuery("#program-modal").removeClass("waiting");
+			jQuery("#program-modal .control-group").each(function () {
+				jQuery(this).addClass("error"); 
+			});
+
+			// Display the error
+			jQuery("#program-errors").html("<li><strong>Unable to save program</strong>: "+message);
+
+		}
+
+		jQuery.ajax({
+			url:jsonURL,
+			data:{
+				'programId':programId,
+				'name': name,
+				'emails': emails
+			},
+			dataType:'json',
+			type:'POST',
+			success:function(data){
+				if (data.success) {
+					successCallback(data);
+				} else {
+					failureCallback(data.message)
+				}
+			},
+			error:function(e){
+				console.log(e);
+				failureCallback("Unable to communicate with the server."+e);
+			}
+
+		});
+
+		return false;
+	}
+}
+
+/**
+ * Delete an existing program. This will confirm that this is what the user wants to do.
+ * 
+ * @param jsonURL
+ *            The url where programs are deleted.
+ * @returns A Callback Function
+ */
+function programRemoveDialogHandler(jsonURL) {
+	return function () {
+
+		// Confirm before deleting
+		var really = confirm("Alert! All submissions which use this program will have their program settings deleted with no way to recover. Are you REALLY sure you want to delete this program?");
+		if (!really)
+			return false;
+		
+		var programId = jQuery("#program-id").val();
+		jQuery("#program-modal").addClass("waiting");
+		
+		var successCallback = function(data) {
+
+			// Remove the ajax loading indicators & alerts
+			jQuery("#program-modal").removeClass("waiting");
+			jQuery("#program-errors").html("");
+			jQuery("#program-modal .control-group").each(function () {
+				jQuery(this).removeClass("error"); 
+			});
+			jQuery("#program_"+programId).remove();
+			
+			// Go back to the list
+			jQuery('#program-modal').modal('hide');
+			
+			// refresh local JS cache of programsArray data
+			var array_key = -1;
+			// look for the array index of this program in the array
+			for(program in jsDataObjects.programsArray) {
+				if(jsDataObjects.programsArray[program].id == programId) {
+					array_key = parseInt(program);
+				}
+			}
+			// if the index position was found
+			if(array_key != -1) {
+				// remove old data
+				var arrayBefore = jsDataObjects.programsArray.slice(0, array_key);
+				var arrayAfter = new Array();
+				// avoid index out of bounds (in case we're removing last element in array)
+				if(array_key+1 < jsDataObjects.programsArray.length) {
+					arrayAfter = jsDataObjects.programsArray.slice(array_key+1, jsDataObjects.programsArray.length);
+				}
+				var newArray = arrayBefore.concat(arrayAfter);
+				jsDataObjects.programsArray = newArray;
+			}
+		}
+
+		var failureCallback = function (message) {
+
+			// Add failure indicators
+			jQuery("#program-modal").removeClass("waiting");
+			jQuery("#program-modal .control-group").each(function () {
+				jQuery(this).addClass("error"); 
+			});
+
+			// Display the error
+			jQuery("#program-errors").html("<li><strong>Unable to remove program</strong>: "+message);
+
+		}
+
+		jQuery.ajax({
+			url:jsonURL,
+			data:{
+				'programId': programId
+			},
+			dataType:'json',
+			type:'POST',
+			success:function(data){
+				if (data.success) {
+					successCallback(data);
+				} else {
+					failureCallback(data.message)
+				}
+			},
+			error:function(){
+				failureCallback("Unable to communicate with the server.");
+			}
+
+		});
+
+		return false;
+	}
+}
+
+/**
+ * Sortable update handler for programs. This callback is called whenever
+ * re-sorts the list of programs, saving the new order in the system.
+ * 
+ * @param jsonURL
+ *            The json url to update programs order.
+ * @returns A Callback function
+ */
+var programSortableUpdateHandler = function(jsonURL) {
+	return function(event, ui) {
+
+		var list = jQuery("#programs-list").sortable('toArray').toString();
+		jQuery("#programs-list").addClass("waiting");
+
+		var successCallback = function(data) {
+			// Remove the ajax loading indicators & alerts
+			clearAlert("program-reorder");
+			jQuery("#programs-list").removeClass("waiting");
+		}
+
+		var failureCallback = function(message) {
+			displayAlert("program-reorder", "Unable to reorder program",
+					message);
+			jQuery("#programs-list").removeClass("waiting");
+		}
+
+		var data = {};
+		data['programIds'] = list;
+
+		jQuery.ajax({
+			url : jsonURL,
+			data : data,
+			dataType : 'json',
+			type : 'POST',
+			success : function(data) {
+				if (data.success) {
+					successCallback(data);
+				} else {
+					failureCallback(data.message)
+				}
+			},
+			error : function() {
+				failureCallback("Unable to communicate with the server.");
+			}
+
+		});
+	};
+}
+
+/**
+ * Open the department dialog box. This will work for opening an existing
+ * department, or adding a new department.
+ * 
+ * @returns A Callback function
+ */
+function departmentOpenDialogHandler(isNew, id) {
+	if(isNew == null && typeof(isNew) == "undefined") {
+		isNew = false;
+	}
+
+	if (!isNew) {
+		// Loading an existing type
+		var array_key = -1;
+		for(department in jsDataObjects.departmentsArray) {
+			if(jsDataObjects.departmentsArray[department].id == id) {
+				array_key = department;
+			}
+		}
+		if(array_key == -1) {
+			return;
+		}
+		// get our college data from JS cache
+		var department = jsDataObjects.departmentsArray[array_key];
+		jQuery("#department-id").val(id);
+		jQuery("#department-name").val(department.name);
+		var emails_string = "";
+		var emails = department.emails;
+		$.each(emails, function(key, val) {
+			if (val.email != "") {
+				emails_string += val.email + ", ";
+			}
+		});
+
+		jQuery("#department-emails").val(emails_string.substring(0, emails_string.length-2));
+		
+		jQuery("#department-modal .modal-header h3").text("Edit Department");
+		jQuery("#department-modal .modal-footer #department-save").val("Save Department");
+		jQuery("#department-remove").show();
+	} else {
+		// Adding a new department
+		jQuery("#department-id").val("");
+		jQuery("#department-name").val("");
+		jQuery("#department-emails").val("");
+		
+		jQuery("#department-modal .modal-header h3").text("Add Department");
+		jQuery("#department-modal .modal-footer #department-save").val("Add Department");
+		jQuery("#department-remove").hide();
+
+	}
+
+	//  out any previous errors
+	jQuery("#department-errors").html("");
+	jQuery("#department-modal .control-group").each(function () {
+		jQuery(this).removeClass("error"); 
+	});
+
+	jQuery('#department-modal').modal('show');
+}
+
+/**
+ * Create or Edit an existing department. This callback function handles
+ * saving the department dialog box.
+ * 
+ * @param jsonURL
+ *            The url where departments should be updated.
+ * @returns A Callback Function
+ */
+function departmentSaveDialogHandler(jsonURL) {
+	return function () {
+		var departmentId = jQuery("#department-id").val();
+		var name = jQuery("#department-name").val();
+		var emails = jQuery("#department-emails").val();
+		
+		jQuery("#department-modal").addClass("waiting");
+
+		var successCallback = function(data) {
+
+			// Remove the ajax loading indicators & alerts
+			jQuery("#department-modal").removeClass("waiting");
+			jQuery("#department-errors").html("");
+			jQuery("#department-modal .control-group").each(function () {
+				jQuery(this).removeClass("error"); 
+			});
+
+			var $row;
+			if (jQuery("#department_"+data.id).length > 0) {
+				// Look up the old row
+				$row = jQuery("#department_"+data.id);
+			} else {
+				// Add a new row to the end of the list.
+				$row = jQuery( 
+						"<tr id='department_"+data.id+"'>"+
+						"    <td class='department-name-cell'></td>"+
+						"    <td class='department-emails-cell'></td>"+
+						"    <td class='department-edit-cell'><a data-id='"+data.id+"' href='javascript:void(0);'>Edit</a></td>" +
+						"</tr>"
+				).appendTo(jQuery("#departments-list"));
+			}
+
+			$row.find(".department-name-cell").text(data.name);
+			var emails_string = "";
+			var emails = data.emails;
+			$.each(emails, function(key, val) {
+				emails_string += val.email + ", ";
+			});
+			$row.find(".department-emails-cell").text(emails_string.substring(0, emails_string.length-2));
+			
+			jQuery('#department-modal').modal('hide');
+			// refresh local JS cache of departmentsArray data
+			var array_key = -1;
+			// look for the array index of this department in the array
+			for(department in jsDataObjects.departmentsArray) {
+				if(jsDataObjects.departmentsArray[department].id == departmentId) {
+					array_key = department;
+				}
+			}
+			// if the index position was not found
+			if(array_key == -1) {
+				// add new data
+				jsDataObjects.departmentsArray.push(data);
+			} else {
+				// change existing data
+				jsDataObjects.departmentsArray[array_key] = data;
+			}
+		}
+
+		var failureCallback = function (message) {
+
+			// Add failure indicators
+			jQuery("#department-modal").removeClass("waiting");
+			jQuery("#department-modal .control-group").each(function () {
+				jQuery(this).addClass("error"); 
+			});
+
+			// Display the error
+			jQuery("#department-errors").html("<li><strong>Unable to save department</strong>: "+message);
+
+		}
+
+		jQuery.ajax({
+			url:jsonURL,
+			data:{
+				'departmentId':departmentId,
+				'name': name,
+				'emails': emails
+			},
+			dataType:'json',
+			type:'POST',
+			success:function(data){
+				if (data.success) {
+					successCallback(data);
+				} else {
+					failureCallback(data.message)
+				}
+			},
+			error:function(e){
+				console.log(e);
+				failureCallback("Unable to communicate with the server."+e);
+			}
+
+		});
+
+		return false;
+	}
+}
+
+/**
+ * Delete an existing department. This will confirm that this is what the user wants to do.
+ * 
+ * @param jsonURL
+ *            The url where departments are deleted.
+ * @returns A Callback Function
+ */
+function departmentRemoveDialogHandler(jsonURL) {
+	return function () {
+
+		// Confirm before deleting
+		var really = confirm("Alert! All submissions which use this department will have their department settings deleted with no way to recover. Are you REALLY sure you want to delete this department?");
+		if (!really)
+			return false;
+		
+		var departmentId = jQuery("#department-id").val();
+		jQuery("#department-modal").addClass("waiting");
+		
+		var successCallback = function(data) {
+
+			// Remove the ajax loading indicators & alerts
+			jQuery("#department-modal").removeClass("waiting");
+			jQuery("#department-errors").html("");
+			jQuery("#department-modal .control-group").each(function () {
+				jQuery(this).removeClass("error"); 
+			});
+			jQuery("#department_"+departmentId).remove();
+			
+			// Go back to the list
+			jQuery('#department-modal').modal('hide');
+			
+			// refresh local JS cache of departmentsArray data
+			var array_key = -1;
+			// look for the array index of this department in the array
+			for(department in jsDataObjects.departmentsArray) {
+				if(jsDataObjects.departmentsArray[department].id == departmentId) {
+					array_key = parseInt(department);
+				}
+			}
+			// if the index position was found
+			if(array_key != -1) {
+				// remove old data
+				var arrayBefore = jsDataObjects.departmentsArray.slice(0, array_key);
+				var arrayAfter = new Array();
+				// avoid index out of bounds (in case we're removing last element in array)
+				if(array_key+1 < jsDataObjects.departmentsArray.length) {
+					arrayAfter = jsDataObjects.departmentsArray.slice(array_key+1, jsDataObjects.departmentsArray.length);
+				}
+				var newArray = arrayBefore.concat(arrayAfter);
+				jsDataObjects.departmentsArray = newArray;
+			}
+		}
+
+		var failureCallback = function (message) {
+
+			// Add failure indicators
+			jQuery("#department-modal").removeClass("waiting");
+			jQuery("#department-modal .control-group").each(function () {
+				jQuery(this).addClass("error"); 
+			});
+
+			// Display the error
+			jQuery("#department-errors").html("<li><strong>Unable to remove department</strong>: "+message);
+
+		}
+
+		jQuery.ajax({
+			url:jsonURL,
+			data:{
+				'departmentId': departmentId
+			},
+			dataType:'json',
+			type:'POST',
+			success:function(data){
+				if (data.success) {
+					successCallback(data);
+				} else {
+					failureCallback(data.message)
+				}
+			},
+			error:function(){
+				failureCallback("Unable to communicate with the server.");
+			}
+
+		});
+
+		return false;
+	}
+}
+
+/**
+ * Sortable update handler for departments. This callback is called whenever
+ * re-sorts the list of departments, saving the new order in the system.
+ * 
+ * @param jsonURL
+ *            The json url to update departments order.
+ * @returns A Callback function
+ */
+var departmentSortableUpdateHandler = function(jsonURL) {
+	return function(event, ui) {
+
+		var list = jQuery("#departments-list").sortable('toArray').toString();
+		jQuery("#departments-list").addClass("waiting");
+
+		var successCallback = function(data) {
+			// Remove the ajax loading indicators & alerts
+			clearAlert("department-reorder");
+			jQuery("#departments-list").removeClass("waiting");
+		}
+
+		var failureCallback = function(message) {
+			displayAlert("department-reorder", "Unable to reorder department",
+					message);
+			jQuery("#departments-list").removeClass("waiting");
+		}
+
+		var data = {};
+		data['departmentIds'] = list;
+
+		jQuery.ajax({
+			url : jsonURL,
+			data : data,
+			dataType : 'json',
+			type : 'POST',
+			success : function(data) {
+				if (data.success) {
+					successCallback(data);
+				} else {
+					failureCallback(data.message)
+				}
+			},
+			error : function() {
+				failureCallback("Unable to communicate with the server.");
+			}
+
+		});
+	};
+}
+
+/**
+ * Open the administrative group dialog box. This will work for opening an existing
+ * administrative group, or adding a new administrative group.
+ * 
+ * @returns A Callback function
+ */
+function adminGroupOpenDialogHandler(isNew, id) {
+	if(isNew == null && typeof(isNew) == "undefined") {
+		isNew = false;
+	}
+
+	if (!isNew) {
+		// Loading an existing type
+		var array_key = -1;
+		for(adminGroup in jsDataObjects.adminGroupsArray) {
+			if(jsDataObjects.adminGroupsArray[adminGroup].id == id) {
+				array_key = adminGroup;
+			}
+		}
+		if(array_key == -1) {
+			return;
+		}
+		// get our college data from JS cache
+		var adminGroup = jsDataObjects.adminGroupsArray[array_key];
+		jQuery("#adminGroup-id").val(id);
+		jQuery("#adminGroup-name").val(adminGroup.name);
+		var emails_string = "";
+		var emails = adminGroup.emails;
+		$.each(emails, function(key, val) {
+			if (val.email != "") {
+				emails_string += val.email + ", ";
+			}
+		});
+
+		jQuery("#adminGroup-emails").val(emails_string.substring(0, emails_string.length-2));
+		
+		jQuery("#adminGroup-modal .modal-header h3").text("Edit Administrative Group");
+		jQuery("#adminGroup-modal .modal-footer #adminGroup-save").val("Save Administrative Group");
+		jQuery("#adminGroup-remove").show();
+	} else {
+		// Adding a new administrative group
+		jQuery("#adminGroup-id").val("");
+		jQuery("#adminGroup-name").val("");
+		jQuery("#adminGroup-emails").val("");
+		
+		jQuery("#adminGroup-modal .modal-header h3").text("Add Administrative Group");
+		jQuery("#adminGroup-modal .modal-footer #adminGroup-save").val("Add Administrative Group");
+		jQuery("#adminGroup-remove").hide();
+
+	}
+
+	//  out any previous errors
+	jQuery("#adminGroup-errors").html("");
+	jQuery("#adminGroup-modal .control-group").each(function () {
+		jQuery(this).removeClass("error"); 
+	});
+
+	jQuery('#adminGroup-modal').modal('show');
+}
+
+/**
+ * Create or Edit an existing administrative group. This callback function handles
+ * saving the administrative group dialog box.
+ * 
+ * @param jsonURL
+ *            The url where administrative groups should be updated.
+ * @returns A Callback Function
+ */
+function adminGroupSaveDialogHandler(jsonURL) {
+	return function () {
+		var adminGroupId = jQuery("#adminGroup-id").val();
+		var name = jQuery("#adminGroup-name").val();
+		var emails = jQuery("#adminGroup-emails").val();
+		
+		jQuery("#adminGroup-modal").addClass("waiting");
+
+		var successCallback = function(data) {
+
+			// Remove the ajax loading indicators & alerts
+			jQuery("#adminGroup-modal").removeClass("waiting");
+			jQuery("#adminGroup-errors").html("");
+			jQuery("#adminGroup-modal .control-group").each(function () {
+				jQuery(this).removeClass("error"); 
+			});
+
+			var $row;
+			if (jQuery("#adminGroup_"+data.id).length > 0) {
+				// Look up the old row
+				$row = jQuery("#adminGroup_"+data.id);
+			} else {
+				// Add a new row to the end of the list.
+				$row = jQuery( 
+						"<tr id='adminGroup_"+data.id+"'>"+
+						"    <td class='adminGroup-name-cell'></td>"+
+						"    <td class='adminGroup-emails-cell'></td>"+
+						"    <td class='adminGroup-edit-cell'><a data-id='"+data.id+"' href='javascript:void(0);'>Edit</a></td>" +
+						"</tr>"
+				).appendTo(jQuery("#adminGroups-list"));
+			}
+
+			$row.find(".adminGroup-name-cell").text(data.name);
+			var emails_string = "";
+			var emails = data.emails;
+			$.each(emails, function(key, val) {
+				emails_string += val.email + ", ";
+			});
+			$row.find(".adminGroup-emails-cell").text(emails_string.substring(0, emails_string.length-2));
+			
+			jQuery('#adminGroup-modal').modal('hide');
+			// refresh local JS cache of adminGroupsArray data
+			var array_key = -1;
+			// look for the array index of this adminGroup in the array
+			for(adminGroup in jsDataObjects.adminGroupsArray) {
+				if(jsDataObjects.adminGroupsArray[adminGroup].id == adminGroupId) {
+					array_key = adminGroup;
+				}
+			}
+			// if the index position was not found
+			if(array_key == -1) {
+				// add new data
+				jsDataObjects.adminGroupsArray.push(data);
+			} else {
+				// change existing data
+				jsDataObjects.adminGroupsArray[array_key] = data;
+			}
+		}
+
+		var failureCallback = function (message) {
+
+			// Add failure indicators
+			jQuery("#adminGroup-modal").removeClass("waiting");
+			jQuery("#adminGroup-modal .control-group").each(function () {
+				jQuery(this).addClass("error"); 
+			});
+
+			// Display the error
+			jQuery("#adminGroup-errors").html("<li><strong>Unable to save administrative group</strong>: "+message);
+
+		}
+
+		jQuery.ajax({
+			url:jsonURL,
+			data:{
+				'adminGroupId':adminGroupId,
+				'name': name,
+				'emails': emails
+			},
+			dataType:'json',
+			type:'POST',
+			success:function(data){
+				if (data.success) {
+					successCallback(data);
+				} else {
+					failureCallback(data.message)
+				}
+			},
+			error:function(e){
+				console.log(e);
+				failureCallback("Unable to communicate with the server."+e);
+			}
+
+		});
+
+		return false;
+	}
+}
+
+/**
+ * Delete an existing administrative group. This will confirm that this is what the user wants to do.
+ * 
+ * @param jsonURL
+ *            The url where administrative groups are deleted.
+ * @returns A Callback Function
+ */
+function adminGroupRemoveDialogHandler(jsonURL) {
+	return function () {
+
+		// Confirm before deleting
+		var really = confirm("Alert! All email workflow rules which use this administrative group will have their recipient settings deleted with no way to recover. Are you REALLY sure you want to delete this administrative group?");
+		if (!really)
+			return false;
+		
+		var adminGroupId = jQuery("#adminGroup-id").val();
+		jQuery("#adminGroup-modal").addClass("waiting");
+		
+		var successCallback = function(data) {
+
+			// Remove the ajax loading indicators & alerts
+			jQuery("#adminGroup-modal").removeClass("waiting");
+			jQuery("#adminGroup-errors").html("");
+			jQuery("#adminGroup-modal .control-group").each(function () {
+				jQuery(this).removeClass("error"); 
+			});
+			jQuery("#adminGroup_"+adminGroupId).remove();
+			
+			// Go back to the list
+			jQuery('#adminGroup-modal').modal('hide');
+			
+			// refresh local JS cache of departmentsArray data
+			var array_key = -1;
+			// look for the array index of this department in the array
+			for(adminGroup in jsDataObjects.adminGroupsArray) {
+				if(jsDataObjects.adminGroupsArray[adminGroup].id == adminGroupId) {
+					array_key = parseInt(adminGroup);
+				}
+			}
+			// if the index position was found
+			if(array_key != -1) {
+				// remove old data
+				var arrayBefore = jsDataObjects.adminGroupsArray.slice(0, array_key);
+				var arrayAfter = new Array();
+				// avoid index out of bounds (in case we're removing last element in array)
+				if(array_key+1 < jsDataObjects.adminGroupsArray.length) {
+					arrayAfter = jsDataObjects.adminGroupsArray.slice(array_key+1, jsDataObjects.adminGroupsArray.length);
+				}
+				var newArray = arrayBefore.concat(arrayAfter);
+				jsDataObjects.adminGroupsArray = newArray;
+			}
+		}
+
+		var failureCallback = function (message) {
+
+			// Add failure indicators
+			jQuery("#adminGroup-modal").removeClass("waiting");
+			jQuery("#adminGroup-modal .control-group").each(function () {
+				jQuery(this).addClass("error"); 
+			});
+
+			// Display the error
+			jQuery("#adminGroup-errors").html("<li><strong>Unable to remove administrative group</strong>: "+message);
+
+		}
+
+		jQuery.ajax({
+			url:jsonURL,
+			data:{
+				'adminGroupId': adminGroupId
+			},
+			dataType:'json',
+			type:'POST',
+			success:function(data){
+				if (data.success) {
+					successCallback(data);
+				} else {
+					failureCallback(data.message)
+				}
+			},
+			error:function(){
+				failureCallback("Unable to communicate with the server.");
+			}
+
+		});
+
+		return false;
+	}
+}
+
+/**
+ * Sortable update handler for administrative groups. This callback is called whenever
+ * re-sorts the list of administrative groups, saving the new order in the system.
+ * 
+ * @param jsonURL
+ *            The json url to update administrative groups order.
+ * @returns A Callback function
+ */
+var adminGroupSortableUpdateHandler = function(jsonURL) {
+	return function(event, ui) {
+
+		var list = jQuery("#adminGroups-list").sortable('toArray').toString();
+		jQuery("#adminGroups-list").addClass("waiting");
+
+		var successCallback = function(data) {
+			// Remove the ajax loading indicators & alerts
+			clearAlert("adminGroup-reorder");
+			jQuery("#adminGroups-list").removeClass("waiting");
+		}
+
+		var failureCallback = function(message) {
+			displayAlert("adminGroup-reorder", "Unable to reorder administrative group",
+					message);
+			jQuery("#adminGroups-list").removeClass("waiting");
+		}
+
+		var data = {};
+		data['adminGroupIds'] = list;
 
 		jQuery.ajax({
 			url : jsonURL,
@@ -1770,6 +3649,7 @@ function depositSaveHandler(closeOnSave, saveURL, updateURL) {
 		var depositor = jQuery("#depositLocation-depositor").val();
 		var packager = jQuery("#depositLocation-packager").val();
 		var repository = jQuery("#depositLocation-repository").val();
+		var timeout = jQuery("#depositLocation-timeout").val();
 		var username = jQuery("#depositLocation-username").val();
 		var password = jQuery("#depositLocation-password").val();
 		var onBehalfOf = jQuery("#depositLocation-onBehalfOf").val();
@@ -1787,6 +3667,7 @@ function depositSaveHandler(closeOnSave, saveURL, updateURL) {
 				depositor: depositor,
 				packager: packager,
 				repository: repository,
+				timeout: timeout,
 				username: username,
 				password: password,
 				onBehalfOf: onBehalfOf,
@@ -2011,6 +3892,3 @@ function addStickySettingsHandler() {
 		
 	};
 }
-
-
-

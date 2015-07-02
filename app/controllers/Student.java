@@ -9,16 +9,22 @@ import static org.tdl.vireo.constant.FieldConfig.SUPPLEMENTAL_ATTACHMENT;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
+import org.apache.commons.io.IOUtils;
 import org.tdl.vireo.constant.AppConfig;
 import org.tdl.vireo.constant.FieldConfig;
 import org.tdl.vireo.model.ActionLog;
 import org.tdl.vireo.model.Attachment;
 import org.tdl.vireo.model.AttachmentType;
 import org.tdl.vireo.model.Configuration;
+import org.tdl.vireo.model.CustomActionDefinition;
 import org.tdl.vireo.model.NameFormat;
 import org.tdl.vireo.model.Person;
 import org.tdl.vireo.model.RoleType;
@@ -26,8 +32,10 @@ import org.tdl.vireo.model.Submission;
 import org.tdl.vireo.state.State;
 
 import play.Logger;
+import play.Play;
 import play.libs.MimeTypes;
 import play.mvc.With;
+import controllers.Application.SubmissionStatus;
 import controllers.submit.PersonalInfo;
 
 /**
@@ -78,59 +86,88 @@ public class Student extends AbstractVireoController {
 	 * the previous submission.
 	 */
 	@Security(RoleType.STUDENT)
-	public static void submissionList() {	
-
+	public static void submissionList() {
+		List<Submission> submissions = subRepo.findSubmission(context.getPerson());
+		
+		SubmissionStatus subStatus = new SubmissionStatus();
+		
+		renderTemplate("Student/list.html",submissions, subStatus);
+	}
+	
+	/**
+	 * Remove additional document(s) via AJAX request
+	 * @param subId The submission id.
+	 */
+	@Security(RoleType.STUDENT)
+	public static void submissionRemoveAdditionalDocumentsJSON(Long subId) {
+		// Locate the submission 
+		Submission sub = subRepo.findSubmission(subId);
+		// Check that we are the owner of the submission.
 		Person submitter = context.getPerson();
-		List<Submission> submissions = subRepo.findSubmission(submitter);
+		if (sub.getSubmitter() != submitter)
+		    unauthorized();		
 
-
-		boolean submissionsOpen = settingRepo.getConfigBoolean(AppConfig.SUBMISSIONS_OPEN);
-		boolean allowMultiple = settingRepo.getConfigBoolean(AppConfig.ALLOW_MULTIPLE_SUBMISSIONS);
-		
-		// Check to see there are no submissions, start a new one.
-		if (submissions.size() == 0 && submissionsOpen) {
-			// First time, here let's start a new sub.
-			PersonalInfo.personalInfo(null);
+		removeAdditional(sub); 
+		renderJSON("{ \"success\": \"true\"}");
+	}
+	
+	/**
+	 * Handle uploading an Additional Document from an AJAX request
+	 * @param subId The submission id.
+	 */
+	@Security(RoleType.STUDENT)
+	public static void submissionUploadAdditionalDocumentJSON(Long subId) {
+		// Locate the submission 
+		Submission sub = subRepo.findSubmission(subId);
+		if(params.get("additionalDocument",File.class) != null) { 
+			// Check that we are the owner of the submission.
+			Person submitter = context.getPerson();
+			if (sub.getSubmitter() != submitter)
+			    unauthorized();		
+			uploadAdditional(sub);
+			renderJSON("{ \"success\": \"true\"}");
 		}
-		
-		
-		// Check to see if we should skip the list page.
-		if (submissions.size() == 1 && !allowMultiple && !submissions.get(0).getState().isArchived()) {
-			// The only condition when a user should skip the list page is, when allow multiple 
-			// submissions is turned off AND they have one *active* submission.
-			Submission sub = submissions.get(0);
-		
-			if (submissionsOpen && sub.getState().isInProgress()) {
-				// The one submission isn't complete yet.
-				PersonalInfo.personalInfo(sub.getId());
-			} else if (!sub.getState().isInProgress()){
-				// Go straight to view the status page.
-				submissionView(sub.getId());
-			}
+		renderJSON("{ \"success\": \"false\"}");
+	}
+	
+	/**
+	 * Handle uploading a Primary Document from an AJAX request
+	 * @param subId The submission id.
+	 */
+	@Security(RoleType.STUDENT)
+	public static void submissionUploadPrimaryDocumentJSON(Long subId) {
+		if(params.get("primaryDocument",File.class) != null) { 
+			// Locate the submission 
+			Submission sub = subRepo.findSubmission(subId);
+			// Check that we are the owner of the submission.
+			Person submitter = context.getPerson();
+			if (sub.getSubmitter() != submitter)
+			    unauthorized();		
+			uploadPrimaryDocument(sub);
+			renderJSON("{ \"success\": \"true\"}");
 		}
-
-		// Should we allow the student to start another submission.
-		boolean showStartSubmissionButton = allowMultiple;
-		
-		// Check if we should allow the user to start another submission.
-		boolean allArchived = true;
-		for (Submission sub : submissions) {
-			if (!sub.getState().isArchived())
-				allArchived = false;
+		renderJSON("{ \"success\": \"false\"}");
+	}
+	
+	/**
+	 * Handle adding a message from an AJAX request
+	 * @param subId The submission id.
+	 */
+	@Security(RoleType.STUDENT)
+	public static void submissionAddMessageJSON(Long subId) {
+		String studentMessage = null;
+		if (!params.get("message").equals("")) {
+			studentMessage = params.get("message");
+			// Locate the submission 
+			Submission sub = subRepo.findSubmission(subId);
+			// Check that we are the owner of the submission.
+			Person submitter = context.getPerson();
+			if (sub.getSubmitter() != submitter)
+			    unauthorized();		
+			sub.logAction("Message added : '" +	studentMessage + "'").save();
+			renderJSON("{ \"success\": \"true\"}");
 		}
-		if (allArchived) {
-			// If all the current submissions are archived, allow the user to submit another submission.
-			showStartSubmissionButton = true;
-		}
-		
-		if (!submissionsOpen)
-			// If we're not open, then no one can start a new submission.
-			showStartSubmissionButton = false;
-		
-		renderArgs.put("SUBMISSIONS_OPEN", settingRepo.findConfigurationByName(AppConfig.SUBMISSIONS_OPEN));
-		renderArgs.put("CURRENT_SEMESTER", settingRepo.getConfigValue(AppConfig.CURRENT_SEMESTER, "current"));
-		
-		renderTemplate("Student/list.html",submissions, showStartSubmissionButton);
+		renderJSON("{ \"success\": \"false\"}");
 	}
 
 	/**
@@ -149,6 +186,10 @@ public class Student extends AbstractVireoController {
 		// Locate the submission 
 		Submission sub = subRepo.findSubmission(subId);
 		
+		if(sub == null){
+			error("Submission with id: " + subId + " was not found!");
+		}
+		
 		// Check that we are the owner of the submission.
 		Person submitter = context.getPerson();
 		if (sub.getSubmitter() != submitter)
@@ -161,12 +202,6 @@ public class Student extends AbstractVireoController {
 				sub.getId());
 		
 		boolean allowMultiple = settingRepo.getConfigBoolean(AppConfig.ALLOW_MULTIPLE_SUBMISSIONS);
-		
-		// Handle add message button. Just add the message to the submission
-		if (params.get("submit_addMessage") != null) {   
-			if (!params.get("studentMessage").equals(""))
-				sub.logAction("Message added : '" +	params.get("studentMessage") + "'").save();
-		}
 		
 		if (sub.getState().isEditableByStudent()) {
 			// If the replace manuscript button is pressed - then delete the manuscript 
@@ -184,11 +219,14 @@ public class Student extends AbstractVireoController {
 				removeAdditional(sub);           	            	
 			}
 			
-			if(params.get("primaryDocument",File.class) != null) 
+			if(params.get("primaryDocument",File.class) != null) {
 				uploadPrimaryDocument(sub);
-			
-			if(params.get("additionalDocument",File.class) != null)
+				renderArgs.put("formSubmitter","replacePrimary");
+			}			
+			if(params.get("additionalDocument",File.class) != null) {
 				uploadAdditional(sub);
+				renderArgs.put("formSubmitter","removeAdditional");
+			}
 			
 			verify(sub);
 			
@@ -223,8 +261,18 @@ public class Student extends AbstractVireoController {
 		for(AttachmentType type : AttachmentType.values()){
 			attachmentTypes.add(type.toString());
 		}
-
-		renderTemplate("Student/view.html",subId, sub, submitter, logs, primaryDocument, additionalDocuments, feedbackDocuments, allSubmissions, grantor, allowMultiple, attachmentTypes);		
+		
+		// get all the custom actions available in the system
+		List<CustomActionDefinition> allActions = settingRepo.findAllCustomActionDefinition();
+		List<CustomActionDefinition> visibleActions = new ArrayList<CustomActionDefinition>();
+		
+		for(CustomActionDefinition action : allActions) {
+			if(action.isStudentVisible()) {
+				visibleActions.add(action);
+			}
+		}
+		
+		renderTemplate("Student/view.html",subId, sub, submitter, logs, primaryDocument, additionalDocuments, feedbackDocuments, allSubmissions, grantor, allowMultiple, attachmentTypes, visibleActions);		
 	}
 
 	/**
@@ -373,10 +421,9 @@ public class Student extends AbstractVireoController {
 	 *            The submission to remove attachments from.
 	 */
 	public static boolean removeAdditional(Submission sub) {
-
 		// Get values from all check boxes
 		String[] idsToRemove = params.getAll("attachmentToRemove");
-		
+
 		if (idsToRemove != null) {
 		
 			// Iterate over all checked check boxes - removing attachments as we go

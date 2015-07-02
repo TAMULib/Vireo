@@ -36,6 +36,7 @@ import play.Logger;
  * Test the FilterTab controller
  * 
  * @author <a href="http://www.scottphillips.com">Scott Phillips</a>
+ * @author James Creel (http://www.jamescreel.net)
  */
 public class FilterTabTest extends AbstractVireoFunctionalTest {
 	
@@ -67,7 +68,7 @@ public class FilterTabTest extends AbstractVireoFunctionalTest {
 		Person reviewer = personRepo.findPersonsByRole(RoleType.REVIEWER).get(0);
 		EmbargoType embargo1 = settingRepo.findAllEmbargoTypes().get(0);
 		EmbargoType embargo2 = settingRepo.findAllEmbargoTypes().get(1);
-	
+
 		// Run for both the list and log tabs
 		String[] possibleNavs = {"list","log"};
 		for (String nav : possibleNavs) {
@@ -149,7 +150,7 @@ public class FilterTabTest extends AbstractVireoFunctionalTest {
 			
 			// Now that we are at the apex, check that everything is still there.
 			response = GET(LIST_URL);
-
+			
 			assertTrue(getContent(response).contains("filter?action=remove&type=include_sub&value=1"));
 			assertTrue(getContent(response).contains("filter?action=remove&type=exclude_sub&value=2"));
 			assertTrue(getContent(response).contains("filter?action=remove&type=state&value=Submitted"));
@@ -181,9 +182,10 @@ public class FilterTabTest extends AbstractVireoFunctionalTest {
 			assertTrue(getContent(response).contains("filter?action=remove&type=major&value=Accounting"));
 			assertFalse(getContent(response).contains("filter?action=add&type=major&value=Accounting"));
 			assertTrue(getContent(response).contains("filter?action=remove&type=major&value=Zoology"));
-			assertFalse(getContent(response).contains("filter?action=add&type=major&value=Zoology"));		
-			assertTrue(getContent(response).contains("filter?action=remove&type=embargo&value="+embargo1.getId()));
-			assertFalse(getContent(response).contains("filter?action=add&type=embargo&value="+embargo1.getId()));		
+			assertFalse(getContent(response).contains("filter?action=add&type=major&value=Zoology"));
+			//specify the closing quote on these hrefs, since substring 'value=1' deceptively matches 'value=10' 
+			assertTrue(getContent(response).contains("filter?action=remove&type=embargo&value="+embargo1.getId()+"\""));
+			assertFalse(getContent(response).contains("filter?action=add&type=embargo&value="+embargo1.getId()+"\""));		
 			assertTrue(getContent(response).contains("filter?action=remove&type=embargo&value="+embargo2.getId()));
 			assertFalse(getContent(response).contains("filter?action=add&type=embargo&value="+embargo2.getId()));
 			assertTrue(getContent(response).contains("filter?action=remove&type=degree&value=Doctor+of+Philosophy"));
@@ -517,13 +519,13 @@ public class FilterTabTest extends AbstractVireoFunctionalTest {
 	
 				response = GET(LIST_URL);
 				String labelName = Messages.get(nav.toUpperCase()+"_COLUMN_"+order.name());
-				assertContentMatch("<th class=\"orderby selected ascending\">\\s*<a href=\"[^\"]*\\?direction=toggle\">"+labelName+"</a>",response);
+				assertContentMatch("<th style='width:[^\"]*\\%' class=\"orderby selected ascending\">\\s*<a href=\"[^\"]*\\?direction=toggle\">"+labelName+"</a>",response);
 				
 				GET(SEARCH_URL+"?orderby="+order.getId());
 				GET(SEARCH_URL+"?direction=toggle");
 	
 				response = GET(LIST_URL);
-				assertContentMatch("<th class=\"orderby selected descending\">\\s*<a href=\"[^\"]*\\?direction=toggle\">"+labelName+"</a>",response);
+				assertContentMatch("<th style='width:[^\"]*\\%' class=\"orderby selected descending\">\\s*<a href=\"[^\"]*\\?direction=toggle\">"+labelName+"</a>",response);
 				
 				GET(SEARCH_URL+"?direction=toggle");
 			//}
@@ -917,14 +919,14 @@ public class FilterTabTest extends AbstractVireoFunctionalTest {
 			
 			Response response = GET(LIST_URL);
 			// Check that we have at least some submissions
-			assertContentMatch("<a href=\"/admin/view\\?subId=\\d+\">\\d+</a>",response);
+			assertContentMatch("<a href=\"/admin/view/\\d+\">\\d+</a>",response);
 			
 			// Change the filter status
 			GET(FILTER_URL+"?action=add&type=state&value=InReview");
 			
 			response = GET(LIST_URL);
 			// Check that our pagination was switched so that we show at least some records.
-			assertContentMatch("<a href=\"/admin/view\\?subId=\\d+\">\\d+</a>",response);
+			assertContentMatch("<a href=\"/admin/view/\\d+\">\\d+</a>",response);
 			
 		}
 	}
