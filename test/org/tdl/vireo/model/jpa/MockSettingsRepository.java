@@ -32,6 +32,7 @@ import org.tdl.vireo.model.MockEmailTemplate;
 import org.tdl.vireo.model.MockEmailWorkflowRule;
 import org.tdl.vireo.model.MockEmbargoType;
 import org.tdl.vireo.model.Program;
+import org.tdl.vireo.model.ProgramMonth;
 import org.tdl.vireo.model.SettingsRepository;
 import org.tdl.vireo.state.State;
 
@@ -564,6 +565,24 @@ public class MockSettingsRepository implements SettingsRepository {
 	@Override
 	public AbstractWorkflowRuleCondition findEmailWorkflowRuleCondition(Long id) {
 		// DO NOTHING
+		return null;
+	}
+
+	@Override
+	public ProgramMonth createProgramMonth(int month) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public ProgramMonth findProgramMonth(Long id) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<ProgramMonth> findAllProgramMonths() {
+		// TODO Auto-generated method stub
 		return null;
 	}
 }

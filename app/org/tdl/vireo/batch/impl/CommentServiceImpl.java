@@ -202,7 +202,7 @@ public class CommentServiceImpl implements CommentService {
 			
 			
 			String jobTitle = "Batch Comment"	;		
-			if (this.emailStudent)
+			if (this.sendEmail)
 				jobTitle = "Batch Email";
 			metadata = jobManager.register(jobTitle,context.getPerson());
 
@@ -236,7 +236,7 @@ public class CommentServiceImpl implements CommentService {
 				metadata.getProgress().completed = 0;
 				
 				// Comment!
-				if (this.emailStudent)
+				if (this.sendEmail)
 					metadata.setMessage("Sending emails...");
 				else
 					metadata.setMessage("Adding comments...");

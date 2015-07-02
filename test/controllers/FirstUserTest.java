@@ -4,29 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.Test;
-<<<<<<< HEAD
-import org.tdl.vireo.model.College;
-import org.tdl.vireo.model.CommitteeMemberRoleType;
-import org.tdl.vireo.model.Configuration;
-import org.tdl.vireo.model.CustomActionDefinition;
-import org.tdl.vireo.model.Degree;
-import org.tdl.vireo.model.DegreeLevel;
-import org.tdl.vireo.model.Department;
-import org.tdl.vireo.model.DepositLocation;
-import org.tdl.vireo.model.DocumentType;
-import org.tdl.vireo.model.EmailTemplate;
-import org.tdl.vireo.model.EmbargoType;
-import org.tdl.vireo.model.GraduationMonth;
-import org.tdl.vireo.model.ProgramMonth;
-import org.tdl.vireo.model.Language;
-import org.tdl.vireo.model.Major;
-import org.tdl.vireo.model.MockCommitteeMemberRoleType;
-import org.tdl.vireo.model.MockConfiguration;
-import org.tdl.vireo.model.MockEmbargoType;
-import org.tdl.vireo.model.MockPerson;
-import org.tdl.vireo.model.Person;
-=======
->>>>>>> v3.0.3
 import org.tdl.vireo.model.PersonRepository;
 import org.tdl.vireo.model.SettingsRepository;
 import org.tdl.vireo.model.jpa.MockPersonRepository;
