@@ -470,8 +470,8 @@ public class UriActiveSearchFilterImpl implements ActiveSearchFilter {
 	public void decode(String encoded) {
 		try {
 			String[] split = encoded.split(":",-1);
-			if (split.length != 22)
-				throw new IllegalArgumentException("Unable to decode active search filter because it does not have the 19 expected number of components instead it has "+split.length);
+			if (split.length != 23)
+				throw new IllegalArgumentException("Unable to decode active search filter because it does not have the 23 expected number of components instead it has "+split.length);
 
 			// Decode all the lists
 			int i = 1;
