@@ -15,70 +15,49 @@
 	<!-- Vireo State Manager -->
 	<bean id="StateManager" class="org.tdl.vireo.state.impl.StateManagerImpl"
 		scope="singleton" autowire="byType">
-		<property name="initialState" ref="ProposalInProgress" />
+		<property name="initialState" ref="InProgress" />
 		<property name="cancelState" ref="Cancelled" />
 		<!-- List of all states will be autowired -->
 	</bean>
 
-	<bean id="ProposalInProgress" class="org.tdl.vireo.state.impl.StateImpl"
+
+	<!-- Vireo 1.x States -->
+	<!-- These states listed below are a direct translation of the vireo 1.x states -->
+	
+	<bean id="InProgress" class="org.tdl.vireo.state.impl.StateImpl"
 		scope="singleton">
-		<property name="displayName" value="Proposal In Progress" />
+		<property name="displayName" value="In Progress" />
 		<property name="inProgress" value="true" />
 		<property name="transitions">
 			<util:list list-class="java.util.ArrayList" value-type="org.tdl.vireo.state.State">
-				<ref bean="ProposalSubmitted" />
+				<ref bean="Submitted" />
 			</util:list>
 		</property>
 	</bean>
 
-	<bean id="ProposalSubmitted" class="org.tdl.vireo.state.impl.StateImpl"
+	<bean id="Submitted" class="org.tdl.vireo.state.impl.StateImpl"
 		scope="singleton">
-		<property name="displayName" value="Proposal Submitted" />
+		<property name="displayName" value="Submitted" />
 		<property name="active" value="true" />
+		<property name="editableByReviewer" value="true" />
 		<property name="transitions">
 			<util:list list-class="java.util.ArrayList" value-type="org.tdl.vireo.state.State">
-				<ref bean="ProposalReadyToReview" />
-				<ref bean="TeamProposalReadyToReview" />
-				<ref bean="TeamMemberOnHold" />
+				<ref bean="InReview" />
 			</util:list>
 		</property>
 		<property name="inWorkflow" value="true" />
 	</bean>
 
-	<bean id="ProposalReadyToReview" class="org.tdl.vireo.state.impl.StateImpl"
+	<bean id="InReview" class="org.tdl.vireo.state.impl.StateImpl"
 		scope="singleton">
-		<property name="displayName" value="Proposal Ready to Review" />
+		<property name="displayName" value="Under Review" />
 		<property name="active" value="true" />
+		<property name="editableByReviewer" value="true" />
 		<property name="transitions">
 			<util:list list-class="java.util.ArrayList" value-type="org.tdl.vireo.state.State">
 				<ref bean="NeedsCorrection" />
-                <ref bean="PendingComplianceApproval" />
-                <ref bean="ProposalAccepted" />
-			</util:list>
-		</property>
-	</bean>
-
-	<bean id="TeamProposalReadyToReview" class="org.tdl.vireo.state.impl.StateImpl"
-		scope="singleton">
-		<property name="displayName" value="Team Proposal Ready to Review" />
-		<property name="active" value="true" />
-		<property name="transitions">
-			<util:list list-class="java.util.ArrayList" value-type="org.tdl.vireo.state.State">
-				<ref bean="NeedsCorrection" />
-                <ref bean="PendingComplianceApproval" />
-                <ref bean="ProposalAccepted" />
-			</util:list>
-		</property>
-	</bean>
-
-	<bean id="TeamMemberOnHold" class="org.tdl.vireo.state.impl.StateImpl"
-		scope="singleton">
-		<property name="displayName" value="Team Member on Hold" />
-		<property name="editableByReviewer" value="false" />
-		<property name="active" value="true" />
-		<property name="transitions">
-			<util:list list-class="java.util.ArrayList" value-type="org.tdl.vireo.state.State">
-				<ref bean="TeamProposalReadyToReview" />
+				<ref bean="WaitingOnRequirements" />
+				<ref bean="Approved" />
 			</util:list>
 		</property>
 	</bean>
@@ -104,102 +83,36 @@
         <property name="editableByReviewer" value="true" />
         <property name="transitions">
             <util:list
-                list-class="java.util.ArrayList" value-type="org.tdl.vireo.state.State">                
-                <ref bean="NeedsCorrection" />
-                <ref bean="PendingComplianceApproval" />
-                <ref bean="ProposalAccepted" />
+                list-class="java.util.ArrayList" value-type="org.tdl.vireo.state.State">
+                <ref bean="InReview" />
+                <ref bean="WaitingOnRequirements" />
+                <ref bean="Approved" />
             </util:list>
         </property>
         <property name="inWorkflow" value="true" />
     </bean>
 
-    <bean id="ProposalAccepted" class="org.tdl.vireo.state.impl.StateImpl"
-		scope="singleton">
-		<property name="displayName" value="Proposal Accepted" />
-		<property name="active" value="true" />
-		<property name="editableByReviewer" value="true" />
-		<property name="approved" value="true"/>
-		<property name="inWorkflow" value="true" />
-	</bean>
-
-	<bean id="PendingComplianceApproval" class="org.tdl.vireo.state.impl.StateImpl"
-		scope="singleton">
-		<property name="displayName" value="Pending Compliance Approval" />
-		<property name="active" value="true" />
-		<property name="editableByReviewer" value="true" />
-		<property name="approved" value="true"/>
-		<property name="inWorkflow" value="true" />
-	</bean>
-
-	<bean id="Cancelled" class="org.tdl.vireo.state.impl.StateImpl"
-		scope="singleton">
-		<property name="displayName" value="Cancelled" />
-		<property name="archived" value="true" />
-		<property name="editableByReviewer" value="true" />
-		<property name="deletable" value="true" />
-	</bean>
-
-
-	<!-- Vireo 1.x States -->
-	<!-- These states listed below are a direct translation of the vireo 1.x states -->
-	
-	<!-- <bean id="InProgress" class="org.tdl.vireo.state.impl.StateImpl"
-		scope="singleton">
-		<property name="displayName" value="In Progress" />
-		<property name="inProgress" value="true" />
-		<property name="transitions">
-			<util:list list-class="java.util.ArrayList" value-type="org.tdl.vireo.state.State">
-				<ref bean="Submitted" />
-			</util:list>
-		</property>
-	</bean> -->
-
-	<!-- <bean id="Submitted" class="org.tdl.vireo.state.impl.StateImpl"
-		scope="singleton">
-		<property name="displayName" value="Submitted" />
-		<property name="active" value="true" />
-		<property name="editableByReviewer" value="true" />
-		<property name="transitions">
-			<util:list list-class="java.util.ArrayList" value-type="org.tdl.vireo.state.State">				
-			</util:list>
-		</property>
-		<property name="inWorkflow" value="true" />
-	</bean> -->
-
-	<!-- <bean id="InReview" class="org.tdl.vireo.state.impl.StateImpl"
-		scope="singleton">
-		<property name="displayName" value="Under Review" />
-		<property name="active" value="true" />
-		<property name="editableByReviewer" value="true" />
-		<property name="transitions">
-			<util:list list-class="java.util.ArrayList" value-type="org.tdl.vireo.state.State">
-				<ref bean="NeedsCorrection" />
-				<ref bean="WaitingOnRequirements" />
-				<ref bean="Approved" />
-			</util:list>
-		</property>
-	</bean> -->
-
-	<!-- <bean id="WaitingOnRequirements" class="org.tdl.vireo.state.impl.StateImpl"
+	<bean id="WaitingOnRequirements" class="org.tdl.vireo.state.impl.StateImpl"
 		scope="singleton">
 		<property name="displayName" value="Waiting On Requirements" />
 		<property name="active" value="true" />
 		<property name="editableByReviewer" value="true" />
 		<property name="transitions">
-			<util:list list-class="java.util.ArrayList" value-type="org.tdl.vireo.state.State">				
+			<util:list list-class="java.util.ArrayList" value-type="org.tdl.vireo.state.State">
+				<ref bean="InReview" />
 				<ref bean="Approved" />
 			</util:list>
 		</property>
-	</bean> -->
+	</bean>
 	
-	<!-- <bean id="OnHold" class="org.tdl.vireo.state.impl.StateImpl"
+	<bean id="OnHold" class="org.tdl.vireo.state.impl.StateImpl"
         scope="singleton">
         <property name="displayName" value="On Hold" />
         <property name="active" value="true" />
         <property name="editableByReviewer" value="true" />
-    </bean> -->
+    </bean>
 
-	<!-- <bean id="Approved" class="org.tdl.vireo.state.impl.StateImpl"
+	<bean id="Approved" class="org.tdl.vireo.state.impl.StateImpl"
 		scope="singleton">
 		<property name="displayName" value="Approved" />
 		<property name="active" value="true" />
@@ -216,9 +129,9 @@
 			</util:list>
 		</property>
 		<property name="inWorkflow" value="true" />
-	</bean> -->
+	</bean>
 
-	<!-- <bean id="PendingPublication" class="org.tdl.vireo.state.impl.StateImpl"
+	<bean id="PendingPublication" class="org.tdl.vireo.state.impl.StateImpl"
 		scope="singleton">
 		<property name="displayName" value="Pending Publication" />
 		<property name="archived" value="true" />
@@ -229,9 +142,9 @@
 			</util:list>
 		</property>
 		<property name="inWorkflow" value="true" />
-	</bean> -->
+	</bean>
 
-	<!-- <bean id="Published" class="org.tdl.vireo.state.impl.StateImpl"
+	<bean id="Published" class="org.tdl.vireo.state.impl.StateImpl"
 		scope="singleton">
 		<property name="displayName" value="Published" />
 		<property name="archived" value="true" />
@@ -243,16 +156,24 @@
 			</util:list>
 		</property>
 		<property name="inWorkflow" value="true" />
-	</bean> -->
+	</bean>
 
 	<!-- Out of Workflow states -->
 
-	<!-- <bean id="Withdrawn" class="org.tdl.vireo.state.impl.StateImpl"
+	<bean id="Withdrawn" class="org.tdl.vireo.state.impl.StateImpl"
 		scope="singleton">
 		<property name="displayName" value="Withdrawn" />
 		<property name="archived" value="true" />
 		<property name="editableByReviewer" value="true" />
         <property name="deletable" value="true" />
-	</bean> -->
+	</bean>
+
+	<bean id="Cancelled" class="org.tdl.vireo.state.impl.StateImpl"
+		scope="singleton">
+		<property name="displayName" value="Cancelled" />
+		<property name="archived" value="true" />
+		<property name="editableByReviewer" value="true" />
+		<property name="deletable" value="true" />
+	</bean>
 
 </beans>
