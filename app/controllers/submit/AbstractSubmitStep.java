@@ -7,6 +7,8 @@ import org.tdl.vireo.model.Person;
 import org.tdl.vireo.model.Submission;
 import org.tdl.vireo.state.State;
 
+import com.jamonapi.utils.Logger;
+
 import play.mvc.Before;
 import play.mvc.With;
 import controllers.AbstractVireoController;
@@ -67,7 +69,9 @@ public class AbstractSubmitStep extends AbstractVireoController {
 		
 		// And check that it is in the initial state.
 		State initialState = stateManager.getInitialState();
-		if (sub.getState() != initialState)
+		State currentState = sub.getState();
+		
+		if (!currentState.isMetadataEditable() && currentState != initialState)
 			error("This submission is no longer editable.");
 		
 		return sub;
