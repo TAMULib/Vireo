@@ -7,8 +7,6 @@ import org.tdl.vireo.model.Person;
 import org.tdl.vireo.model.Submission;
 import org.tdl.vireo.state.State;
 
-import com.jamonapi.utils.Logger;
-
 import play.mvc.Before;
 import play.mvc.With;
 import controllers.AbstractVireoController;
