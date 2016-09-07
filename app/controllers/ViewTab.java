@@ -986,6 +986,8 @@ public class ViewTab extends AbstractVireoController {
 				log.save();
 			}
 		}
+		
+		submission.save();
 	}
 	
 	/**
