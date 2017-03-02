@@ -292,7 +292,7 @@ public class Sword1DepositorImpl implements Depositor, BeanNameAware {
 	}
 
 	/**
-	* Private method to set credentials on the client and enable preempitce authentication.
+	* Private method to set credentials on the client and enable preemptive authentication.
 	*
 	* @param client
 	*            The SWORD client.
