@@ -1,5 +1,6 @@
 package org.tdl.vireo.export.impl;
 
+import java.lang.reflect.Field;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -13,6 +14,7 @@ import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import org.apache.commons.httpclient.HttpClient;
 import org.purl.sword.base.Collection;
 import org.purl.sword.base.DepositResponse;
 import org.purl.sword.base.Service;
@@ -33,7 +35,7 @@ import play.Logger;
 /**
  * Sword, version 1, depositor. This supports identifying collections from the
  * service document and depositing them into the repository.
- * 
+ *
  * @author <a href="http://www.scottphillips.com">Scott Phillips</a>
  */
 public class Sword1DepositorImpl implements Depositor, BeanNameAware {
@@ -81,26 +83,27 @@ public class Sword1DepositorImpl implements Depositor, BeanNameAware {
 			if(location == null || location.getRepository() == null)
 				throw new IllegalArgumentException("Bad deposit location or repository URL when trying to getCollections()");
 
-			
+
 			URL repositoryURL = new URL(location.getRepository());
-			
+
 			//Building the client
 			Client client = new Client();
 			// get the timeout from the location, or default it to the default
 			client.setSocketTimeout(location.getTimeout() == null ? DepositLocation.DEFAULT_TIMEOUT : (location.getTimeout() * 1000));
 			client.setServer(repositoryURL.getHost(), repositoryURL.getPort());
 			client.setUserAgent(USER_AGENT);
-			
+
 			//If the credentials include a username and password, set those on the client.
-			if(location.getUsername() != null && location.getPassword() != null)
-				client.setCredentials(location.getUsername(), location.getPassword());
+			if(location.getUsername() != null && location.getPassword() != null) {
+				setAuthentication(client, location);
+			}
 
 			//Obtaining the service document
 			//If the credentials contain an onbehalfof user, retrieve the service document on behalf of that user.  Otherwise, simply retrieve the service document.
 			ServiceDocument serviceDocument = null;
 			try {
 				if(location.getOnBehalfOf() != null)
-				{			
+				{
 					serviceDocument = client.getServiceDocument(location.getRepository(), location.getOnBehalfOf());
 				}
 				else
@@ -110,7 +113,7 @@ public class Sword1DepositorImpl implements Depositor, BeanNameAware {
 			} catch (SWORDClientException e) {
 				throw new RuntimeException(e);
 			}
-			
+
 			//Getting the service from the service document
 			Service service = serviceDocument.getService();
 
@@ -121,16 +124,16 @@ public class Sword1DepositorImpl implements Depositor, BeanNameAware {
 				{
 					foundCollections.put(collection.getTitle(), collection.getLocation());
 				}
-			}		
-			
+			}
+
 			return foundCollections;
 
 		} catch (MalformedURLException murle) {
 			throw new DepositException(FIELD.REPOSITORY,"The repository is an invalid URL",murle);
-		
+
 		} catch (RuntimeException re) {
 			Logger.error(re,"Unable to getCollections()");
-			
+
 			FIELD field = FIELD.OTHER;
 			String message = re.getMessage();
 
@@ -146,10 +149,10 @@ public class Sword1DepositorImpl implements Depositor, BeanNameAware {
 			} else if (re.getMessage().contains("Unable to parse the XML")) {
 				field = FIELD.REPOSITORY;
 				message = "The repository does not appear to be a valid SWORD server.";
-			} 
+			}
 
 			throw new DepositException(field, message, re);
-		} 
+		}
 	}
 
 
@@ -169,31 +172,31 @@ public class Sword1DepositorImpl implements Depositor, BeanNameAware {
 
 		boolean zippedExport = false;
 		File exportFile = null;
-		
+
 		try {
 			// Check our input
 			if (location == null)
 				throw new IllegalArgumentException("The deposit location is required.");
-	
+
 			if (exportPackage == null)
 				throw new IllegalArgumentException("The deposit package is required.");
-	
+
 			if ( exportPackage.getFile() == null ||  !exportPackage.getFile().exists())
 				throw new IllegalArgumentException("The deposit package does not exist on disk or is inaccessable.");
-	
+
 			if (location.getRepository() == null)
 				throw new IllegalArgumentException("The deposit location must have a repository URL defined.");
-	
+
 			if (location.getCollection() == null)
 				throw new IllegalArgumentException("The deposit location must have a collection URL defined.");
 
 
 			URL repositoryURL = new URL(location.getRepository());
-		
+
 			// Check the package
 			exportFile = exportPackage.getFile();
 			String exportMimeType = exportPackage.getMimeType();
-			
+
 			// If we are given a directory, zip it up because sword requires one file submissions.
 			if (exportFile.isDirectory()) {
 				File zipFile = File.createTempFile(exportFile.getName()+"-", ".zip");
@@ -202,21 +205,22 @@ public class Sword1DepositorImpl implements Depositor, BeanNameAware {
 				exportMimeType = "application/zip";
 				zippedExport = true;
 			}
-			
-			
+
+
 			//Building the client
 			Client client = new Client();
 			// get the timeout from the location, or default it to the default
 			client.setSocketTimeout(location.getTimeout() == null ? DepositLocation.DEFAULT_TIMEOUT : (location.getTimeout() * 1000));
 			client.setServer(
-					repositoryURL.getHost(), 
+					repositoryURL.getHost(),
 					repositoryURL.getPort());
 			client.setUserAgent(USER_AGENT);
-	
+
 			//If the credentials include a username and password, set those on the client.
-			if (location.getUsername() != null && location.getPassword() != null)
-				client.setCredentials(location.getUsername(), location.getPassword());
-			
+			if (location.getUsername() != null && location.getPassword() != null) {
+				setAuthentication(client, location);
+			}
+
 			PostMessage message = new PostMessage();
 
 			message.setFilepath(exportFile.getAbsolutePath());
@@ -242,16 +246,16 @@ public class Sword1DepositorImpl implements Depositor, BeanNameAware {
 			if (depositId == null)
 				throw new RuntimeException("Sword server failed to return a deposit id.");
 			return depositId;
-			
+
 		} catch (MalformedURLException murle) {
 			Logger.error(murle,"Unable to deposit()");
 
 			throw new DepositException(FIELD.REPOSITORY,"The repository is an invalid URL",murle);
-			
+
 		} catch(SWORDClientException sce) {
 			Logger.error(sce,"Unable to deposit()");
 
-			
+
 			FIELD field = FIELD.OTHER;
 			String message = sce.getMessage();
 
@@ -267,33 +271,59 @@ public class Sword1DepositorImpl implements Depositor, BeanNameAware {
 			} else if (sce.getMessage().contains("Unable to parse the XML")) {
 				field = FIELD.REPOSITORY;
 				message = "The repository does not appear to be a valid SWORD server.";
-			} 
+			}
 
 			throw new DepositException(field, message, sce);
 		} catch (IOException ioe) {
 			Logger.error(ioe, "Unable to deposit()");
-			
+
 			throw new DepositException(FIELD.OTHER,ioe.getMessage(),ioe);
-			
+
 		} catch (RuntimeException re) {
 			Logger.error(re,"Unable to deposit()");
-			
+
 			throw new DepositException(FIELD.OTHER, re.getMessage(), re);
 		} finally {
 			// If we created a zip file make sure it gets cleaned up.
-			
+
 			if (zippedExport && exportFile != null)
 				exportFile.delete();
 		}
-	}	
+	}
+
+	/**
+	* Private method to set credentials on the client and enable preemptive authentication.
+	*
+	* @param client
+	*            The SWORD client.
+	* @param location
+	*            The deposite location.
+	*/
+	private void setAuthentication(Client client, DepositLocation location) {
+		client.setCredentials(location.getUsername(), location.getPassword());
+		try {
+			Field httpClientField = client.getClass().getDeclaredField("client");
+			httpClientField.setAccessible(true);
+			HttpClient httpClient = (HttpClient) httpClientField.get(client);
+			httpClient.getParams().setAuthenticationPreemptive(true);
+		} catch (NoSuchFieldException e) {
+			e.printStackTrace();
+		} catch (SecurityException e) {
+			e.printStackTrace();
+		} catch (IllegalArgumentException e) {
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			e.printStackTrace();
+		}
+	}
 
 	/**
 	 * Internal method for ziping a directory together into a single deposit
 	 * package.
-	 * 
+	 *
 	 * One tricky note, the file name of the directory is not included in the
 	 * resulting zip.
-	 * 
+	 *
 	 * @param zipFile
 	 *            The file where the zip will be created.
 	 * @param dirFile
@@ -306,17 +336,17 @@ public class Sword1DepositorImpl implements Depositor, BeanNameAware {
 		ZipOutputStream zos  = new ZipOutputStream(fos);
 		byte[] buffer = new byte[1024];
 		int bufferLength;
-		
-		
+
+
 		zipDirectory("",dirFile,zos);
-		
+
 		zos.close();
 	}
-	
+
 	/**
 	 * Internal recursive method for zipping the files and sub-directories of a
 	 * file into a single deposit package.
-	 * 
+	 *
 	 * @param baseName
 	 *            The base name to pre-pend to file names in the zip archive.
 	 * @param directory
@@ -329,27 +359,27 @@ public class Sword1DepositorImpl implements Depositor, BeanNameAware {
 		// Add all the files
 		File[] files = directory.listFiles();
 		for (File file : files) {
-			
+
 			if (file.isDirectory()) {
 
 				zipDirectory(baseName + directory.getName() + File.separator, file, zos);
 			} else {
-				
+
 				InputStream is = new BufferedInputStream(new FileInputStream(file));
-				
+
 				zos.putNextEntry(new ZipEntry(baseName + file.getName()));
-				
+
 				byte[] buf = new byte[1024];
 				int len;
 				while ((len = is.read(buf)) > 0) {
 					zos.write(buf, 0, len);
 				}
-				
+
 				is.close();
 				zos.closeEntry();
-			}	
+			}
 		}
 	}
-	
-	
+
+
 }
