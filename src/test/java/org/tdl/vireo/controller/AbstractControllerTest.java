@@ -21,12 +21,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.tamu.weaver.auth.model.Credentials;
 import edu.tamu.weaver.auth.service.CryptoService;
 import edu.tamu.weaver.email.service.MockEmailService;
+import edu.tamu.weaver.response.ApiResponse;
 import edu.tamu.weaver.token.service.TokenService;
 import edu.tamu.weaver.utility.HttpUtility;
 
 @ActiveProfiles("test")
 @RunWith(SpringRunner.class)
 public abstract class AbstractControllerTest extends MockData {
+    protected static ApiResponse response;
 
     protected static final String SECRET_PROPERTY_NAME = "secret";
     protected static final String SECRET_VALUE = "verysecretsecret";
@@ -61,7 +63,7 @@ public abstract class AbstractControllerTest extends MockData {
     protected BCryptPasswordEncoder passwordEncoder;
 
     @Mock
-    private SimpMessagingTemplate simpMessagingTemplate;
+    protected SimpMessagingTemplate simpMessagingTemplate;
 
     @Mock
     private Environment env;
@@ -85,6 +87,8 @@ public abstract class AbstractControllerTest extends MockData {
     @InjectMocks
     protected TemplateUtility templateUtility;
 
-    protected Credentials TEST_CREDENTIALS = new Credentials();
+    @InjectMocks
+    protected ConfigurableSettingsController configurableSettingsController;
 
+    protected Credentials TEST_CREDENTIALS = new Credentials();
 }
