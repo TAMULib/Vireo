@@ -28,13 +28,13 @@ import edu.emory.mathcs.backport.java.util.Arrays;
 import edu.tamu.weaver.response.ApiStatus;
 
 @ActiveProfiles("test")
-public class ConfigurableSettingsControllerTest extends AbstractControllerTest{
+public class ConfigurableSettingsControllerTest extends AbstractControllerTest {
 
 	protected Configuration TEST_CONFIGURATION_SETTING1 = new ManagedConfiguration("name1", "value1", "type1");
 	protected Configuration TEST_CONFIGURATION_SETTING2 = new ManagedConfiguration("name2", "value2", "type2");
 	protected static List<Configuration> mockConfigurationSettings;
 
-	public Configuration saveConfiguration(ManagedConfiguration modifiedConfiguration) throws JsonProcessingException {
+	public Configuration saveConfiguration(ManagedConfiguration modifiedConfiguration) {
 		ManagedConfiguration managedConfiguration = null;
 		if(modifiedConfiguration.getName().equals(TEST_CONFIGURATION_SETTING1.getName())) {			
 			managedConfiguration = (ManagedConfiguration) TEST_CONFIGURATION_SETTING1;

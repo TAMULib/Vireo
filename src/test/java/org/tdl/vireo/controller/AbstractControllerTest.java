@@ -90,5 +90,9 @@ public abstract class AbstractControllerTest extends MockData {
     @InjectMocks
     protected ConfigurableSettingsController configurableSettingsController;
 
+    @InjectMocks
+	protected ControlledVocabularyController controlledVocabularyController;
+
     protected Credentials TEST_CREDENTIALS = new Credentials();
+
 }
