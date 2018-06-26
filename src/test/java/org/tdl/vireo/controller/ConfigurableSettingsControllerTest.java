@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,7 +20,6 @@ import org.tdl.vireo.model.Configuration;
 import org.tdl.vireo.model.ManagedConfiguration;
 import org.tdl.vireo.model.repo.ConfigurationRepo;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 
 import edu.emory.mathcs.backport.java.util.Arrays;
@@ -72,7 +70,7 @@ public class ConfigurableSettingsControllerTest extends AbstractControllerTest {
 	}
 
 	@Test
-	public void testGetSettings() throws IOException {
+	public void testGetSettings() {
 		response = configurableSettingsController.getSettings();		
 		assertEquals(ApiStatus.SUCCESS, response.getMeta().getStatus());
 		Map<String, List<Configuration>> currentConfigurationsMap = objectMapper.readValue(objectMapper.writeValueAsString(response.getPayload().get("HashMap")), new TypeReference<Map<String, List<ManagedConfiguration>>>(){});
@@ -82,7 +80,7 @@ public class ConfigurableSettingsControllerTest extends AbstractControllerTest {
 	}
 
 	@Test
-	public void testUpdateSettings() throws JsonProcessingException {
+	public void testUpdateSettings() {
 		ManagedConfiguration testManagedConfiguration = new ManagedConfiguration(TEST_CONFIGURATION_SETTING1.getName(), TEST_CONFIGURATION_SETTING1.getValue(), TEST_CONFIGURATION_SETTING1.getType());
 		response = configurableSettingsController.updateSetting(testManagedConfiguration);
 		assertEquals(ApiStatus.SUCCESS, response.getMeta().getStatus());
@@ -91,7 +89,7 @@ public class ConfigurableSettingsControllerTest extends AbstractControllerTest {
 	}
 
 	@Test
-	public void testResetSetting() throws JsonProcessingException {
+	public void testResetSetting() {
 		ManagedConfiguration testManagedConfiguration = new ManagedConfiguration(TEST_CONFIGURATION_SETTING1.getName(), TEST_CONFIGURATION_SETTING1.getValue(), TEST_CONFIGURATION_SETTING1.getType());
 		response = configurableSettingsController.resetSetting(testManagedConfiguration);
 		assertEquals(ApiStatus.SUCCESS, response.getMeta().getStatus());
