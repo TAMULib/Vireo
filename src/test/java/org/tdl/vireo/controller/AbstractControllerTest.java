@@ -41,9 +41,13 @@ import org.tdl.vireo.model.FieldPredicate;
 import org.tdl.vireo.model.GraduationMonth;
 import org.tdl.vireo.model.Language;
 import org.tdl.vireo.model.ManagedConfiguration;
+import org.tdl.vireo.model.Organization;
 import org.tdl.vireo.model.OrganizationCategory;
+import org.tdl.vireo.model.SubmissionStatus;
 import org.tdl.vireo.model.User;
 import org.tdl.vireo.model.VocabularyWord;
+import org.tdl.vireo.model.WorkflowStep;
+import org.tdl.vireo.model.repo.AbstractEmailRecipientRepo;
 import org.tdl.vireo.model.repo.ConfigurationRepo;
 import org.tdl.vireo.model.repo.ControlledVocabularyRepo;
 import org.tdl.vireo.model.repo.CustomActionDefinitionRepo;
@@ -51,6 +55,7 @@ import org.tdl.vireo.model.repo.DegreeRepo;
 import org.tdl.vireo.model.repo.DepositLocationRepo;
 import org.tdl.vireo.model.repo.DocumentTypeRepo;
 import org.tdl.vireo.model.repo.EmailTemplateRepo;
+import org.tdl.vireo.model.repo.EmailWorkflowRuleRepo;
 import org.tdl.vireo.model.repo.EmbargoRepo;
 import org.tdl.vireo.model.repo.FieldGlossRepo;
 import org.tdl.vireo.model.repo.FieldPredicateRepo;
@@ -59,8 +64,11 @@ import org.tdl.vireo.model.repo.GraduationMonthRepo;
 import org.tdl.vireo.model.repo.LanguageRepo;
 import org.tdl.vireo.model.repo.NoteRepo;
 import org.tdl.vireo.model.repo.OrganizationCategoryRepo;
+import org.tdl.vireo.model.repo.OrganizationRepo;
+import org.tdl.vireo.model.repo.SubmissionStatusRepo;
 import org.tdl.vireo.model.repo.UserRepo;
 import org.tdl.vireo.model.repo.VocabularyWordRepo;
+import org.tdl.vireo.model.repo.WorkflowStepRepo;
 import org.tdl.vireo.service.ControlledVocabularyCachingService;
 import org.tdl.vireo.service.DepositorService;
 import org.tdl.vireo.service.EntityControlledVocabularyService;
@@ -179,7 +187,13 @@ public abstract class AbstractControllerTest extends MockData {
 	protected NoteController noteController;
 
 	@InjectMocks
+	protected OrganizationController organizationController;
+
+	@InjectMocks
 	protected OrganizationCategoryController organizationCategoryController;
+
+	@Mock
+	protected AbstractEmailRecipientRepo abstractEmailRecipientRepo;
 
 	@Mock
 	protected ConfigurationRepo configurationRepo;
@@ -198,6 +212,9 @@ public abstract class AbstractControllerTest extends MockData {
 
 	@Mock
 	protected EmailTemplateRepo emailTemplateRepo;
+
+	@Mock
+	protected EmailWorkflowRuleRepo emailWorkflowRuleRepo;
 
 	@Mock
 	protected EmbargoRepo embargoRepo;
@@ -224,7 +241,16 @@ public abstract class AbstractControllerTest extends MockData {
 	protected OrganizationCategoryRepo organizationCategoryRepo;
 
 	@Mock
+	protected OrganizationRepo organizationRepo;
+
+	@Mock
+	protected SubmissionStatusRepo submissionStatusRepo;
+
+	@Mock
 	protected UserRepo userRepo;
+
+	@Mock
+	protected WorkflowStepRepo workflowStepRepo;
 
 	@Mock
 	protected VocabularyWordRepo vocabularyWordRepo;
@@ -573,6 +599,36 @@ public abstract class AbstractControllerTest extends MockData {
 
 		when(noteRepo.findAll()).thenReturn(mockNoteList);
 
+		when(organizationRepo.findAllByOrderByIdAsc()).thenReturn(mockOrganizationList);
+
+		when(organizationRepo.read(any(Long.class))).then( new Answer<Organization>() {
+			@Override
+			public Organization answer(InvocationOnMock invocation) throws Throwable {
+				return getOrganizationById( (Long) invocation.getArguments()[0]);
+			}
+		});
+
+		when(organizationRepo.create( any(String.class) , any(Organization.class),  any(OrganizationCategory.class) )).then(new Answer<Organization>() {
+			@Override
+			public Organization answer(InvocationOnMock invocation) throws Throwable {
+				return createOrganization( (String) invocation.getArguments()[0] , (Organization) invocation.getArguments()[1] , (OrganizationCategory) invocation.getArguments()[2]);
+			}
+		});
+
+		when( organizationRepo.update(any(Organization.class)) ).then(new Answer<Organization>() {
+			@Override
+			public Organization answer(InvocationOnMock invocation) throws Throwable {
+				return updateOrganization( (Organization) invocation.getArguments()[0]);
+			}
+		});
+
+		when(organizationRepo.restoreDefaults( any(Organization.class))).then( new Answer<Organization>() {
+			@Override
+			public Organization answer(InvocationOnMock invocation) throws Throwable {
+				return getDefaultOrganization( (Organization)invocation.getArguments()[0]);
+			}
+		});
+
 		when(organizationCategoryRepo.findAll()).thenReturn(mockOrganizationCategoryList);
 
 		when( organizationCategoryRepo.create( any(String.class)) ).then(new Answer<OrganizationCategory>() {
@@ -586,6 +642,13 @@ public abstract class AbstractControllerTest extends MockData {
 			@Override
 			public OrganizationCategory answer(InvocationOnMock invocation) throws Throwable {
 				return updateOrganizationCategory( (OrganizationCategory) invocation.getArguments()[0]);
+			}
+		});
+
+		when(submissionStatusRepo.findOne(any(Long.class))).then( new Answer<SubmissionStatus>() {
+			@Override
+			public SubmissionStatus answer(InvocationOnMock invocation) throws Throwable {
+				return getSubmissionStatusById( (Long)invocation.getArguments()[0]);
 			}
 		});
 
@@ -607,20 +670,32 @@ public abstract class AbstractControllerTest extends MockData {
 			}
 		});
 
-		when(vireoUserCredentialsService.createUserFromRegistration(any(String.class), any(String.class),
-				any(String.class), any(String.class))).then(new Answer<Object>() {
-					@Override
-					public Object answer(InvocationOnMock invocation) throws Throwable {
-						return userRepo.save(new User((String) invocation.getArguments()[0],
-								(String) invocation.getArguments()[1], (String) invocation.getArguments()[2],
-								(String) invocation.getArguments()[3], TEST_USER_ROLE));
-					}
-				});
+		when(vireoUserCredentialsService.createUserFromRegistration(any(String.class), any(String.class), any(String.class), any(String.class))).then(new Answer<Object>() {
+			@Override
+			public Object answer(InvocationOnMock invocation) throws Throwable {
+				return userRepo.save(new User((String) invocation.getArguments()[0], (String) invocation.getArguments()[1], (String) invocation.getArguments()[2], (String) invocation.getArguments()[3], TEST_USER_ROLE));
+			}
+		});
+
+		when(workflowStepRepo.create( any(String.class), any(Organization.class) )).then( new Answer<WorkflowStep>() {
+			@Override
+			public WorkflowStep answer(InvocationOnMock invocation) throws Throwable {
+				return createWorkflowStepForOrganization( (String)invocation.getArguments()[0] , (Organization)invocation.getArguments()[1]);
+			}
+		});
+
+		when(workflowStepRepo.findOne( any(Long.class) )).then( new Answer<WorkflowStep>() {
+			@Override
+			public WorkflowStep answer(InvocationOnMock invocation) throws Throwable {
+				return getWorkflowStepById( (Long) invocation.getArguments()[0]);
+			}
+		});
 	}
 
 	@After
 	public void cleanUp() {
 		response = null;
+		abstractEmailRecipientRepo.deleteAll();
 		configurationRepo.deleteAll();
 		controlledVocabularyRepo.deleteAll();
 		customActionDefinitionRepo.deleteAll();
@@ -629,6 +704,7 @@ public abstract class AbstractControllerTest extends MockData {
 		degreeRepo.deleteAll();
 		documentTypeRepo.deleteAll();
 		emailTemplateRepo.deleteAll();
+		emailWorkflowRuleRepo.deleteAll();
 		embargoRepo.deleteAll();
 		fieldGlossRepo.deleteAll();
 		fieldPredicateRepo.deleteAll();
@@ -637,7 +713,10 @@ public abstract class AbstractControllerTest extends MockData {
 		languageRepo.deleteAll();
 		noteRepo.deleteAll();
 		organizationCategoryRepo.deleteAll();
+		organizationRepo.deleteAll();
+		submissionStatusRepo.deleteAll();
 		userRepo.deleteAll();
+		workflowStepRepo.deleteAll();
 	}
 
 }

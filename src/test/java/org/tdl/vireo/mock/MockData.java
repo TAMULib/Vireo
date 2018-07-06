@@ -15,6 +15,11 @@ import org.tdl.vireo.model.CustomActionDefinition;
 import org.tdl.vireo.model.Degree;
 import org.tdl.vireo.model.DegreeLevel;
 import org.tdl.vireo.model.DocumentType;
+import org.tdl.vireo.model.EmailRecipient;
+import org.tdl.vireo.model.EmailRecipientAssignee;
+import org.tdl.vireo.model.EmailRecipientContact;
+import org.tdl.vireo.model.EmailRecipientOrganization;
+import org.tdl.vireo.model.EmailRecipientSubmitter;
 import org.tdl.vireo.model.EmailTemplate;
 import org.tdl.vireo.model.Embargo;
 import org.tdl.vireo.model.EmbargoGuarantor;
@@ -29,6 +34,8 @@ import org.tdl.vireo.model.Note;
 import org.tdl.vireo.model.Organization;
 import org.tdl.vireo.model.OrganizationCategory;
 import org.tdl.vireo.model.Role;
+import org.tdl.vireo.model.SubmissionState;
+import org.tdl.vireo.model.SubmissionStatus;
 import org.tdl.vireo.model.User;
 import org.tdl.vireo.model.VocabularyWord;
 import org.tdl.vireo.model.WorkflowStep;
@@ -85,15 +92,12 @@ public abstract class MockData {
 	protected static Note TEST_NOTE1 = new Note(" Note1_name "," This is a text for note1 ");
 	protected static Note TEST_NOTE2 = new Note(" Note2_name "," This is a text for note2 ");
 
-	protected static ControlledVocabulary TEST_CONTROLLED_VOCABULARY_1 = new ControlledVocabulary(
-			"Controlled Vocabulary Name1", TEST_LANGUAGE1, false);
-	protected static ControlledVocabulary TEST_CONTROLLED_VOCABULARY_2 = new ControlledVocabulary(
-			"Controlled Vocabulary Name2", TEST_LANGUAGE2, false);
+	protected static ControlledVocabulary TEST_CONTROLLED_VOCABULARY_1 = new ControlledVocabulary("Controlled Vocabulary Name1", TEST_LANGUAGE1, false);
+	protected static ControlledVocabulary TEST_CONTROLLED_VOCABULARY_2 = new ControlledVocabulary("Controlled Vocabulary Name2", TEST_LANGUAGE2, false);
 
-	protected static ControlledVocabularyCache TEST_CONTROLLED_VOCABULARY_CACHE = new ControlledVocabularyCache(1l,
-			TEST_CONTROLLED_VOCABULARY_1.getName());
-	protected static List<ControlledVocabulary> mockControlledVocabularyList = new ArrayList<ControlledVocabulary>(
-			Arrays.asList(new ControlledVocabulary[] { TEST_CONTROLLED_VOCABULARY_1, TEST_CONTROLLED_VOCABULARY_2 }));
+	protected static ControlledVocabularyCache TEST_CONTROLLED_VOCABULARY_CACHE = new ControlledVocabularyCache(1l, TEST_CONTROLLED_VOCABULARY_1.getName());
+
+	protected static List<ControlledVocabulary> mockControlledVocabularyList = new ArrayList<ControlledVocabulary>(Arrays.asList(new ControlledVocabulary[] { TEST_CONTROLLED_VOCABULARY_1, TEST_CONTROLLED_VOCABULARY_2 }));
 
 	protected static List<String> mockVocabularyWordContactList = Arrays.asList(new String[] { "VocabWordContact1", "VocabWordContact2" });
 
@@ -101,13 +105,22 @@ public abstract class MockData {
 	protected static OrganizationCategory TEST_ORGANIZATION_CATEGORY2 = new OrganizationCategory("OrganizationCategory2_name");
 
 	protected static Organization TEST_ORGANIZATION1 = new Organization("Organization1_name", TEST_ORGANIZATION_CATEGORY1);
+	protected static Organization TEST_ORGANIZATION2 = new Organization("Organization2_name", TEST_ORGANIZATION_CATEGORY2);
+
+	protected static SubmissionStatus TEST_SUBMISSION_STATUS1 = new SubmissionStatus("Submission Status1 name", true, true, true, true, true, true, SubmissionState.SUBMITTED);
+	protected static SubmissionStatus TEST_SUBMISSION_STATUS2 = new SubmissionStatus("Submission Status2 ", true, true, true, true, true, true, SubmissionState.APPROVED);
 
 	protected static WorkflowStep TEST_WORKFLOW1 = new WorkflowStep("WorkFlow name 1", TEST_ORGANIZATION1);
+	protected static WorkflowStep TEST_WORKFLOW2 = new WorkflowStep("WorkFlow name 1", TEST_ORGANIZATION1);
+
+	protected static EmailRecipient ASSIGNEE = new EmailRecipientAssignee();
+	protected static EmailRecipient SUBMITTER = new EmailRecipientSubmitter();
+	protected static EmailRecipient ORGANIZATION = new EmailRecipientOrganization(TEST_ORGANIZATION1);
+	protected static EmailRecipient CONTACT = new EmailRecipientContact("Contact Email Recipient Label", TEST_FIELD_PREDICATE1);
 
 	protected static InputType TEST_INPUT_TYPE1 = new InputType("Input Type 1");
 
-	protected static FieldProfile TEST_FILED_PROFILE1 = new FieldProfile(TEST_WORKFLOW1, TEST_FIELD_PREDICATE1,
-			TEST_INPUT_TYPE1, true, false, true, false, true, true, "defaultValue");
+	protected static FieldProfile TEST_FILED_PROFILE1 = new FieldProfile(TEST_WORKFLOW1, TEST_FIELD_PREDICATE1, TEST_INPUT_TYPE1, true, false, true, false, true, true, "defaultValue");
 
 	protected static VocabularyWord TEST_VOCABULARY_WORD1 = new VocabularyWord("Vocabulary Word Name1",
 			"Vocabulary Word Definition1", "Vocabulary Word Identifier1", mockVocabularyWordContactList);
@@ -145,9 +158,15 @@ public abstract class MockData {
 	protected static List<GraduationMonth> mockGraduationMonthList = new ArrayList<>(
 			Arrays.asList(new GraduationMonth[] { TEST_GRADUATION_MONTH1, TEST_GRADUATION_MONTH2 }));
 
+	protected static List<Note> mockNoteList = new ArrayList<>(	Arrays.asList(new Note[] { TEST_NOTE1, TEST_NOTE2 }));
+
 	protected static List<OrganizationCategory> mockOrganizationCategoryList = new ArrayList<>(	Arrays.asList(new OrganizationCategory[] { TEST_ORGANIZATION_CATEGORY1, TEST_ORGANIZATION_CATEGORY2 }));
 
-	protected static List<Note> mockNoteList = new ArrayList<>(	Arrays.asList(new Note[] { TEST_NOTE1, TEST_NOTE2 }));
+	protected static List<Organization> mockOrganizationList = new ArrayList<>(Arrays.asList(new Organization[] { TEST_ORGANIZATION1 , TEST_ORGANIZATION2 }));
+
+	protected static List<SubmissionStatus> mockSubmissionStatusList = new ArrayList<>(Arrays.asList(new SubmissionStatus[] { TEST_SUBMISSION_STATUS1 , TEST_SUBMISSION_STATUS2 }));
+
+	protected static List<WorkflowStep> mockWorkflowStepList = new ArrayList<>(Arrays.asList(new WorkflowStep[] { TEST_WORKFLOW1 , TEST_WORKFLOW2 }));
 
 	static {
 		TEST_FIELD_PREDICATE.setId(1l);
@@ -192,12 +211,21 @@ public abstract class MockData {
 		TEST_NOTE1.setId(1l);
 		TEST_NOTE2.setId(2l);
 
+		TEST_ORGANIZATION1.setId(1l);
+		TEST_ORGANIZATION2.setId(2l);
+
 		TEST_ORGANIZATION_CATEGORY1.setId(1l);
 		TEST_ORGANIZATION_CATEGORY2.setId(2l);
+
+		TEST_SUBMISSION_STATUS1.setId(1l);
+		TEST_SUBMISSION_STATUS2.setId(2l);
 
 		TEST_VOCABULARY_WORD1.setId(1l);
 		TEST_VOCABULARY_WORD1.setControlledVocabulary(TEST_CONTROLLED_VOCABULARY_1);
 		TEST_VOCABULARY_WORD2.setId(2l);
+
+		TEST_WORKFLOW1.setId(1l);
+		TEST_WORKFLOW2.setId(2l);
 	}
 
 	protected static final String SECRET_PROPERTY_NAME = "secret";
@@ -529,6 +557,47 @@ public abstract class MockData {
 		return language;
 	}
 
+	public Organization createOrganization(String name, Organization parentOrganization, OrganizationCategory organizationCategory) {
+		Organization organization = new Organization();
+		organization.setName(name);
+		organization.setParentOrganization(parentOrganization);
+		organization.setCategory(organizationCategory);
+		return organization;
+	}
+
+	public Organization getOrganizationById(Long organizationId) {
+		for(Organization organization : mockOrganizationList) {
+			if(organization.getId().equals(organizationId)) {
+				return organization;
+			}
+		}
+		return null;
+	}
+
+	public Organization getDefaultOrganization(Organization organization) {
+		organization.setAcceptsSubmissions(null);
+		organization.setAggregateWorkflowSteps(null);
+		organization.setCategory(new OrganizationCategory());
+		organization.setChildrenOrganizations(null);
+		organization.setEmails(null);
+		organization.setEmailWorkflowRules(null);
+		organization.setParentOrganization(null);
+		return organization;
+	}
+
+	public Organization updateOrganization(Organization modifiedOrganization) {
+		Organization organization = null;
+		for(Organization org : mockOrganizationList) {
+			if(org.getId().equals(modifiedOrganization.getId())) {
+				org.setName(modifiedOrganization.getName());
+				org.setCategory(modifiedOrganization.getCategory());
+				organization = org;
+				break;
+			}
+		}
+		return organization;
+	}
+
 	public OrganizationCategory createOrganizationCategory(String organizationCategoryName) {
 		return new OrganizationCategory(organizationCategoryName);
 	}
@@ -543,6 +612,16 @@ public abstract class MockData {
 			}
 		}
 		return organizationCategory;
+	}
+
+	public SubmissionStatus getSubmissionStatusById(Long submissionStatusId) {
+		SubmissionStatus submissionStatus = null;
+		for(SubmissionStatus ss : mockSubmissionStatusList) {
+			if(ss.getId().equals(submissionStatusId)) {
+				submissionStatus = ss; break;
+			}
+		}
+		return submissionStatus;
 	}
 
 	public User findByEmail(String email) {
@@ -566,5 +645,19 @@ public abstract class MockData {
 			}
 		}
 		return null;
+	}
+
+	public WorkflowStep createWorkflowStepForOrganization(String workFlowName, Organization originatingOrganization) {
+		return new WorkflowStep(workFlowName, originatingOrganization);
+	}
+
+	public WorkflowStep getWorkflowStepById(Long workflowStepId) {
+		WorkflowStep workflowStep = null;
+		for(WorkflowStep wfStep : mockWorkflowStepList) {
+			if(wfStep.getId().equals(workflowStepId)) {
+				workflowStep = wfStep;break;
+			}
+		}
+		return workflowStep;
 	}
 }
