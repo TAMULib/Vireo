@@ -41,6 +41,7 @@ import org.tdl.vireo.model.FieldPredicate;
 import org.tdl.vireo.model.GraduationMonth;
 import org.tdl.vireo.model.Language;
 import org.tdl.vireo.model.ManagedConfiguration;
+import org.tdl.vireo.model.OrganizationCategory;
 import org.tdl.vireo.model.User;
 import org.tdl.vireo.model.VocabularyWord;
 import org.tdl.vireo.model.repo.ConfigurationRepo;
@@ -56,6 +57,8 @@ import org.tdl.vireo.model.repo.FieldPredicateRepo;
 import org.tdl.vireo.model.repo.FieldProfileRepo;
 import org.tdl.vireo.model.repo.GraduationMonthRepo;
 import org.tdl.vireo.model.repo.LanguageRepo;
+import org.tdl.vireo.model.repo.NoteRepo;
+import org.tdl.vireo.model.repo.OrganizationCategoryRepo;
 import org.tdl.vireo.model.repo.UserRepo;
 import org.tdl.vireo.model.repo.VocabularyWordRepo;
 import org.tdl.vireo.service.ControlledVocabularyCachingService;
@@ -172,6 +175,12 @@ public abstract class AbstractControllerTest extends MockData {
 	@InjectMocks
 	protected LanguageController languageController;
 
+	@InjectMocks
+	protected NoteController noteController;
+
+	@InjectMocks
+	protected OrganizationCategoryController organizationCategoryController;
+
 	@Mock
 	protected ConfigurationRepo configurationRepo;
 
@@ -207,6 +216,12 @@ public abstract class AbstractControllerTest extends MockData {
 
 	@Mock
 	protected LanguageRepo languageRepo;
+
+	@Mock
+	protected NoteRepo noteRepo;
+
+	@Mock
+	protected OrganizationCategoryRepo organizationCategoryRepo;
 
 	@Mock
 	protected UserRepo userRepo;
@@ -556,6 +571,24 @@ public abstract class AbstractControllerTest extends MockData {
 			}
 		});
 
+		when(noteRepo.findAll()).thenReturn(mockNoteList);
+
+		when(organizationCategoryRepo.findAll()).thenReturn(mockOrganizationCategoryList);
+
+		when( organizationCategoryRepo.create( any(String.class)) ).then(new Answer<OrganizationCategory>() {
+			@Override
+			public OrganizationCategory answer(InvocationOnMock invocation) throws Throwable {
+				return createOrganizationCategory( (String) invocation.getArguments()[0]);
+			}
+		});
+
+		when( organizationCategoryRepo.update(any(OrganizationCategory.class)) ).then(new Answer<OrganizationCategory>() {
+			@Override
+			public OrganizationCategory answer(InvocationOnMock invocation) throws Throwable {
+				return updateOrganizationCategory( (OrganizationCategory) invocation.getArguments()[0]);
+			}
+		});
+
 		// User
 
 		when(userRepo.findAll()).thenReturn(mockUsers);
@@ -602,6 +635,8 @@ public abstract class AbstractControllerTest extends MockData {
 		fieldProfileRepo.deleteAll();
 		graduationMonthRepo.deleteAll();
 		languageRepo.deleteAll();
+		noteRepo.deleteAll();
+		organizationCategoryRepo.deleteAll();
 		userRepo.deleteAll();
 	}
 

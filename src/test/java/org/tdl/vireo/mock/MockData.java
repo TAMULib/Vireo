@@ -25,6 +25,7 @@ import org.tdl.vireo.model.GraduationMonth;
 import org.tdl.vireo.model.InputType;
 import org.tdl.vireo.model.Language;
 import org.tdl.vireo.model.ManagedConfiguration;
+import org.tdl.vireo.model.Note;
 import org.tdl.vireo.model.Organization;
 import org.tdl.vireo.model.OrganizationCategory;
 import org.tdl.vireo.model.Role;
@@ -81,6 +82,9 @@ public abstract class MockData {
 
 	protected static FieldProfile TEST_FIELD_PROFILE1 = new FieldProfile();
 
+	protected static Note TEST_NOTE1 = new Note(" Note1_name "," This is a text for note1 ");
+	protected static Note TEST_NOTE2 = new Note(" Note2_name "," This is a text for note2 ");
+
 	protected static ControlledVocabulary TEST_CONTROLLED_VOCABULARY_1 = new ControlledVocabulary(
 			"Controlled Vocabulary Name1", TEST_LANGUAGE1, false);
 	protected static ControlledVocabulary TEST_CONTROLLED_VOCABULARY_2 = new ControlledVocabulary(
@@ -91,14 +95,12 @@ public abstract class MockData {
 	protected static List<ControlledVocabulary> mockControlledVocabularyList = new ArrayList<ControlledVocabulary>(
 			Arrays.asList(new ControlledVocabulary[] { TEST_CONTROLLED_VOCABULARY_1, TEST_CONTROLLED_VOCABULARY_2 }));
 
-	protected static List<String> mockVocabularyWordContactList = Arrays
-			.asList(new String[] { "VocabWordContact1", "VocabWordContact2" });
+	protected static List<String> mockVocabularyWordContactList = Arrays.asList(new String[] { "VocabWordContact1", "VocabWordContact2" });
 
-	protected static OrganizationCategory TEST_ORGANIZATION_CATEGORY1 = new OrganizationCategory(
-			"OrganizationCategory1_name");
+	protected static OrganizationCategory TEST_ORGANIZATION_CATEGORY1 = new OrganizationCategory("OrganizationCategory1_name");
+	protected static OrganizationCategory TEST_ORGANIZATION_CATEGORY2 = new OrganizationCategory("OrganizationCategory2_name");
 
-	protected static Organization TEST_ORGANIZATION1 = new Organization("Organization1_name",
-			TEST_ORGANIZATION_CATEGORY1);
+	protected static Organization TEST_ORGANIZATION1 = new Organization("Organization1_name", TEST_ORGANIZATION_CATEGORY1);
 
 	protected static WorkflowStep TEST_WORKFLOW1 = new WorkflowStep("WorkFlow name 1", TEST_ORGANIZATION1);
 
@@ -143,6 +145,10 @@ public abstract class MockData {
 	protected static List<GraduationMonth> mockGraduationMonthList = new ArrayList<>(
 			Arrays.asList(new GraduationMonth[] { TEST_GRADUATION_MONTH1, TEST_GRADUATION_MONTH2 }));
 
+	protected static List<OrganizationCategory> mockOrganizationCategoryList = new ArrayList<>(	Arrays.asList(new OrganizationCategory[] { TEST_ORGANIZATION_CATEGORY1, TEST_ORGANIZATION_CATEGORY2 }));
+
+	protected static List<Note> mockNoteList = new ArrayList<>(	Arrays.asList(new Note[] { TEST_NOTE1, TEST_NOTE2 }));
+
 	static {
 		TEST_FIELD_PREDICATE.setId(1l);
 		TEST_FIELD_PREDICATE1.setId(2l);
@@ -182,6 +188,12 @@ public abstract class MockData {
 
 		TEST_GRADUATION_MONTH1.setId(1l);
 		TEST_GRADUATION_MONTH2.setId(2l);
+
+		TEST_NOTE1.setId(1l);
+		TEST_NOTE2.setId(2l);
+
+		TEST_ORGANIZATION_CATEGORY1.setId(1l);
+		TEST_ORGANIZATION_CATEGORY2.setId(2l);
 
 		TEST_VOCABULARY_WORD1.setId(1l);
 		TEST_VOCABULARY_WORD1.setControlledVocabulary(TEST_CONTROLLED_VOCABULARY_1);
@@ -515,6 +527,22 @@ public abstract class MockData {
 			}
 		}
 		return language;
+	}
+
+	public OrganizationCategory createOrganizationCategory(String organizationCategoryName) {
+		return new OrganizationCategory(organizationCategoryName);
+	}
+
+	public OrganizationCategory updateOrganizationCategory(OrganizationCategory modifiedOrganizationCategory) {
+		OrganizationCategory organizationCategory = null;
+		for(OrganizationCategory orgCat : mockOrganizationCategoryList) {
+			if(orgCat.getId().equals(modifiedOrganizationCategory.getId())) {
+				orgCat.setName(modifiedOrganizationCategory.getName());
+				organizationCategory = orgCat;
+				break;
+			}
+		}
+		return organizationCategory;
 	}
 
 	public User findByEmail(String email) {
