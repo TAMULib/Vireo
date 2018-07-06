@@ -21,6 +21,7 @@ import org.tdl.vireo.model.EmbargoGuarantor;
 import org.tdl.vireo.model.FieldGloss;
 import org.tdl.vireo.model.FieldPredicate;
 import org.tdl.vireo.model.FieldProfile;
+import org.tdl.vireo.model.GraduationMonth;
 import org.tdl.vireo.model.InputType;
 import org.tdl.vireo.model.Language;
 import org.tdl.vireo.model.ManagedConfiguration;
@@ -48,6 +49,9 @@ public abstract class MockData {
 	protected static Degree TEST_DEGREE1 = new Degree("A Degree Name", TEST_DEGREE_LEVEL, "ProquestCode for Degree1 ");
 	protected static Degree TEST_DEGREE2 = new Degree("Second Degree Name", TEST_DEGREE_LEVEL,
 			"ProquestCode for Second Degree ");
+
+	protected static GraduationMonth TEST_GRADUATION_MONTH1 = new GraduationMonth(6);
+	protected static GraduationMonth TEST_GRADUATION_MONTH2 = new GraduationMonth(8);
 
 	protected static Language TEST_LANGUAGE1 = new Language("A Language");
 	protected static Language TEST_LANGUAGE2 = new Language("Another Language");
@@ -136,6 +140,9 @@ public abstract class MockData {
 	protected static List<FieldProfile> mockFieldProfileList = new ArrayList<>(
 			Arrays.asList(new FieldProfile[] { TEST_FILED_PROFILE1 }));
 
+	protected static List<GraduationMonth> mockGraduationMonthList = new ArrayList<>(
+			Arrays.asList(new GraduationMonth[] { TEST_GRADUATION_MONTH1, TEST_GRADUATION_MONTH2 }));
+
 	static {
 		TEST_FIELD_PREDICATE.setId(1l);
 		TEST_FIELD_PREDICATE1.setId(2l);
@@ -169,6 +176,9 @@ public abstract class MockData {
 		TEST_FIELD_GLOSS2.setId(2l);
 
 		TEST_FILED_PROFILE1.setId(1l);
+
+		TEST_GRADUATION_MONTH1.setId(1l);
+		TEST_GRADUATION_MONTH2.setId(2l);
 
 		TEST_VOCABULARY_WORD1.setId(1l);
 		TEST_VOCABULARY_WORD1.setControlledVocabulary(TEST_CONTROLLED_VOCABULARY_1);
@@ -468,6 +478,22 @@ public abstract class MockData {
 			}
 		}
 		return fieldPredicate;
+	}
+
+	public GraduationMonth createGraduationMonth( int month) {
+		return new GraduationMonth(month);
+	}
+
+	public GraduationMonth updateGraduationMonth( GraduationMonth modifiedGraduationMonth) {
+		GraduationMonth gradutionMonth = null;
+		for(GraduationMonth gm : mockGraduationMonthList) {
+			if(gm.getId().equals(modifiedGraduationMonth.getId())) {
+				gm.setMonth(modifiedGraduationMonth.getMonth());
+				gradutionMonth = gm;
+				break;
+			}
+		}
+		return gradutionMonth;
 	}
 
 	public User findByEmail(String email) {

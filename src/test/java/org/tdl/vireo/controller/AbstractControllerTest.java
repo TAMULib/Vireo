@@ -38,6 +38,7 @@ import org.tdl.vireo.model.Embargo;
 import org.tdl.vireo.model.EmbargoGuarantor;
 import org.tdl.vireo.model.FieldGloss;
 import org.tdl.vireo.model.FieldPredicate;
+import org.tdl.vireo.model.GraduationMonth;
 import org.tdl.vireo.model.Language;
 import org.tdl.vireo.model.ManagedConfiguration;
 import org.tdl.vireo.model.User;
@@ -53,6 +54,7 @@ import org.tdl.vireo.model.repo.EmbargoRepo;
 import org.tdl.vireo.model.repo.FieldGlossRepo;
 import org.tdl.vireo.model.repo.FieldPredicateRepo;
 import org.tdl.vireo.model.repo.FieldProfileRepo;
+import org.tdl.vireo.model.repo.GraduationMonthRepo;
 import org.tdl.vireo.model.repo.LanguageRepo;
 import org.tdl.vireo.model.repo.UserRepo;
 import org.tdl.vireo.model.repo.VocabularyWordRepo;
@@ -164,6 +166,9 @@ public abstract class AbstractControllerTest extends MockData {
 	@InjectMocks
 	protected FieldProfileController fieldProfileController;
 
+	@InjectMocks
+	protected GraduationMonthController graduationMonthController;
+
 	@Mock
 	protected ConfigurationRepo configurationRepo;
 
@@ -193,6 +198,9 @@ public abstract class AbstractControllerTest extends MockData {
 
 	@Mock
 	protected FieldProfileRepo fieldProfileRepo;
+
+	@Mock
+	protected GraduationMonthRepo graduationMonthRepo;
 
 	@Mock
 	protected LanguageRepo languageRepo;
@@ -511,6 +519,22 @@ public abstract class AbstractControllerTest extends MockData {
 
 		when(fieldProfileRepo.findAll()).thenReturn(mockFieldProfileList);
 
+		when(graduationMonthRepo.findAllByOrderByPositionAsc()).thenReturn(mockGraduationMonthList);
+
+		when(graduationMonthRepo.create( any(Integer.class))).then(new Answer<GraduationMonth>() {
+			@Override
+			public GraduationMonth answer(InvocationOnMock invocation) throws Throwable {
+				return createGraduationMonth((Integer) invocation.getArguments()[0]);
+			}
+		});
+
+		when( graduationMonthRepo.update(any(GraduationMonth.class) ) ).then(new Answer<GraduationMonth>() {
+			@Override
+			public GraduationMonth answer(InvocationOnMock invocation) throws Throwable {
+				return updateGraduationMonth( (GraduationMonth) invocation.getArguments()[0] );
+			}
+		});
+
 		// User
 
 		when(userRepo.findAll()).thenReturn(mockUsers);
@@ -555,6 +579,7 @@ public abstract class AbstractControllerTest extends MockData {
 		fieldGlossRepo.deleteAll();
 		fieldPredicateRepo.deleteAll();
 		fieldProfileRepo.deleteAll();
+		graduationMonthRepo.deleteAll();
 		languageRepo.deleteAll();
 		userRepo.deleteAll();
 	}
