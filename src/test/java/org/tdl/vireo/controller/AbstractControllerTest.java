@@ -169,6 +169,9 @@ public abstract class AbstractControllerTest extends MockData {
 	@InjectMocks
 	protected GraduationMonthController graduationMonthController;
 
+	@InjectMocks
+	protected LanguageController languageController;
+
 	@Mock
 	protected ConfigurationRepo configurationRepo;
 
@@ -381,7 +384,7 @@ public abstract class AbstractControllerTest extends MockData {
 		when(proquestCodesService.getCodes(any(String.class) )).then(new Answer<Map<String,String>>() {
 			@Override
 			public Map<String, String> answer(InvocationOnMock invocation) throws Throwable {
-				return getProquestDegreeCodes( (String) invocation.getArguments()[0] );
+				return getProquestLanguageCodes();
 			}
 		});
 
@@ -532,6 +535,24 @@ public abstract class AbstractControllerTest extends MockData {
 			@Override
 			public GraduationMonth answer(InvocationOnMock invocation) throws Throwable {
 				return updateGraduationMonth( (GraduationMonth) invocation.getArguments()[0] );
+			}
+		});
+
+		//Language
+
+		when(languageRepo.findAllByOrderByPositionAsc()).thenReturn(mockLanguageList);
+
+		when( languageRepo.create( any(String.class)) ).then(new Answer<Language>() {
+			@Override
+			public Language answer(InvocationOnMock invocation) throws Throwable {
+				return createLanguage( (String) invocation.getArguments()[0]);
+			}
+		});
+
+		when( languageRepo.update(any(Language.class)) ).then(new Answer<Language>() {
+			@Override
+			public Language answer(InvocationOnMock invocation) throws Throwable {
+				return updateLanguage( (Language) invocation.getArguments()[0]);
 			}
 		});
 

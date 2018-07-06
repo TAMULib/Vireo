@@ -25,6 +25,7 @@ public class GraduationMonthControllerTest extends AbstractControllerTest {
 		response = graduationMonthController.createGraduationMonth(TEST_GRADUATION_MONTH1);
 		assertEquals(ApiStatus.SUCCESS, response.getMeta().getStatus());
 	}
+
 	@Test
 	public void testUpdateGraduateMonth() {
 		response = graduationMonthController.updateGraduationMonth(TEST_GRADUATION_MONTH1);

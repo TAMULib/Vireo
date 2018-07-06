@@ -132,7 +132,7 @@ public abstract class MockData {
 	protected static List<FieldGloss> mockFieldGlossList = new ArrayList<>(
 			Arrays.asList(new FieldGloss[] { TEST_FIELD_GLOSS1, TEST_FIELD_GLOSS2 }));
 
-	protected static List<Language> mockLanguageList = Arrays.asList(new Language[] { TEST_LANGUAGE1, TEST_LANGUAGE2 });
+	protected static List<Language> mockLanguageList = new ArrayList<>(Arrays.asList(new Language[] { TEST_LANGUAGE1, TEST_LANGUAGE2 }));
 
 	protected static List<FieldPredicate> mockFieldPredicateList = new ArrayList<>(
 			Arrays.asList(new FieldPredicate[] { TEST_FIELD_PREDICATE, TEST_FIELD_PREDICATE1, TEST_FIELD_PREDICATE2 }));
@@ -147,12 +147,15 @@ public abstract class MockData {
 		TEST_FIELD_PREDICATE.setId(1l);
 		TEST_FIELD_PREDICATE1.setId(2l);
 		TEST_FIELD_PREDICATE2.setId(3l);
+
 		TEST_LANGUAGE1.setId(1l);
 		TEST_LANGUAGE2.setId(2l);
+
 		TEST_CONTROLLED_VOCABULARY_1.setId(1l);
 		TEST_CONTROLLED_VOCABULARY_1.setDictionary(mockVocabularyWordList);
 		TEST_CONTROLLED_VOCABULARY_2.setId(2l);
 		TEST_CONTROLLED_VOCABULARY_2.setDictionary(mockVocabularyWordList);
+
 		TEST_CUSTOM_ACTION_DEF1.setId(1l);
 		TEST_CUSTOM_ACTION_DEF2.setId(2l);
 
@@ -368,12 +371,14 @@ public abstract class MockData {
 		return updatedDegree;
 	}
 
-	public Map<String, String> getProquestDegreeCodes(String degreeCode) {
-		Map<String, String> degrees = new HashMap<String, String>();
-		degrees.put("name", "This is a name");
-		degrees.put("level", "This is a degree level");
-		degrees.put("code", "This is a degree code");
-		return degrees;
+	public Map<String, String> getProquestLanguageCodes() {
+		Map<String, String> codes = new HashMap<String, String>();
+		codes.put("name", "This is a name");
+		codes.put("level", "This is a degree level");
+		codes.put("code", "This is a language code");
+		codes.put("degrees", "This is a degrees proquest code");
+		codes.put("languages", "This is a languages proquest code");
+		return codes;
 	}
 
 	public DocumentType createDocumentType(String documentTypeName) {
@@ -494,6 +499,22 @@ public abstract class MockData {
 			}
 		}
 		return gradutionMonth;
+	}
+
+	public Language createLanguage(String languageName) {
+		return new Language(languageName);
+	}
+
+	public Language updateLanguage(Language modifiedLanguage) {
+		Language language = null;
+		for(Language l: mockLanguageList) {
+			if(l.getId().equals(modifiedLanguage.getId())) {
+				l.setName(modifiedLanguage.getName());
+				language = l;
+				break;
+			}
+		}
+		return language;
 	}
 
 	public User findByEmail(String email) {

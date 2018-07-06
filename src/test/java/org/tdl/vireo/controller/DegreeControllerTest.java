@@ -62,7 +62,7 @@ public class DegreeControllerTest extends AbstractControllerTest {
 	public void testGetProquestLanguageCodes() throws Exception{
 		response = degreeController.getProquestLanguageCodes();
 		assertEquals(ApiStatus.SUCCESS, response.getMeta().getStatus());
-		Map<String, String> degreeCodes = (Map<String, String>) response.getPayload().get("HashMap");
-		assertEquals("The code in the degreeCodeMap is incorrect ", degreeCodes.get("code"), getProquestDegreeCodes("degrees").get("code"));
+		Map<String, String> codeMap = (Map<String, String>) response.getPayload().get("HashMap");
+		assertEquals("The code in the degreeCodeMap is incorrect ", codeMap.get("degrees"), getProquestLanguageCodes().get("degrees"));
 	}
 }
