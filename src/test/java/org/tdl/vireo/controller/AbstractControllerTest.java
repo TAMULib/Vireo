@@ -43,11 +43,13 @@ import org.tdl.vireo.model.Language;
 import org.tdl.vireo.model.ManagedConfiguration;
 import org.tdl.vireo.model.Organization;
 import org.tdl.vireo.model.OrganizationCategory;
+import org.tdl.vireo.model.Submission;
 import org.tdl.vireo.model.SubmissionStatus;
 import org.tdl.vireo.model.User;
 import org.tdl.vireo.model.VocabularyWord;
 import org.tdl.vireo.model.WorkflowStep;
 import org.tdl.vireo.model.repo.AbstractEmailRecipientRepo;
+import org.tdl.vireo.model.repo.ActionLogRepo;
 import org.tdl.vireo.model.repo.ConfigurationRepo;
 import org.tdl.vireo.model.repo.ControlledVocabularyRepo;
 import org.tdl.vireo.model.repo.CustomActionDefinitionRepo;
@@ -60,11 +62,16 @@ import org.tdl.vireo.model.repo.EmbargoRepo;
 import org.tdl.vireo.model.repo.FieldGlossRepo;
 import org.tdl.vireo.model.repo.FieldPredicateRepo;
 import org.tdl.vireo.model.repo.FieldProfileRepo;
+import org.tdl.vireo.model.repo.FieldValueRepo;
 import org.tdl.vireo.model.repo.GraduationMonthRepo;
+import org.tdl.vireo.model.repo.InputTypeRepo;
 import org.tdl.vireo.model.repo.LanguageRepo;
+import org.tdl.vireo.model.repo.NamedSearchFilterGroupRepo;
 import org.tdl.vireo.model.repo.NoteRepo;
 import org.tdl.vireo.model.repo.OrganizationCategoryRepo;
 import org.tdl.vireo.model.repo.OrganizationRepo;
+import org.tdl.vireo.model.repo.SubmissionFieldProfileRepo;
+import org.tdl.vireo.model.repo.SubmissionRepo;
 import org.tdl.vireo.model.repo.SubmissionStatusRepo;
 import org.tdl.vireo.model.repo.UserRepo;
 import org.tdl.vireo.model.repo.VocabularyWordRepo;
@@ -73,12 +80,15 @@ import org.tdl.vireo.service.ControlledVocabularyCachingService;
 import org.tdl.vireo.service.DepositorService;
 import org.tdl.vireo.service.EntityControlledVocabularyService;
 import org.tdl.vireo.service.ProquestCodesService;
+import org.tdl.vireo.utility.FileIOUtility;
+import org.tdl.vireo.utility.PackagerUtility;
 import org.tdl.vireo.utility.TemplateUtility;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.tamu.weaver.auth.model.Credentials;
 import edu.tamu.weaver.auth.service.CryptoService;
+import edu.tamu.weaver.email.service.EmailSender;
 import edu.tamu.weaver.email.service.MockEmailService;
 import edu.tamu.weaver.response.ApiResponse;
 import edu.tamu.weaver.token.service.TokenService;
@@ -100,6 +110,9 @@ public abstract class AbstractControllerTest extends MockData {
 	protected SimpMessagingTemplate simpMessagingTemplate;
 
 	@Mock
+	protected EmailSender emailSender;
+
+	@Mock
 	protected Environment env;
 
 	@Mock
@@ -116,6 +129,14 @@ public abstract class AbstractControllerTest extends MockData {
 	@Spy
 	@InjectMocks
 	protected TokenService tokenService;
+
+	@Spy
+	@InjectMocks
+	protected FileIOUtility fileIOUtility;
+
+	@Spy
+	@InjectMocks
+	protected PackagerUtility packagerUtility;
 
 	@Spy
 	@InjectMocks
@@ -192,8 +213,14 @@ public abstract class AbstractControllerTest extends MockData {
 	@InjectMocks
 	protected OrganizationCategoryController organizationCategoryController;
 
+	@InjectMocks
+	protected SubmissionController submissionController;
+
 	@Mock
 	protected AbstractEmailRecipientRepo abstractEmailRecipientRepo;
+
+	@Mock
+	protected ActionLogRepo actionLogRepo;
 
 	@Mock
 	protected ConfigurationRepo configurationRepo;
@@ -229,10 +256,19 @@ public abstract class AbstractControllerTest extends MockData {
 	protected FieldProfileRepo fieldProfileRepo;
 
 	@Mock
+	protected FieldValueRepo fieldValueRepo;
+
+	@Mock
 	protected GraduationMonthRepo graduationMonthRepo;
 
 	@Mock
+	protected InputTypeRepo inputTypeRepo;
+
+	@Mock
 	protected LanguageRepo languageRepo;
+
+	@Mock
+	protected NamedSearchFilterGroupRepo namedSearchFilterGroupRepo;
 
 	@Mock
 	protected NoteRepo noteRepo;
@@ -242,6 +278,12 @@ public abstract class AbstractControllerTest extends MockData {
 
 	@Mock
 	protected OrganizationRepo organizationRepo;
+
+	@Mock
+	protected SubmissionRepo submissionRepo;
+
+	@Mock
+	protected SubmissionFieldProfileRepo submissionFieldProfileRepo;
 
 	@Mock
 	protected SubmissionStatusRepo submissionStatusRepo;
@@ -645,6 +687,24 @@ public abstract class AbstractControllerTest extends MockData {
 			}
 		});
 
+		when(submissionRepo.findAll()).thenReturn(mockSubmissionList);
+
+		when(submissionRepo.findAllBySubmitter( any(User.class) )).thenReturn(mockSubmissionList);
+
+		when(submissionRepo.read( any(Long.class))).then( new Answer<Submission>() {
+			@Override
+			public Submission answer(InvocationOnMock invocation) throws Throwable {
+				return getSubmissionById( (Long) invocation.getArguments()[0]);
+			}
+		});
+
+		when(submissionRepo.findOneBySubmitterAndId( any(User.class), any(Long.class))).then(new Answer<Submission>() {
+			@Override
+			public Submission answer(InvocationOnMock invocation) throws Throwable {
+				return getSubmissionBySubmitterAndId( (User) invocation.getArguments()[0] , (Long) invocation.getArguments()[1]);
+			}
+		});
+
 		when(submissionStatusRepo.findOne(any(Long.class))).then( new Answer<SubmissionStatus>() {
 			@Override
 			public SubmissionStatus answer(InvocationOnMock invocation) throws Throwable {
@@ -696,6 +756,7 @@ public abstract class AbstractControllerTest extends MockData {
 	public void cleanUp() {
 		response = null;
 		abstractEmailRecipientRepo.deleteAll();
+		actionLogRepo.deleteAll();
 		configurationRepo.deleteAll();
 		controlledVocabularyRepo.deleteAll();
 		customActionDefinitionRepo.deleteAll();
@@ -709,11 +770,16 @@ public abstract class AbstractControllerTest extends MockData {
 		fieldGlossRepo.deleteAll();
 		fieldPredicateRepo.deleteAll();
 		fieldProfileRepo.deleteAll();
+		fieldValueRepo.deleteAll();
 		graduationMonthRepo.deleteAll();
+		inputTypeRepo.deleteAll();
 		languageRepo.deleteAll();
+		namedSearchFilterGroupRepo.deleteAll();
 		noteRepo.deleteAll();
 		organizationCategoryRepo.deleteAll();
 		organizationRepo.deleteAll();
+		submissionFieldProfileRepo.deleteAll();
+		submissionRepo.deleteAll();
 		submissionStatusRepo.deleteAll();
 		userRepo.deleteAll();
 		workflowStepRepo.deleteAll();
