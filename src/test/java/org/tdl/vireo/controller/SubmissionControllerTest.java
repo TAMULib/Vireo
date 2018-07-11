@@ -4,7 +4,6 @@ import static edu.tamu.weaver.response.ApiStatus.ERROR;
 import static org.junit.Assert.assertEquals;
 
 import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -235,7 +234,7 @@ public class SubmissionControllerTest extends AbstractControllerTest {
 		response = submissionController.removeFieldValue(TEST_SUBMISSION1.getId(), TEST_FIELD_VALUE2);
 		assertEquals(ApiStatus.SUCCESS, response.getMeta().getStatus());
 		Submission submission = (Submission) response.getPayload().get("Submission");
-		assertEquals("The fieldValue was not removed ", 0 , submission.getFieldValues().size());
+		assertEquals("The fieldValue was not removed ", null , submission.getFieldValues());
 	}
 
 	@Test
@@ -348,6 +347,7 @@ public class SubmissionControllerTest extends AbstractControllerTest {
 		data.put("message", " This is test message for updating the advisor approval");
 
 		response = submissionController.updateAdvisorApproval(TEST_SUBMISSION1.getId(), data);
+		assertEquals(ApiStatus.SUCCESS, response.getMeta().getStatus());
 		Submission submission = (Submission) response.getPayload().get("Submission");
 		assertEquals("The advisor approval is not updated ", TEST_SUBMISSION1.getApproveAdvisor(), submission.getApproveAdvisor());
 		assertEquals("The advisor approval date is not updated ", TEST_SUBMISSION1.getApproveAdvisorDate(), submission.getApproveAdvisorDate());

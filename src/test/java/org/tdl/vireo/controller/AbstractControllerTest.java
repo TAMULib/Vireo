@@ -122,6 +122,9 @@ public abstract class AbstractControllerTest extends MockData {
 	@Mock
 	protected MockEmailService mockEmailService;
 
+	@Mock
+	protected TemplateUtility templateUtility;
+
 	@Spy
 	@InjectMocks
 	protected HttpUtility httpUtility;
@@ -141,10 +144,6 @@ public abstract class AbstractControllerTest extends MockData {
 	@Spy
 	@InjectMocks
 	protected PackagerUtility packagerUtility;
-
-	@Spy
-	@InjectMocks
-	protected TemplateUtility templateUtility;
 
 	@Spy
 	protected ControlledVocabularyCachingService controlledVocabularyCachingService;
@@ -222,6 +221,9 @@ public abstract class AbstractControllerTest extends MockData {
 
 	@InjectMocks
 	protected SubmissionController submissionController;
+
+	@InjectMocks
+	protected SubmissionStatusController submissionStatusController;
 
 	@Mock
 	protected AbstractEmailRecipientRepo abstractEmailRecipientRepo;
@@ -756,7 +758,7 @@ public abstract class AbstractControllerTest extends MockData {
 		when( submissionRepo.save( any(Submission.class))).then(new Answer<Submission>() {
 			@Override
 			public Submission answer(InvocationOnMock invocation) throws Throwable {
-				return updateSubmission( (Submission) invocation.getArguments()[0]);
+				return saveSubmission( (Submission) invocation.getArguments()[0]);
 			}
 		});
 
@@ -788,6 +790,8 @@ public abstract class AbstractControllerTest extends MockData {
 			}
 		});
 
+		when(submissionStatusRepo.findAll()).thenReturn(mockSubmissionStatusList);
+
 		when(submissionStatusRepo.findByName( any(String.class))).then( new Answer<SubmissionStatus>() {
 			@Override
 			public SubmissionStatus answer(InvocationOnMock invocation) throws Throwable {
@@ -801,15 +805,6 @@ public abstract class AbstractControllerTest extends MockData {
 				return getSubmissionStatusById( (Long)invocation.getArguments()[0]);
 			}
 		});
-
-		//TODO
-		 /* when(templateUtility.compileString(any(String.class), any(Submission.class))).then( new Answer<String>() {
-			@Override
-			public String answer(InvocationOnMock invocation) throws Throwable {
-				return null;
-			}
-		});*/
-		// User
 
 		when(userRepo.findAll()).thenReturn(mockUsers);
 

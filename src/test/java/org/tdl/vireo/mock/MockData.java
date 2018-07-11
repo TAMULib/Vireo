@@ -754,12 +754,22 @@ public abstract class MockData {
 		for(Submission s : mockSubmissionList) {
 			if(s.getId().equals(submission.getId())) {
 				s.setAssignee(submission.getAssignee());
-				s.removeFieldValue(TEST_FIELD_VALUE2);
 				//TODO - can use further setters to update the submission object
 				updatedSubmission = s; break;
 			}
 		}
 		return updatedSubmission;
+	}
+
+	public Submission saveSubmission(Submission submission) {
+		Submission savedSubmission = null;
+		for(Submission s : mockSubmissionList) {
+			if(s.getId().equals(submission.getId())) {
+				s.setFieldValues(null);
+				savedSubmission = s; break;
+			}
+		}
+		return savedSubmission;
 	}
 
 	public Submission updateSubmissionStatus(Submission submission, SubmissionStatus submissionStatus, User user) {
