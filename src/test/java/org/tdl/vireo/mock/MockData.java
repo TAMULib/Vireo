@@ -4,8 +4,10 @@ import java.security.Key;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.crypto.spec.SecretKeySpec;
 
@@ -256,6 +258,8 @@ public abstract class MockData {
 	protected static List<FieldProfile> mockFieldProfileList = new ArrayList<>(Arrays.asList(new FieldProfile[] { TEST_FILED_PROFILE1 }));
 
 	protected static List<FieldValue> mockFieldValueList =  new ArrayList<>(Arrays.asList(new FieldValue[] { TEST_FIELD_VALUE1, TEST_FIELD_VALUE2 }));
+
+	protected static Set<FieldValue> mockFieldValueSet = new HashSet<>(Arrays.asList(new FieldValue[] { TEST_FIELD_VALUE1, TEST_FIELD_VALUE2 }));
 
 	protected static List<GraduationMonth> mockGraduationMonthList = new ArrayList<>(Arrays.asList(new GraduationMonth[] { TEST_GRADUATION_MONTH1, TEST_GRADUATION_MONTH2 }));
 
