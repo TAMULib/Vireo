@@ -78,7 +78,7 @@ public class ControlledVocabularyControllerTest extends AbstractControllerTest{
 		assertEquals("The size of the cv Map headers is not correct", 4, cvMapHeaderList.size() );
 		List<List<Object>> cvMapRowList = (List<List<Object>>) ((Map<String, Object>) response.getPayload().get("HashMap")).get("rows");
 		assertEquals("The vocabulary word name is incorrect", TEST_CONTROLLED_VOCABULARY_1.getDictionary().get(0).getName() , cvMapRowList.get(0).get(0));
-		assertTrue("The contact list is inccorrect for the first controlled vocabulary", cvMapRowList.get(0).get(3).equals("VocabWordContact1,VocabWordContact2"));
+		assertTrue("The contact list is inccorrect for the first controlled vocabulary", cvMapRowList.get(0).get(3).equals("Contact1,Contact2"));
 	}
 
 	@Test

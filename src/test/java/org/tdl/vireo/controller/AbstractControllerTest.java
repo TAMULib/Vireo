@@ -26,6 +26,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import org.tdl.vireo.auth.controller.AuthController;
 import org.tdl.vireo.auth.service.VireoUserCredentialsService;
 import org.tdl.vireo.mock.MockData;
+import org.tdl.vireo.model.ActionLog;
 import org.tdl.vireo.model.Configuration;
 import org.tdl.vireo.model.ControlledVocabulary;
 import org.tdl.vireo.model.ControlledVocabularyCache;
@@ -38,12 +39,15 @@ import org.tdl.vireo.model.Embargo;
 import org.tdl.vireo.model.EmbargoGuarantor;
 import org.tdl.vireo.model.FieldGloss;
 import org.tdl.vireo.model.FieldPredicate;
+import org.tdl.vireo.model.FieldValue;
 import org.tdl.vireo.model.GraduationMonth;
+import org.tdl.vireo.model.InputType;
 import org.tdl.vireo.model.Language;
 import org.tdl.vireo.model.ManagedConfiguration;
 import org.tdl.vireo.model.Organization;
 import org.tdl.vireo.model.OrganizationCategory;
 import org.tdl.vireo.model.Submission;
+import org.tdl.vireo.model.SubmissionFieldProfile;
 import org.tdl.vireo.model.SubmissionStatus;
 import org.tdl.vireo.model.User;
 import org.tdl.vireo.model.VocabularyWord;
@@ -202,6 +206,9 @@ public abstract class AbstractControllerTest extends MockData {
 	protected GraduationMonthController graduationMonthController;
 
 	@InjectMocks
+	protected InputTypeController inputTypeController;
+
+	@InjectMocks
 	protected LanguageController languageController;
 
 	@InjectMocks
@@ -304,7 +311,7 @@ public abstract class AbstractControllerTest extends MockData {
 
 	@SuppressWarnings("unchecked")
 	@Before
-	public void setUp() {
+	public void setUp() throws Exception {
 
 		MockitoAnnotations.initMocks(this);
 
@@ -330,9 +337,7 @@ public abstract class AbstractControllerTest extends MockData {
 		// Configurable Settings
 
 		Map<String, List<Configuration>> parameters = new HashMap<String, List<Configuration>>();
-		mockConfigurationSettings = Arrays
-				.asList(new ManagedConfiguration[] { (ManagedConfiguration) TEST_CONFIGURATION_SETTING1,
-						(ManagedConfiguration) TEST_CONFIGURATION_SETTING2 });
+		mockConfigurationSettings = Arrays.asList(new ManagedConfiguration[] { (ManagedConfiguration) TEST_CONFIGURATION_SETTING1,(ManagedConfiguration) TEST_CONFIGURATION_SETTING2 });
 		parameters.put("list", mockConfigurationSettings);
 
 		when(configurationRepo.getCurrentConfigurations()).thenReturn(parameters);
@@ -357,8 +362,7 @@ public abstract class AbstractControllerTest extends MockData {
 
 		when(controlledVocabularyRepo.findAllByOrderByPositionAsc()).thenReturn(mockControlledVocabularyList);
 
-		when(controlledVocabularyRepo.create(any(String.class), any(Language.class)))
-				.then(new Answer<ControlledVocabulary>() {
+		when(controlledVocabularyRepo.create(any(String.class), any(Language.class))).then(new Answer<ControlledVocabulary>() {
 					@Override
 					public ControlledVocabulary answer(InvocationOnMock invocation) throws Throwable {
 						return TEST_CONTROLLED_VOCABULARY_1;
@@ -491,6 +495,12 @@ public abstract class AbstractControllerTest extends MockData {
 		});
 
 		// Email Template
+		when(emailTemplateRepo.findByNameAndSystemRequired( any(String.class), any(Boolean.class) )).then( new Answer<EmailTemplate>() {
+			@Override
+			public EmailTemplate answer(InvocationOnMock invocation) throws Throwable {
+				return findEmailTemplateByNameAndSystemRequired( (String)invocation.getArguments()[0], (Boolean) invocation.getArguments()[1]);
+			}
+		});
 
 		when(emailTemplateRepo.findAllByOrderByPositionAsc()).thenReturn(mockEmailTemplateList);
 
@@ -605,6 +615,13 @@ public abstract class AbstractControllerTest extends MockData {
 
 		when(fieldProfileRepo.findAll()).thenReturn(mockFieldProfileList);
 
+		when(fieldValueRepo.findOne( any(Long.class) )).then( new Answer<FieldValue>() {
+			@Override
+			public FieldValue answer(InvocationOnMock invocation) throws Throwable {
+				return getFieldValueById( (Long)invocation.getArguments()[0]);
+			}
+		});
+
 		when(graduationMonthRepo.findAllByOrderByPositionAsc()).thenReturn(mockGraduationMonthList);
 
 		when(graduationMonthRepo.create( any(Integer.class))).then(new Answer<GraduationMonth>() {
@@ -618,6 +635,15 @@ public abstract class AbstractControllerTest extends MockData {
 			@Override
 			public GraduationMonth answer(InvocationOnMock invocation) throws Throwable {
 				return updateGraduationMonth( (GraduationMonth) invocation.getArguments()[0] );
+			}
+		});
+
+		when(inputTypeRepo.findAll()).thenReturn(mockInputTypeList);
+
+		when(inputTypeRepo.findByName( any(String.class) )).then( new Answer<InputType>() {
+			@Override
+			public InputType answer(InvocationOnMock invocation) throws Throwable {
+				return findInputTypeByName( (String)invocation.getArguments()[0]);
 			}
 		});
 
@@ -687,9 +713,31 @@ public abstract class AbstractControllerTest extends MockData {
 			}
 		});
 
+		when(submissionFieldProfileRepo.getOne( any(Long.class))).then( new Answer<SubmissionFieldProfile>() {
+			@Override
+			public SubmissionFieldProfile answer(InvocationOnMock invocation) throws Throwable {
+				return getSubmissionFieldProfileById( (Long)invocation.getArguments()[0]);
+			}
+		});
+
+		when(submissionRepo.create( any(User.class), any(Organization.class), any(SubmissionStatus.class), any(Credentials.class))).then(new Answer<Submission>() {
+			@Override
+			public Submission answer(InvocationOnMock invocation) throws Throwable {
+				//TODO
+				return  createSubmission((User) invocation.getArguments()[0], (Organization) invocation.getArguments()[1], (SubmissionStatus)invocation.getArguments()[2]);
+			}
+		});
+
 		when(submissionRepo.findAll()).thenReturn(mockSubmissionList);
 
 		when(submissionRepo.findAllBySubmitter( any(User.class) )).thenReturn(mockSubmissionList);
+
+		when(submissionRepo.findOneByAdvisorAccessHash( any(String.class) )).then(new Answer<Submission>() {
+			@Override
+			public Submission answer(InvocationOnMock invocation) throws Throwable {
+				return findSubmissionByAdvisorAccessHash((String)invocation.getArguments()[0]) ;
+			}
+		});
 
 		when(submissionRepo.read( any(Long.class))).then( new Answer<Submission>() {
 			@Override
@@ -705,6 +753,48 @@ public abstract class AbstractControllerTest extends MockData {
 			}
 		});
 
+		when( submissionRepo.save( any(Submission.class))).then(new Answer<Submission>() {
+			@Override
+			public Submission answer(InvocationOnMock invocation) throws Throwable {
+				return updateSubmission( (Submission) invocation.getArguments()[0]);
+			}
+		});
+
+		when( submissionRepo.update( any(Submission.class))).then(new Answer<Submission>() {
+			@Override
+			public Submission answer(InvocationOnMock invocation) throws Throwable {
+				return updateSubmission( (Submission) invocation.getArguments()[0]);
+			}
+		});
+
+		when( submissionRepo.updateStatus( any(Submission.class) , any(SubmissionStatus.class), any(User.class) ) ).then(new Answer<Submission>() {
+			@Override
+			public Submission answer(InvocationOnMock invocation) throws Throwable {
+				return updateSubmissionStatus( (Submission) invocation.getArguments()[0] , (SubmissionStatus) invocation.getArguments()[1] , (User) invocation.getArguments()[2]);
+			}
+		});
+
+		when(actionLogRepo.createPublicLog(any(Submission.class), any(User.class), any(String.class) )).then(new Answer<ActionLog>() {
+			@Override
+			public ActionLog answer(InvocationOnMock invocation) throws Throwable {
+				return createPublicSubmissionActionLog((Submission)invocation.getArguments()[0], (User)invocation.getArguments()[1], (String)invocation.getArguments()[2]);
+			}
+		});
+
+		when(actionLogRepo.createPrivateLog(any(Submission.class), any(User.class), any(String.class) )).then(new Answer<ActionLog>() {
+			@Override
+			public ActionLog answer(InvocationOnMock invocation) throws Throwable {
+				return createPrivateSubmissionActionLog((Submission)invocation.getArguments()[0], (User)invocation.getArguments()[1], (String)invocation.getArguments()[2]);
+			}
+		});
+
+		when(submissionStatusRepo.findByName( any(String.class))).then( new Answer<SubmissionStatus>() {
+			@Override
+			public SubmissionStatus answer(InvocationOnMock invocation) throws Throwable {
+				return getSubmissionStatusByName( (String)invocation.getArguments()[0]);
+			}
+		});
+
 		when(submissionStatusRepo.findOne(any(Long.class))).then( new Answer<SubmissionStatus>() {
 			@Override
 			public SubmissionStatus answer(InvocationOnMock invocation) throws Throwable {
@@ -712,6 +802,13 @@ public abstract class AbstractControllerTest extends MockData {
 			}
 		});
 
+		//TODO
+		 /* when(templateUtility.compileString(any(String.class), any(Submission.class))).then( new Answer<String>() {
+			@Override
+			public String answer(InvocationOnMock invocation) throws Throwable {
+				return null;
+			}
+		});*/
 		// User
 
 		when(userRepo.findAll()).thenReturn(mockUsers);

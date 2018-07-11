@@ -106,12 +106,12 @@ public class OrganizationControllerTest extends AbstractControllerTest {
 	}
 
 	@Test
-	public void testAddEmailWorkflowRule() throws Exception {
-		Map<String, Object> data = new HashMap<String, Object>();
-		data.put("submissionStatusId",TEST_SUBMISSION_STATUS1.getId());
-		//data.put("recipient", TEST_EMa);
-		//data.put("templateId", TEST_EMAIL_TEMPLATE1.getId());
-
+	public void testAddEmailWorkflowRule() {
+		//TODO
+		//Map<String, Object> data = new HashMap<String, Object>();
+		//data.put("submissionStatusId",TEST_SUBMISSION_STATUS1.getId().intValue());
+		//data.put("recipient", TEST_ASSIGNEE_RECIPIENT);
+		//data.put("templateId", TEST_EMAIL_TEMPLATE1.getId().intValue());
 		//response = organizationController.addEmailWorkflowRule(TEST_ORGANIZATION1.getId(), data);
 	}
 

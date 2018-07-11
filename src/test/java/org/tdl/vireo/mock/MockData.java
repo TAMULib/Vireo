@@ -2,16 +2,19 @@ package org.tdl.vireo.mock;
 
 import java.security.Key;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.crypto.spec.SecretKeySpec;
 
+import org.tdl.vireo.model.ActionLog;
 import org.tdl.vireo.model.Configuration;
 import org.tdl.vireo.model.ControlledVocabulary;
 import org.tdl.vireo.model.ControlledVocabularyCache;
 import org.tdl.vireo.model.CustomActionDefinition;
+import org.tdl.vireo.model.CustomActionValue;
 import org.tdl.vireo.model.Degree;
 import org.tdl.vireo.model.DegreeLevel;
 import org.tdl.vireo.model.DocumentType;
@@ -26,6 +29,7 @@ import org.tdl.vireo.model.EmbargoGuarantor;
 import org.tdl.vireo.model.FieldGloss;
 import org.tdl.vireo.model.FieldPredicate;
 import org.tdl.vireo.model.FieldProfile;
+import org.tdl.vireo.model.FieldValue;
 import org.tdl.vireo.model.GraduationMonth;
 import org.tdl.vireo.model.InputType;
 import org.tdl.vireo.model.Language;
@@ -35,13 +39,16 @@ import org.tdl.vireo.model.Organization;
 import org.tdl.vireo.model.OrganizationCategory;
 import org.tdl.vireo.model.Role;
 import org.tdl.vireo.model.Submission;
+import org.tdl.vireo.model.SubmissionFieldProfile;
 import org.tdl.vireo.model.SubmissionState;
 import org.tdl.vireo.model.SubmissionStatus;
+import org.tdl.vireo.model.SubmissionWorkflowStep;
 import org.tdl.vireo.model.User;
 import org.tdl.vireo.model.VocabularyWord;
 import org.tdl.vireo.model.WorkflowStep;
 
 import edu.emory.mathcs.backport.java.util.Arrays;
+import edu.tamu.weaver.auth.model.Credentials;
 
 @SuppressWarnings("unchecked")
 public abstract class MockData {
@@ -122,6 +129,9 @@ public abstract class MockData {
 	protected static CustomActionDefinition TEST_CUSTOM_ACTION_DEF1 = new CustomActionDefinition("Custom Action Label 1", false);
 	protected static CustomActionDefinition TEST_CUSTOM_ACTION_DEF2 = new CustomActionDefinition("Custom Action Label 2", false);
 
+	protected static CustomActionValue TEST_CUSTOM_ACTION_VALUE1 = new CustomActionValue(TEST_CUSTOM_ACTION_DEF1, true);
+	protected static CustomActionValue TEST_CUSTOM_ACTION_VALUE2 = new CustomActionValue(TEST_CUSTOM_ACTION_DEF2, true);
+
 	protected static DegreeLevel TEST_DEGREE_LEVEL = new DegreeLevel("Degree Level name");
 	protected static Degree TEST_DEGREE1 = new Degree("A Degree Name", TEST_DEGREE_LEVEL, "ProquestCode for Degree1 ");
 	protected static Degree TEST_DEGREE2 = new Degree("Second Degree Name", TEST_DEGREE_LEVEL, "ProquestCode for Second Degree ");
@@ -140,12 +150,9 @@ public abstract class MockData {
 	protected static DocumentType TEST_DOCUMENT_TYPE2 = new DocumentType("DocumentTypeName2", TEST_FIELD_PREDICATE);
 	protected static DocumentType TEST_DOCUMENT_TYPE3 = new DocumentType("DocumentTypeName3", TEST_FIELD_PREDICATE);
 
-	protected static EmailTemplate TEST_EMAIL_TEMPLATE1 = new EmailTemplate("EmailTemplate1_Name",
-			"EmailTemplate1_Subject", "EmailTemplate1_Message");
-	protected static EmailTemplate TEST_EMAIL_TEMPLATE2 = new EmailTemplate("EmailTemplate2_Name",
-			"EmailTemplate2_Subject", "EmailTemplate2_Message");
-	protected static EmailTemplate TEST_EMAIL_TEMPLATE3 = new EmailTemplate("EmailTemplate3_Name",
-			"EmailTemplate3_Subject", "EmailTemplate3_Message");
+	protected static EmailTemplate TEST_EMAIL_TEMPLATE1 = new EmailTemplate("EmailTemplate1_Name", "EmailTemplate1_Subject", "EmailTemplate1_Message");
+	protected static EmailTemplate TEST_EMAIL_TEMPLATE2 = new EmailTemplate("EmailTemplate2_Name", "EmailTemplate2_Subject", "EmailTemplate2_Message");
+	protected static EmailTemplate TEST_EMAIL_TEMPLATE3 = new EmailTemplate("EmailTemplate3_Name", "EmailTemplate3_Subject", "EmailTemplate3_Message");
 
 	protected static Embargo TEST_EMBARGO1 = new Embargo("Embargo1_name", "Embargo1_description", new Integer(10), EmbargoGuarantor.PROQUEST, true);
 	protected static Embargo TEST_EMBARGO2 = new Embargo("Embargo2_name", "Embargo2_description", new Integer(20), EmbargoGuarantor.DEFAULT, false);
@@ -153,7 +160,15 @@ public abstract class MockData {
 	protected static FieldGloss TEST_FIELD_GLOSS1 = new FieldGloss("FieldGloss1_Value", TEST_LANGUAGE1);
 	protected static FieldGloss TEST_FIELD_GLOSS2 = new FieldGloss("FieldGloss2_Value", TEST_LANGUAGE2);
 
+	protected static List<String> mockContactList = Arrays.asList(new String[] { "Contact1", "Contact2" });
+
 	protected static FieldProfile TEST_FIELD_PROFILE1 = new FieldProfile();
+
+	protected static FieldValue TEST_FIELD_VALUE1 = new FieldValue(TEST_FIELD_PREDICATE, mockContactList);
+	protected static FieldValue TEST_FIELD_VALUE2 = new FieldValue(TEST_FIELD_PREDICATE2, mockContactList);
+
+	protected static InputType TEST_INPUT_TYPE1 = new InputType("INPUT_CONTACT");
+	protected static InputType TEST_INPUT_TYPE2 = new InputType("Another input type");
 
 	protected static Note TEST_NOTE1 = new Note(" Note1_name "," This is a text for note1 ");
 	protected static Note TEST_NOTE2 = new Note(" Note2_name "," This is a text for note2 ");
@@ -165,16 +180,18 @@ public abstract class MockData {
 
 	protected static List<ControlledVocabulary> mockControlledVocabularyList = new ArrayList<ControlledVocabulary>(Arrays.asList(new ControlledVocabulary[] { TEST_CONTROLLED_VOCABULARY_1, TEST_CONTROLLED_VOCABULARY_2 }));
 
-	protected static List<String> mockVocabularyWordContactList = Arrays.asList(new String[] { "VocabWordContact1", "VocabWordContact2" });
-
 	protected static OrganizationCategory TEST_ORGANIZATION_CATEGORY1 = new OrganizationCategory("OrganizationCategory1_name");
 	protected static OrganizationCategory TEST_ORGANIZATION_CATEGORY2 = new OrganizationCategory("OrganizationCategory2_name");
 
 	protected static Organization TEST_ORGANIZATION1 = new Organization("Organization1_name", TEST_ORGANIZATION_CATEGORY1);
 	protected static Organization TEST_ORGANIZATION2 = new Organization("Organization2_name", TEST_ORGANIZATION_CATEGORY2);
 
+	protected static SubmissionFieldProfile TEST_SUBMISSION_FIELD_PROFILE = new SubmissionFieldProfile();
+
+	//protected static FieldValueValidator TEST_FIELDVALUE_VALIDATOR = new FieldValueValidator(TEST_SUBMISSION_FIELD_PROFILE);
+
 	protected static SubmissionStatus TEST_SUBMISSION_STATUS1 = new SubmissionStatus("Submission Status1 name", true, true, true, true, true, true, SubmissionState.SUBMITTED);
-	protected static SubmissionStatus TEST_SUBMISSION_STATUS2 = new SubmissionStatus("Submission Status2 ", true, true, true, true, true, true, SubmissionState.APPROVED);
+	protected static SubmissionStatus TEST_SUBMISSION_STATUS2 = new SubmissionStatus("Submission Status1 name", true, true, true, true, true, true, SubmissionState.NEEDS_CORRECTIONS);
 
 	protected static User TEST_USER = new User(TEST_USER_EMAIL, TEST_USER_FIRST_NAME, TEST_USER_LAST_NAME, Role.ROLE_STUDENT);
 	protected static User TEST_USER2 = new User(TEST_USER2_EMAIL, "Jack", "Daniels", Role.ROLE_ADMIN);
@@ -185,6 +202,20 @@ public abstract class MockData {
 	protected static Submission TEST_SUBMISSION2 = new Submission(TEST_USER, TEST_ORGANIZATION1, TEST_SUBMISSION_STATUS1);
 	protected static Submission TEST_SUBMISSION3 = new Submission(TEST_USER3, TEST_ORGANIZATION1, TEST_SUBMISSION_STATUS2);
 
+	protected static SubmissionWorkflowStep TEST_SUBMISSION_WORKFLOWSTEP1 = new SubmissionWorkflowStep("SubmissionWorkflowStep1");
+	protected static SubmissionWorkflowStep TEST_SUBMISSION_WORKFLOWSTEP2 = new SubmissionWorkflowStep("SubmissionWorkflowStep2");
+
+	// TEST_CREDENTIALS
+		protected static Credentials TEST_CREDENTIALS = new Credentials();
+
+		static {
+			TEST_CREDENTIALS.setFirstName("Jack");
+			TEST_CREDENTIALS.setLastName("Daniel");
+			TEST_CREDENTIALS.setRole(Role.ROLE_STUDENT.toString());
+			TEST_CREDENTIALS.setNetid(TEST_USER.getNetid());
+			TEST_CREDENTIALS.setEmail(TEST_USER.getEmail());
+		}
+
 	protected static WorkflowStep TEST_WORKFLOW1 = new WorkflowStep("WorkFlow name 1", TEST_ORGANIZATION1);
 	protected static WorkflowStep TEST_WORKFLOW2 = new WorkflowStep("WorkFlow name 1", TEST_ORGANIZATION1);
 
@@ -193,16 +224,16 @@ public abstract class MockData {
 	protected static EmailRecipient TEST_ORGANIZATION_RECIPIENT = new EmailRecipientOrganization(TEST_ORGANIZATION1);
 	protected static EmailRecipient TEST_CONTACT_RECIPIENT = new EmailRecipientContact("Contact Email Recipient Label", TEST_FIELD_PREDICATE1);
 
-	protected static InputType TEST_INPUT_TYPE1 = new InputType("Input Type 1");
-
 	protected static FieldProfile TEST_FILED_PROFILE1 = new FieldProfile(TEST_WORKFLOW1, TEST_FIELD_PREDICATE1, TEST_INPUT_TYPE1, true, false, true, false, true, true, "defaultValue");
 
-	protected static VocabularyWord TEST_VOCABULARY_WORD1 = new VocabularyWord("Vocabulary Word Name1",	"Vocabulary Word Definition1", "Vocabulary Word Identifier1", mockVocabularyWordContactList);
-	protected static VocabularyWord TEST_VOCABULARY_WORD2 = new VocabularyWord("Vocabulary Word Name2",	"Vocabulary Word Definition2", "Vocabulary Word Identifier2", mockVocabularyWordContactList);
+	protected static VocabularyWord TEST_VOCABULARY_WORD1 = new VocabularyWord("Vocabulary Word Name1",	"Vocabulary Word Definition1", "Vocabulary Word Identifier1", mockContactList);
+	protected static VocabularyWord TEST_VOCABULARY_WORD2 = new VocabularyWord("Vocabulary Word Name2",	"Vocabulary Word Definition2", "Vocabulary Word Identifier2", mockContactList);
 
 	protected static List<Configuration> mockConfigurationSettings;
 
 	protected static List<CustomActionDefinition> mockCustomActionDefList = new ArrayList<>(Arrays.asList(new CustomActionDefinition[] { TEST_CUSTOM_ACTION_DEF1, TEST_CUSTOM_ACTION_DEF2 }));
+
+	protected static List<CustomActionValue> mockCustomActionValueList = new ArrayList<>(Arrays.asList(new CustomActionValue[] { TEST_CUSTOM_ACTION_VALUE1, TEST_CUSTOM_ACTION_VALUE2 }));
 
 	protected static List<VocabularyWord> mockVocabularyWordList = Arrays.asList(new VocabularyWord[] { TEST_VOCABULARY_WORD1, TEST_VOCABULARY_WORD2 });
 
@@ -216,11 +247,15 @@ public abstract class MockData {
 
 	protected static List<FieldGloss> mockFieldGlossList = new ArrayList<>(Arrays.asList(new FieldGloss[] { TEST_FIELD_GLOSS1, TEST_FIELD_GLOSS2 }));
 
+	protected static List<InputType> mockInputTypeList = new ArrayList<>(Arrays.asList(new InputType[] { TEST_INPUT_TYPE1, TEST_INPUT_TYPE2 }));
+
 	protected static List<Language> mockLanguageList = new ArrayList<>(Arrays.asList(new Language[] { TEST_LANGUAGE1, TEST_LANGUAGE2 }));
 
 	protected static List<FieldPredicate> mockFieldPredicateList = new ArrayList<>(Arrays.asList(new FieldPredicate[] { TEST_FIELD_PREDICATE, TEST_FIELD_PREDICATE1, TEST_FIELD_PREDICATE2 }));
 
 	protected static List<FieldProfile> mockFieldProfileList = new ArrayList<>(Arrays.asList(new FieldProfile[] { TEST_FILED_PROFILE1 }));
+
+	protected static List<FieldValue> mockFieldValueList =  new ArrayList<>(Arrays.asList(new FieldValue[] { TEST_FIELD_VALUE1, TEST_FIELD_VALUE2 }));
 
 	protected static List<GraduationMonth> mockGraduationMonthList = new ArrayList<>(Arrays.asList(new GraduationMonth[] { TEST_GRADUATION_MONTH1, TEST_GRADUATION_MONTH2 }));
 
@@ -234,17 +269,13 @@ public abstract class MockData {
 
 	protected static List<SubmissionStatus> mockSubmissionStatusList = new ArrayList<>(Arrays.asList(new SubmissionStatus[] { TEST_SUBMISSION_STATUS1 , TEST_SUBMISSION_STATUS2 }));
 
+	protected static List<SubmissionWorkflowStep> mockSubmissionWorkflowStepList = new ArrayList<>(Arrays.asList(new SubmissionWorkflowStep[] { TEST_SUBMISSION_WORKFLOWSTEP1 , TEST_SUBMISSION_WORKFLOWSTEP2 }));
+
 	protected static List<User> mockUsers = Arrays.asList(new User[] { TEST_USER, TEST_USER2, TEST_USER3, TEST_USER4 });
 
 	protected static List<WorkflowStep> mockWorkflowStepList = new ArrayList<>(Arrays.asList(new WorkflowStep[] { TEST_WORKFLOW1 , TEST_WORKFLOW2 }));
 
 	static {
-		TEST_FIELD_PREDICATE.setId(1l);
-		TEST_FIELD_PREDICATE1.setId(2l);
-		TEST_FIELD_PREDICATE2.setId(3l);
-
-		TEST_LANGUAGE1.setId(1l);
-		TEST_LANGUAGE2.setId(2l);
 
 		TEST_CONTROLLED_VOCABULARY_1.setId(1l);
 		TEST_CONTROLLED_VOCABULARY_1.setDictionary(mockVocabularyWordList);
@@ -253,6 +284,9 @@ public abstract class MockData {
 
 		TEST_CUSTOM_ACTION_DEF1.setId(1l);
 		TEST_CUSTOM_ACTION_DEF2.setId(2l);
+
+		TEST_CUSTOM_ACTION_VALUE1.setId(1l);
+		TEST_CUSTOM_ACTION_VALUE2.setId(2l);
 
 		TEST_DEGREE1.setId(1l);
 		TEST_DEGREE1.setPosition(1l);
@@ -273,10 +307,20 @@ public abstract class MockData {
 		TEST_FIELD_GLOSS1.setId(1l);
 		TEST_FIELD_GLOSS2.setId(2l);
 
+		TEST_FIELD_PREDICATE.setId(1l);
+		TEST_FIELD_PREDICATE1.setId(2l);
+		TEST_FIELD_PREDICATE2.setId(3l);
+
 		TEST_FILED_PROFILE1.setId(1l);
+
+		TEST_FIELD_VALUE1.setId(1l);
+		TEST_FIELD_VALUE2.setId(2l);
 
 		TEST_GRADUATION_MONTH1.setId(1l);
 		TEST_GRADUATION_MONTH2.setId(2l);
+
+		TEST_LANGUAGE1.setId(1l);
+		TEST_LANGUAGE2.setId(2l);
 
 		TEST_NOTE1.setId(1l);
 		TEST_NOTE2.setId(2l);
@@ -290,8 +334,17 @@ public abstract class MockData {
 		TEST_SUBMISSION1.setId(1l);
 		TEST_SUBMISSION2.setId(2l);
 
+		TEST_SUBMISSION_FIELD_PROFILE.setId(1l);
+		TEST_SUBMISSION_FIELD_PROFILE.setControlledVocabularies(mockControlledVocabularyList);
+		TEST_SUBMISSION_FIELD_PROFILE.setLogged(true);
+		TEST_SUBMISSION_FIELD_PROFILE.setFieldGlosses(mockFieldGlossList);
+		TEST_SUBMISSION_FIELD_PROFILE.setOptional(true);
+
 		TEST_SUBMISSION_STATUS1.setId(1l);
 		TEST_SUBMISSION_STATUS2.setId(2l);
+
+		TEST_SUBMISSION_WORKFLOWSTEP1.setId(1l);
+		TEST_SUBMISSION_WORKFLOWSTEP2.setId(2l);
 
 		TEST_USER.setId(1l);
 		TEST_USER2.setId(2l);
@@ -304,6 +357,14 @@ public abstract class MockData {
 
 		TEST_WORKFLOW1.setId(1l);
 		TEST_WORKFLOW2.setId(2l);
+	}
+
+	public ActionLog createPublicSubmissionActionLog(Submission submission, User user, String entry) {
+		return new ActionLog(submission.getSubmissionStatus(), user, Calendar.getInstance(), entry, false);
+	}
+
+	public ActionLog createPrivateSubmissionActionLog(Submission submission, User user, String entry) {
+		return new ActionLog(submission.getSubmissionStatus(), user, Calendar.getInstance(), entry, false);
 	}
 
 	public Configuration saveConfiguration(ManagedConfiguration modifiedConfiguration) {
@@ -453,6 +514,17 @@ public abstract class MockData {
 		return emailTemplate;
 	}
 
+	public EmailTemplate findEmailTemplateByNameAndSystemRequired(String emailTemplateName, Boolean isSystemRequired) {
+		EmailTemplate emailTemplate = null;
+		for (EmailTemplate et : mockEmailTemplateList) {
+			if ( (et.getName().equals(emailTemplateName)) && (et.getSystemRequired().equals(isSystemRequired)) ) {
+				emailTemplate = et;
+				break;
+			}
+		}
+		return emailTemplate;
+	}
+
 	public EmailTemplate findEmailTemplateByNameOverride(String string) {
 		// TODO Auto-generated method stub
 		return null;
@@ -522,6 +594,16 @@ public abstract class MockData {
 		return fieldPredicate;
 	}
 
+	public FieldValue getFieldValueById(Long fieldValueId) {
+		FieldValue fieldValue = null;
+		for(FieldValue fv : mockFieldValueList) {
+			if(fv.getId().equals(fieldValueId)) {
+				fieldValue = fv; break;
+			}
+		}
+		return fieldValue;
+	}
+
 	public GraduationMonth createGraduationMonth( int month) {
 		return new GraduationMonth(month);
 	}
@@ -536,6 +618,16 @@ public abstract class MockData {
 			}
 		}
 		return gradutionMonth;
+	}
+
+	public InputType findInputTypeByName(String inputTypeName) {
+		InputType inputType = null;
+		for(InputType it : mockInputTypeList) {
+			if(it.getName().equals(inputTypeName)) {
+				inputType = it; break;
+			}
+		}
+		return inputType;
 	}
 
 	public Language createLanguage(String languageName) {
@@ -611,6 +703,28 @@ public abstract class MockData {
 		return organizationCategory;
 	}
 
+	public Submission createSubmission(User submitter, Organization organization, SubmissionStatus submissionStatus) {
+		Submission submission = new Submission(submitter, organization, submissionStatus);
+		submission.setSubmissionWorkflowSteps(mockSubmissionWorkflowStepList);
+		TEST_SUBMISSION_WORKFLOWSTEP1.getAggregateFieldProfiles().forEach(afp->{
+			ManagedConfiguration mappedShibAttribute = afp.getMappedShibAttribute();
+			if (mappedShibAttribute != null) {
+                if (TEST_CREDENTIALS.getAllCredentials().containsKey(mappedShibAttribute.getValue())) {
+                    String credentialValue = TEST_CREDENTIALS.getAllCredentials().get(mappedShibAttribute.getValue());
+                    FieldValue fieldValue = new FieldValue(afp.getFieldPredicate());
+                    fieldValue.setValue(credentialValue);
+                    submission.addFieldValue(fieldValue);
+                }
+            }
+		});
+		return submission;
+	}
+
+	public Submission findSubmissionByAdvisorAccessHash(String advisorHash) {
+		//TODO return submission based on advisor hash string
+		return TEST_SUBMISSION1;
+	}
+
 	public Submission getSubmissionById(Long submissionId) {
 		Submission submission = null;
 		for(Submission s : mockSubmissionList) {
@@ -631,6 +745,24 @@ public abstract class MockData {
 		return submission;
 	}
 
+	public Submission updateSubmission(Submission submission) {
+		Submission updatedSubmission = null;
+		for(Submission s : mockSubmissionList) {
+			if(s.getId().equals(submission.getId())) {
+				s.setAssignee(submission.getAssignee());
+				s.removeFieldValue(TEST_FIELD_VALUE2);
+				//TODO - can use further setters to update the submission object
+				updatedSubmission = s; break;
+			}
+		}
+		return updatedSubmission;
+	}
+
+	public Submission updateSubmissionStatus(Submission submission, SubmissionStatus submissionStatus, User user) {
+		submission.setSubmissionStatus(submissionStatus);
+		return submission;
+	}
+
 	public SubmissionStatus getSubmissionStatusById(Long submissionStatusId) {
 		SubmissionStatus submissionStatus = null;
 		for(SubmissionStatus ss : mockSubmissionStatusList) {
@@ -639,6 +771,24 @@ public abstract class MockData {
 			}
 		}
 		return submissionStatus;
+	}
+
+	public SubmissionStatus getSubmissionStatusByName(String submissionStatusName) {
+		SubmissionStatus submissionStatus = null;
+		for(SubmissionStatus ss : mockSubmissionStatusList) {
+			if(ss.getName().equals(submissionStatusName)) {
+				submissionStatus = ss; break;
+			}
+		}
+		return submissionStatus;
+	}
+
+	public SubmissionFieldProfile getSubmissionFieldProfileById(Long fieldProfileId) {
+		SubmissionFieldProfile submissionFieldProfile = null;
+		if(TEST_SUBMISSION_FIELD_PROFILE.getId().equals(fieldProfileId)) {
+			submissionFieldProfile = TEST_SUBMISSION_FIELD_PROFILE;
+		}
+		return submissionFieldProfile;
 	}
 
 	public User findByEmail(String email) {
