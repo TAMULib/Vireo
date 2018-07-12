@@ -39,13 +39,16 @@ import org.tdl.vireo.model.Embargo;
 import org.tdl.vireo.model.EmbargoGuarantor;
 import org.tdl.vireo.model.FieldGloss;
 import org.tdl.vireo.model.FieldPredicate;
+import org.tdl.vireo.model.FieldProfile;
 import org.tdl.vireo.model.FieldValue;
 import org.tdl.vireo.model.GraduationMonth;
 import org.tdl.vireo.model.InputType;
 import org.tdl.vireo.model.Language;
 import org.tdl.vireo.model.ManagedConfiguration;
+import org.tdl.vireo.model.Note;
 import org.tdl.vireo.model.Organization;
 import org.tdl.vireo.model.OrganizationCategory;
+import org.tdl.vireo.model.Role;
 import org.tdl.vireo.model.Submission;
 import org.tdl.vireo.model.SubmissionFieldProfile;
 import org.tdl.vireo.model.SubmissionStatus;
@@ -75,6 +78,7 @@ import org.tdl.vireo.model.repo.NoteRepo;
 import org.tdl.vireo.model.repo.OrganizationCategoryRepo;
 import org.tdl.vireo.model.repo.OrganizationRepo;
 import org.tdl.vireo.model.repo.SubmissionFieldProfileRepo;
+import org.tdl.vireo.model.repo.SubmissionListColumnRepo;
 import org.tdl.vireo.model.repo.SubmissionRepo;
 import org.tdl.vireo.model.repo.SubmissionStatusRepo;
 import org.tdl.vireo.model.repo.UserRepo;
@@ -224,6 +228,12 @@ public abstract class AbstractControllerTest extends MockData {
 
 	@InjectMocks
 	protected SubmissionStatusController submissionStatusController;
+
+	@InjectMocks
+	protected UserController userController;
+
+	@InjectMocks
+	protected WorkflowStepController workflowStepController;
 
 	@Mock
 	protected AbstractEmailRecipientRepo abstractEmailRecipientRepo;
@@ -624,6 +634,27 @@ public abstract class AbstractControllerTest extends MockData {
 			}
 		});
 
+		when( fieldProfileRepo.create(any(WorkflowStep.class) , any(FieldPredicate.class) , any(InputType.class) ,  any(String.class), any(String.class), any(Boolean.class) , any(Boolean.class) , any(Boolean.class) , any(Boolean.class) , any(Boolean.class) , any(Boolean.class) , any(List.class) , any(List.class) ,any(String.class))).then( new Answer<FieldProfile>() {
+			@Override
+			public FieldProfile answer(InvocationOnMock invocation) throws Throwable {
+				return createFieldProfile((WorkflowStep) invocation.getArguments()[0], (FieldPredicate) invocation.getArguments()[1] , (InputType) invocation.getArguments()[2],  (String) invocation.getArguments()[3], (String) invocation.getArguments()[4], (Boolean) invocation.getArguments()[5], (Boolean) invocation.getArguments()[6] , (Boolean) invocation.getArguments()[7] , (Boolean) invocation.getArguments()[8], (Boolean) invocation.getArguments()[9] , (Boolean) invocation.getArguments()[10], (List<ControlledVocabulary>) invocation.getArguments()[11], (List<FieldGloss>) invocation.getArguments()[12] ,(String) invocation.getArguments()[13]);
+			}
+		});
+
+		when(fieldProfileRepo.findOne(any(Long.class))).then( new Answer<FieldProfile>() {
+			@Override
+			public FieldProfile answer(InvocationOnMock invocation) throws Throwable {
+				return findFieldProfileById( (Long)invocation.getArguments()[0]);
+			}
+		});
+
+		when(fieldProfileRepo.update(any(FieldProfile.class), any(Organization.class)) ).then( new Answer<FieldProfile>() {
+			@Override
+			public FieldProfile answer(InvocationOnMock invocation) throws Throwable {
+				return updateFieldProfile( (FieldProfile) invocation.getArguments()[0] , (Organization) invocation.getArguments()[1]);
+			}
+		});
+
 		when(graduationMonthRepo.findAllByOrderByPositionAsc()).thenReturn(mockGraduationMonthList);
 
 		when(graduationMonthRepo.create( any(Integer.class))).then(new Answer<GraduationMonth>() {
@@ -669,6 +700,13 @@ public abstract class AbstractControllerTest extends MockData {
 
 		when(noteRepo.findAll()).thenReturn(mockNoteList);
 
+		when(noteRepo.findOne( any(Long.class)) ).then( new Answer<Note>() {
+			@Override
+			public Note answer(InvocationOnMock invocation) throws Throwable {
+				return findNoteById( (Long)invocation.getArguments()[0]);
+			}
+		});
+
 		when(organizationRepo.findAllByOrderByIdAsc()).thenReturn(mockOrganizationList);
 
 		when(organizationRepo.read(any(Long.class))).then( new Answer<Organization>() {
@@ -682,6 +720,13 @@ public abstract class AbstractControllerTest extends MockData {
 			@Override
 			public Organization answer(InvocationOnMock invocation) throws Throwable {
 				return createOrganization( (String) invocation.getArguments()[0] , (Organization) invocation.getArguments()[1] , (OrganizationCategory) invocation.getArguments()[2]);
+			}
+		});
+
+		when(organizationRepo.findOne( any(Long.class))).then( new Answer<Organization>() {
+			@Override
+			public Organization answer(InvocationOnMock invocation) throws Throwable {
+				return getOrganizationById( (Long) invocation.getArguments()[0]);
 			}
 		});
 
@@ -808,10 +853,24 @@ public abstract class AbstractControllerTest extends MockData {
 
 		when(userRepo.findAll()).thenReturn(mockUsers);
 
+		when(userRepo.findAllByRole( any(Role.class))).then(new Answer<List<User>>() {
+			@Override
+			public List<User> answer(InvocationOnMock invocation) throws Throwable {
+				return findUsersByRole((Role) invocation.getArguments()[0]);
+			}
+		});
+
 		when(userRepo.findByEmail(any(String.class))).then(new Answer<Object>() {
 			@Override
 			public Object answer(InvocationOnMock invocation) throws Throwable {
 				return findByEmail((String) invocation.getArguments()[0]);
+			}
+		});
+
+		when(userRepo.findOne( any(Long.class))).then( new Answer<User>() {
+			@Override
+			public User answer(InvocationOnMock invocation) throws Throwable {
+				return findUserById( (Long) invocation.getArguments()[0]);
 			}
 		});
 
@@ -829,6 +888,8 @@ public abstract class AbstractControllerTest extends MockData {
 			}
 		});
 
+		when(workflowStepRepo.findAll()).thenReturn(mockWorkflowStepList);
+
 		when(workflowStepRepo.create( any(String.class), any(Organization.class) )).then( new Answer<WorkflowStep>() {
 			@Override
 			public WorkflowStep answer(InvocationOnMock invocation) throws Throwable {
@@ -840,6 +901,13 @@ public abstract class AbstractControllerTest extends MockData {
 			@Override
 			public WorkflowStep answer(InvocationOnMock invocation) throws Throwable {
 				return getWorkflowStepById( (Long) invocation.getArguments()[0]);
+			}
+		});
+
+		when(workflowStepRepo.update( any(WorkflowStep.class), any(Organization.class) )).then( new Answer<WorkflowStep>() {
+			@Override
+			public WorkflowStep answer(InvocationOnMock invocation) throws Throwable {
+				return updateWorkFlowStepByWorkflowStepAndReqOrganization( (WorkflowStep) invocation.getArguments()[0] , (Organization) invocation.getArguments()[1] );
 			}
 		});
 	}

@@ -164,16 +164,11 @@ public abstract class MockData {
 
 	protected static List<String> mockContactList = Arrays.asList(new String[] { "Contact1", "Contact2" });
 
-	protected static FieldProfile TEST_FIELD_PROFILE1 = new FieldProfile();
-
 	protected static FieldValue TEST_FIELD_VALUE1 = new FieldValue(TEST_FIELD_PREDICATE, mockContactList);
 	protected static FieldValue TEST_FIELD_VALUE2 = new FieldValue(TEST_FIELD_PREDICATE2, mockContactList);
 
 	protected static InputType TEST_INPUT_TYPE1 = new InputType("INPUT_CONTACT");
 	protected static InputType TEST_INPUT_TYPE2 = new InputType("Another input type");
-
-	protected static Note TEST_NOTE1 = new Note(" Note1_name "," This is a text for note1 ");
-	protected static Note TEST_NOTE2 = new Note(" Note2_name "," This is a text for note2 ");
 
 	protected static ControlledVocabulary TEST_CONTROLLED_VOCABULARY_1 = new ControlledVocabulary("Controlled Vocabulary Name1", TEST_LANGUAGE1, false);
 	protected static ControlledVocabulary TEST_CONTROLLED_VOCABULARY_2 = new ControlledVocabulary("Controlled Vocabulary Name2", TEST_LANGUAGE2, false);
@@ -226,10 +221,13 @@ public abstract class MockData {
 	protected static EmailRecipient TEST_ORGANIZATION_RECIPIENT = new EmailRecipientOrganization(TEST_ORGANIZATION1);
 	protected static EmailRecipient TEST_CONTACT_RECIPIENT = new EmailRecipientContact("Contact Email Recipient Label", TEST_FIELD_PREDICATE1);
 
-	protected static FieldProfile TEST_FILED_PROFILE1 = new FieldProfile(TEST_WORKFLOW1, TEST_FIELD_PREDICATE1, TEST_INPUT_TYPE1, true, false, true, false, true, true, "defaultValue");
+	protected static FieldProfile TEST_FIELD_PROFILE1 = new FieldProfile(TEST_WORKFLOW1, TEST_FIELD_PREDICATE1, TEST_INPUT_TYPE1, true, false, true, false, true, true, "defaultValue");
 
 	protected static VocabularyWord TEST_VOCABULARY_WORD1 = new VocabularyWord("Vocabulary Word Name1",	"Vocabulary Word Definition1", "Vocabulary Word Identifier1", mockContactList);
 	protected static VocabularyWord TEST_VOCABULARY_WORD2 = new VocabularyWord("Vocabulary Word Name2",	"Vocabulary Word Definition2", "Vocabulary Word Identifier2", mockContactList);
+
+	protected static Note TEST_NOTE1 = new Note(TEST_WORKFLOW1, " Note1_name "," This is a text for note1 ");
+	protected static Note TEST_NOTE2 = new Note(TEST_WORKFLOW2," Note2_name "," This is a text for note2 ");
 
 	protected static List<Configuration> mockConfigurationSettings;
 
@@ -255,7 +253,7 @@ public abstract class MockData {
 
 	protected static List<FieldPredicate> mockFieldPredicateList = new ArrayList<>(Arrays.asList(new FieldPredicate[] { TEST_FIELD_PREDICATE, TEST_FIELD_PREDICATE1, TEST_FIELD_PREDICATE2 }));
 
-	protected static List<FieldProfile> mockFieldProfileList = new ArrayList<>(Arrays.asList(new FieldProfile[] { TEST_FILED_PROFILE1 }));
+	protected static List<FieldProfile> mockFieldProfileList = new ArrayList<>(Arrays.asList(new FieldProfile[] { TEST_FIELD_PROFILE1 }));
 
 	protected static List<FieldValue> mockFieldValueList =  new ArrayList<>(Arrays.asList(new FieldValue[] { TEST_FIELD_VALUE1, TEST_FIELD_VALUE2 }));
 
@@ -275,7 +273,7 @@ public abstract class MockData {
 
 	protected static List<SubmissionWorkflowStep> mockSubmissionWorkflowStepList = new ArrayList<>(Arrays.asList(new SubmissionWorkflowStep[] { TEST_SUBMISSION_WORKFLOWSTEP1 , TEST_SUBMISSION_WORKFLOWSTEP2 }));
 
-	protected static List<User> mockUsers = Arrays.asList(new User[] { TEST_USER, TEST_USER2, TEST_USER3, TEST_USER4 });
+	protected static List<User> mockUsers = new ArrayList<>(Arrays.asList(new User[] { TEST_USER, TEST_USER2, TEST_USER3, TEST_USER4 }));
 
 	protected static List<WorkflowStep> mockWorkflowStepList = new ArrayList<>(Arrays.asList(new WorkflowStep[] { TEST_WORKFLOW1 , TEST_WORKFLOW2 }));
 
@@ -315,7 +313,10 @@ public abstract class MockData {
 		TEST_FIELD_PREDICATE1.setId(2l);
 		TEST_FIELD_PREDICATE2.setId(3l);
 
-		TEST_FILED_PROFILE1.setId(1l);
+		TEST_FIELD_PROFILE1.setId(1l);
+		TEST_FIELD_PROFILE1.setFieldGlosses(mockFieldGlossList);
+		TEST_FIELD_PROFILE1.setControlledVocabularies(mockControlledVocabularyList);
+		TEST_FIELD_PROFILE1.setOriginatingWorkflowStep(TEST_WORKFLOW1);
 
 		TEST_FIELD_VALUE1.setId(1l);
 		TEST_FIELD_VALUE2.setId(2l);
@@ -598,6 +599,34 @@ public abstract class MockData {
 		return fieldPredicate;
 	}
 
+	public FieldProfile createFieldProfile(WorkflowStep originatingWorkflowStep, FieldPredicate fieldPredicate,InputType inputType, String usage, String help, Boolean isRepeatable, Boolean isOverrideable,
+			Boolean isEnabled, Boolean isOptional, Boolean isFlagged, Boolean isLogged , List<ControlledVocabulary> controlledVocabularies, List<FieldGloss> fieldGlosses, String defaultValue) {
+		return new FieldProfile(originatingWorkflowStep, fieldPredicate, inputType, usage, help, isRepeatable, isOverrideable, isEnabled, isOptional, isFlagged, isLogged, controlledVocabularies, fieldGlosses,  defaultValue);
+	}
+
+	public FieldProfile findFieldProfileById(Long fieldProfileId) {
+		FieldProfile fieldProfile = null;
+		for (FieldProfile fp : mockFieldProfileList) {
+			if (fp.getId().equals(fieldProfileId)) {
+				fieldProfile = fp;
+			}
+		}
+		return fieldProfile;
+	}
+
+	public FieldProfile updateFieldProfile(FieldProfile modifiedFieldProfile, Organization organization) {
+		//TODO - there is only one mocked object for FieldProfile - TEST_FIELD_PROFILE1 - so using the same for updating as well
+		TEST_FIELD_PROFILE1.setRepeatable(modifiedFieldProfile.getRepeatable());
+		TEST_FIELD_PROFILE1.setEnabled(modifiedFieldProfile.getEnabled());
+		TEST_FIELD_PROFILE1.setOptional(modifiedFieldProfile.getOptional());
+		TEST_FIELD_PROFILE1.setHidden(modifiedFieldProfile.getOptional());
+		TEST_FIELD_PROFILE1.setFlagged(modifiedFieldProfile.getFlagged());
+		TEST_FIELD_PROFILE1.setLogged(modifiedFieldProfile.getLogged());
+		TEST_FIELD_PROFILE1.setFieldGlosses(modifiedFieldProfile.getFieldGlosses());
+		TEST_FIELD_PROFILE1.setControlledVocabularies(modifiedFieldProfile.getControlledVocabularies());
+		return TEST_FIELD_PROFILE1;
+	}
+
 	public FieldValue getFieldValueById(Long fieldValueId) {
 		FieldValue fieldValue = null;
 		for(FieldValue fv : mockFieldValueList) {
@@ -648,6 +677,16 @@ public abstract class MockData {
 			}
 		}
 		return language;
+	}
+
+	public Note findNoteById(Long noteId) {
+		Note note = null;
+		for(Note n : mockNoteList) {
+			if(n.getId().equals(noteId)) {
+				note = n; break;
+			}
+		}
+		return note;
 	}
 
 	public Organization createOrganization(String name, Organization parentOrganization, OrganizationCategory organizationCategory) {
@@ -814,6 +853,26 @@ public abstract class MockData {
 		return null;
 	}
 
+	public User findUserById(Long userId) {
+		User user = null;
+		for (User u : mockUsers) {
+			if (u.getId().equals(userId)) {
+				user = u; break;
+			}
+		}
+		return user;
+	}
+
+	public List<User> findUsersByRole(Role role) {
+		List<User> usersByRoleList = new ArrayList<User>();
+		for (User u : mockUsers) {
+			if (u.getRole().equals(role)) {
+				usersByRoleList.add(u);
+			}
+		}
+		return usersByRoleList;
+	}
+
 	public User updateUser(User updatedUser) {
 		for (User user : mockUsers) {
 			if (user.getEmail().equals(updatedUser.getEmail())) {
@@ -836,6 +895,18 @@ public abstract class MockData {
 		WorkflowStep workflowStep = null;
 		for(WorkflowStep wfStep : mockWorkflowStepList) {
 			if(wfStep.getId().equals(workflowStepId)) {
+				workflowStep = wfStep;break;
+			}
+		}
+		return workflowStep;
+	}
+
+	public WorkflowStep updateWorkFlowStepByWorkflowStepAndReqOrganization(WorkflowStep modifiedWorkflowStep, Organization requestingOrganization) {
+		WorkflowStep workflowStep = null;
+		for(WorkflowStep wfStep : mockWorkflowStepList) {
+			if( (wfStep.getId().equals(modifiedWorkflowStep.getId())) && (wfStep.getOriginatingOrganization().getId().equals(requestingOrganization.getId())) ){
+				wfStep.setOriginatingOrganization(requestingOrganization);
+				wfStep.setOriginatingWorkflowStep(modifiedWorkflowStep);
 				workflowStep = wfStep;break;
 			}
 		}
