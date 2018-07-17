@@ -32,16 +32,21 @@ import org.tdl.vireo.model.FieldGloss;
 import org.tdl.vireo.model.FieldPredicate;
 import org.tdl.vireo.model.FieldProfile;
 import org.tdl.vireo.model.FieldValue;
+import org.tdl.vireo.model.FilterCriterion;
 import org.tdl.vireo.model.GraduationMonth;
 import org.tdl.vireo.model.InputType;
 import org.tdl.vireo.model.Language;
 import org.tdl.vireo.model.ManagedConfiguration;
+import org.tdl.vireo.model.NamedSearchFilter;
+import org.tdl.vireo.model.NamedSearchFilterGroup;
 import org.tdl.vireo.model.Note;
 import org.tdl.vireo.model.Organization;
 import org.tdl.vireo.model.OrganizationCategory;
 import org.tdl.vireo.model.Role;
+import org.tdl.vireo.model.Sort;
 import org.tdl.vireo.model.Submission;
 import org.tdl.vireo.model.SubmissionFieldProfile;
+import org.tdl.vireo.model.SubmissionListColumn;
 import org.tdl.vireo.model.SubmissionState;
 import org.tdl.vireo.model.SubmissionStatus;
 import org.tdl.vireo.model.SubmissionWorkflowStep;
@@ -167,6 +172,9 @@ public abstract class MockData {
 	protected static FieldValue TEST_FIELD_VALUE1 = new FieldValue(TEST_FIELD_PREDICATE, mockContactList);
 	protected static FieldValue TEST_FIELD_VALUE2 = new FieldValue(TEST_FIELD_PREDICATE2, mockContactList);
 
+	protected static FilterCriterion TEST_FILTER_CRITERION1 = new FilterCriterion(TEST_FIELD_VALUE1.getValue(), TEST_FIELD_GLOSS1.getValue());
+	protected static FilterCriterion TEST_FILTER_CRITERION2 = new FilterCriterion(TEST_FIELD_VALUE2.getValue(), TEST_FIELD_GLOSS2.getValue());
+
 	protected static InputType TEST_INPUT_TYPE1 = new InputType("INPUT_CONTACT");
 	protected static InputType TEST_INPUT_TYPE2 = new InputType("Another input type");
 
@@ -186,7 +194,6 @@ public abstract class MockData {
 	protected static SubmissionFieldProfile TEST_SUBMISSION_FIELD_PROFILE = new SubmissionFieldProfile();
 
 	//protected static FieldValueValidator TEST_FIELDVALUE_VALIDATOR = new FieldValueValidator(TEST_SUBMISSION_FIELD_PROFILE);
-
 	protected static SubmissionStatus TEST_SUBMISSION_STATUS1 = new SubmissionStatus("Submission Status1 name", true, true, true, true, true, true, SubmissionState.SUBMITTED);
 	protected static SubmissionStatus TEST_SUBMISSION_STATUS2 = new SubmissionStatus("Submission Status1 name", true, true, true, true, true, true, SubmissionState.NEEDS_CORRECTIONS);
 
@@ -198,6 +205,9 @@ public abstract class MockData {
 	protected static Submission TEST_SUBMISSION1 = new Submission(TEST_USER, TEST_ORGANIZATION1, TEST_SUBMISSION_STATUS1);
 	protected static Submission TEST_SUBMISSION2 = new Submission(TEST_USER, TEST_ORGANIZATION1, TEST_SUBMISSION_STATUS1);
 	protected static Submission TEST_SUBMISSION3 = new Submission(TEST_USER3, TEST_ORGANIZATION1, TEST_SUBMISSION_STATUS2);
+
+	protected static SubmissionListColumn TEST_SUBMISSION_LIST_COL1 = new SubmissionListColumn("SubmissionListColumn title1", Sort.NONE, "SubmissionListColumn Predicate1", TEST_INPUT_TYPE1);
+	protected static SubmissionListColumn TEST_SUBMISSION_LIST_COL2 = new SubmissionListColumn("SubmissionListColumn title2", Sort.ASC, "SubmissionListColumn Predicate2", TEST_INPUT_TYPE2);
 
 	protected static SubmissionWorkflowStep TEST_SUBMISSION_WORKFLOWSTEP1 = new SubmissionWorkflowStep("SubmissionWorkflowStep1");
 	protected static SubmissionWorkflowStep TEST_SUBMISSION_WORKFLOWSTEP2 = new SubmissionWorkflowStep("SubmissionWorkflowStep2");
@@ -215,6 +225,12 @@ public abstract class MockData {
 
 	protected static WorkflowStep TEST_WORKFLOW1 = new WorkflowStep("WorkFlow name 1", TEST_ORGANIZATION1);
 	protected static WorkflowStep TEST_WORKFLOW2 = new WorkflowStep("WorkFlow name 1", TEST_ORGANIZATION1);
+
+	protected static NamedSearchFilter TEST_NAME_SREARCH_FILTER1 = new NamedSearchFilter(TEST_SUBMISSION_LIST_COL1);
+	protected static NamedSearchFilter TEST_NAME_SREARCH_FILTER2 = new NamedSearchFilter(TEST_SUBMISSION_LIST_COL2);
+	protected static Set<NamedSearchFilter> mockNamedSearchFilterSet = new HashSet<>(Arrays.asList(new NamedSearchFilter[] { TEST_NAME_SREARCH_FILTER1, TEST_NAME_SREARCH_FILTER2 }));
+	protected static NamedSearchFilter searchFilter = new NamedSearchFilter(TEST_SUBMISSION_LIST_COL1);
+	protected static NamedSearchFilterGroup activeFilter = new NamedSearchFilterGroup();
 
 	protected static EmailRecipient TEST_ASSIGNEE_RECIPIENT = new EmailRecipientAssignee();
 	protected static EmailRecipient TEST_SUBMITTER_RECIPIENT = new EmailRecipientSubmitter();
@@ -261,6 +277,8 @@ public abstract class MockData {
 
 	protected static List<GraduationMonth> mockGraduationMonthList = new ArrayList<>(Arrays.asList(new GraduationMonth[] { TEST_GRADUATION_MONTH1, TEST_GRADUATION_MONTH2 }));
 
+	protected static List<NamedSearchFilterGroup> mockNamedSearchFilterGroupList = new ArrayList<>(Arrays.asList(new NamedSearchFilterGroup[] { activeFilter, activeFilter }));
+
 	protected static List<Note> mockNoteList = new ArrayList<>(	Arrays.asList(new Note[] { TEST_NOTE1, TEST_NOTE2 }));
 
 	protected static List<OrganizationCategory> mockOrganizationCategoryList = new ArrayList<>(	Arrays.asList(new OrganizationCategory[] { TEST_ORGANIZATION_CATEGORY1, TEST_ORGANIZATION_CATEGORY2 }));
@@ -268,6 +286,8 @@ public abstract class MockData {
 	protected static List<Organization> mockOrganizationList = new ArrayList<>(Arrays.asList(new Organization[] { TEST_ORGANIZATION1 , TEST_ORGANIZATION2 }));
 
 	protected static List<Submission> mockSubmissionList = new ArrayList<>(Arrays.asList(new Submission[] {TEST_SUBMISSION1, TEST_SUBMISSION2 , TEST_SUBMISSION3 }));
+
+	protected static List<SubmissionListColumn> mockSubmissionListColumnList = new ArrayList<>(Arrays.asList(new SubmissionListColumn[] {TEST_SUBMISSION_LIST_COL1, TEST_SUBMISSION_LIST_COL2 }));
 
 	protected static List<SubmissionStatus> mockSubmissionStatusList = new ArrayList<>(Arrays.asList(new SubmissionStatus[] { TEST_SUBMISSION_STATUS1 , TEST_SUBMISSION_STATUS2 }));
 
@@ -324,6 +344,9 @@ public abstract class MockData {
 		TEST_GRADUATION_MONTH1.setId(1l);
 		TEST_GRADUATION_MONTH2.setId(2l);
 
+		TEST_INPUT_TYPE1.setId(1l);
+		TEST_INPUT_TYPE2.setId(2l);
+
 		TEST_LANGUAGE1.setId(1l);
 		TEST_LANGUAGE2.setId(2l);
 
@@ -338,6 +361,12 @@ public abstract class MockData {
 
 		TEST_SUBMISSION1.setId(1l);
 		TEST_SUBMISSION2.setId(2l);
+
+		TEST_SUBMISSION_LIST_COL1.setId(1l);
+		TEST_SUBMISSION_LIST_COL2.setId(2l);
+
+		TEST_NAME_SREARCH_FILTER1.setId(1l);
+		TEST_NAME_SREARCH_FILTER2.setId(2l);
 
 		TEST_SUBMISSION_FIELD_PROFILE.setId(1l);
 		TEST_SUBMISSION_FIELD_PROFILE.setControlledVocabularies(mockControlledVocabularyList);
@@ -637,6 +666,11 @@ public abstract class MockData {
 		return fieldValue;
 	}
 
+	public FilterCriterion createFilterCriterionByValueAndGloss(String value, String gloss) {
+		FilterCriterion filterCriterion = new FilterCriterion(value, gloss);
+		return filterCriterion;
+	}
+
 	public GraduationMonth createGraduationMonth( int month) {
 		return new GraduationMonth(month);
 	}
@@ -677,6 +711,32 @@ public abstract class MockData {
 			}
 		}
 		return language;
+	}
+
+	public NamedSearchFilterGroup cloneNamedSearchFilter(NamedSearchFilterGroup newNamedSearchFilterGroup,	NamedSearchFilterGroup namedSearchFilterGroup) {
+		newNamedSearchFilterGroup.setPublicFlag(namedSearchFilterGroup.getPublicFlag());
+        newNamedSearchFilterGroup.setUmiRelease(namedSearchFilterGroup.getUmiRelease());
+        newNamedSearchFilterGroup.setColumnsFlag(namedSearchFilterGroup.getColumnsFlag());
+        if (newNamedSearchFilterGroup.getColumnsFlag()) {
+            namedSearchFilterGroup.getSavedColumns().forEach(column -> {
+                newNamedSearchFilterGroup.addSavedColumn(column);
+            });
+        }
+        return newNamedSearchFilterGroup;
+	}
+
+	public NamedSearchFilterGroup findNamedSearchFilterGroupByNameAndPublicFlagTrue(String namedSearchFilterGroupName) {
+		//TODO create a list for namedSearchFilterGroup
+		NamedSearchFilterGroup namedSearchFilterGroup = new NamedSearchFilterGroup();
+		namedSearchFilterGroup.setName(namedSearchFilterGroupName);
+		return namedSearchFilterGroup;
+	}
+
+	public NamedSearchFilterGroup createNamedSearchFilterGroupByUser(User user) {
+		NamedSearchFilterGroup namedSearchFilterGroup = new NamedSearchFilterGroup();
+		namedSearchFilterGroup.setUser(user);
+		namedSearchFilterGroup.setName("namedSearchFilterGroup created by user");
+        return namedSearchFilterGroup;
 	}
 
 	public Note findNoteById(Long noteId) {

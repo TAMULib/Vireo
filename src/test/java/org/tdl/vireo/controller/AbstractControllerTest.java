@@ -41,10 +41,12 @@ import org.tdl.vireo.model.FieldGloss;
 import org.tdl.vireo.model.FieldPredicate;
 import org.tdl.vireo.model.FieldProfile;
 import org.tdl.vireo.model.FieldValue;
+import org.tdl.vireo.model.FilterCriterion;
 import org.tdl.vireo.model.GraduationMonth;
 import org.tdl.vireo.model.InputType;
 import org.tdl.vireo.model.Language;
 import org.tdl.vireo.model.ManagedConfiguration;
+import org.tdl.vireo.model.NamedSearchFilterGroup;
 import org.tdl.vireo.model.Note;
 import org.tdl.vireo.model.Organization;
 import org.tdl.vireo.model.OrganizationCategory;
@@ -70,10 +72,12 @@ import org.tdl.vireo.model.repo.FieldGlossRepo;
 import org.tdl.vireo.model.repo.FieldPredicateRepo;
 import org.tdl.vireo.model.repo.FieldProfileRepo;
 import org.tdl.vireo.model.repo.FieldValueRepo;
+import org.tdl.vireo.model.repo.FilterCriterionRepo;
 import org.tdl.vireo.model.repo.GraduationMonthRepo;
 import org.tdl.vireo.model.repo.InputTypeRepo;
 import org.tdl.vireo.model.repo.LanguageRepo;
 import org.tdl.vireo.model.repo.NamedSearchFilterGroupRepo;
+import org.tdl.vireo.model.repo.NamedSearchFilterRepo;
 import org.tdl.vireo.model.repo.NoteRepo;
 import org.tdl.vireo.model.repo.OrganizationCategoryRepo;
 import org.tdl.vireo.model.repo.OrganizationRepo;
@@ -85,6 +89,7 @@ import org.tdl.vireo.model.repo.UserRepo;
 import org.tdl.vireo.model.repo.VocabularyWordRepo;
 import org.tdl.vireo.model.repo.WorkflowStepRepo;
 import org.tdl.vireo.service.ControlledVocabularyCachingService;
+import org.tdl.vireo.service.DefaultSubmissionListColumnService;
 import org.tdl.vireo.service.DepositorService;
 import org.tdl.vireo.service.EntityControlledVocabularyService;
 import org.tdl.vireo.service.ProquestCodesService;
@@ -151,6 +156,9 @@ public abstract class AbstractControllerTest extends MockData {
 
 	@Spy
 	protected ControlledVocabularyCachingService controlledVocabularyCachingService;
+
+	@Spy
+	protected DefaultSubmissionListColumnService defaultSubmissionListColumnService;
 
 	@InjectMocks
 	protected EntityControlledVocabularyService entityControlledVocabularyService;
@@ -227,6 +235,9 @@ public abstract class AbstractControllerTest extends MockData {
 	protected SubmissionController submissionController;
 
 	@InjectMocks
+	protected SubmissionListController submissionListController;
+
+	@InjectMocks
 	protected SubmissionStatusController submissionStatusController;
 
 	@InjectMocks
@@ -278,6 +289,9 @@ public abstract class AbstractControllerTest extends MockData {
 	protected FieldValueRepo fieldValueRepo;
 
 	@Mock
+	protected FilterCriterionRepo filterCriterionRepo;
+
+	@Mock
 	protected GraduationMonthRepo graduationMonthRepo;
 
 	@Mock
@@ -285,6 +299,9 @@ public abstract class AbstractControllerTest extends MockData {
 
 	@Mock
 	protected LanguageRepo languageRepo;
+
+	@Mock
+	protected NamedSearchFilterRepo namedSearchFilterRepo;
 
 	@Mock
 	protected NamedSearchFilterGroupRepo namedSearchFilterGroupRepo;
@@ -303,6 +320,9 @@ public abstract class AbstractControllerTest extends MockData {
 
 	@Mock
 	protected SubmissionFieldProfileRepo submissionFieldProfileRepo;
+
+	@Mock
+	protected SubmissionListColumnRepo submissionListColumnRepo;
 
 	@Mock
 	protected SubmissionStatusRepo submissionStatusRepo;
@@ -655,6 +675,13 @@ public abstract class AbstractControllerTest extends MockData {
 			}
 		});
 
+		when(filterCriterionRepo.create( any(String.class), any(String.class))).then( new Answer<FilterCriterion>() {
+			@Override
+			public FilterCriterion answer(InvocationOnMock invocation) throws Throwable {
+				return createFilterCriterionByValueAndGloss( (String)invocation.getArguments()[0] , (String)invocation.getArguments()[1]);
+			}
+		});
+
 		when(graduationMonthRepo.findAllByOrderByPositionAsc()).thenReturn(mockGraduationMonthList);
 
 		when(graduationMonthRepo.create( any(Integer.class))).then(new Answer<GraduationMonth>() {
@@ -697,6 +724,29 @@ public abstract class AbstractControllerTest extends MockData {
 				return updateLanguage( (Language) invocation.getArguments()[0]);
 			}
 		});
+
+		when(namedSearchFilterGroupRepo.create( any(User.class))).then( new Answer<NamedSearchFilterGroup>() {
+			@Override
+			public NamedSearchFilterGroup answer(InvocationOnMock invocation) throws Throwable {
+				return createNamedSearchFilterGroupByUser( (User)invocation.getArguments()[0]);
+			}
+		});
+
+		when(namedSearchFilterGroupRepo.clone(any(NamedSearchFilterGroup.class), any(NamedSearchFilterGroup.class))).then( new Answer<NamedSearchFilterGroup>() {
+			@Override
+			public NamedSearchFilterGroup answer(InvocationOnMock invocation) throws Throwable {
+				return cloneNamedSearchFilter( (NamedSearchFilterGroup) invocation.getArguments()[0] , (NamedSearchFilterGroup) invocation.getArguments()[1]);
+			}
+		});
+
+		when(namedSearchFilterGroupRepo.findByNameAndPublicFlagTrue( any (String.class))).then(new Answer<NamedSearchFilterGroup>() {
+			@Override
+			public NamedSearchFilterGroup answer(InvocationOnMock invocation) throws Throwable {
+				return findNamedSearchFilterGroupByNameAndPublicFlagTrue( (String) invocation.getArguments()[0]);
+			}
+		});
+
+		when(namedSearchFilterGroupRepo.findByPublicFlagTrue()).thenReturn(mockNamedSearchFilterGroupList);
 
 		when(noteRepo.findAll()).thenReturn(mockNoteList);
 
@@ -835,6 +885,8 @@ public abstract class AbstractControllerTest extends MockData {
 			}
 		});
 
+		when(submissionListColumnRepo.findAll()).thenReturn(mockSubmissionListColumnList);
+
 		when(submissionStatusRepo.findAll()).thenReturn(mockSubmissionStatusList);
 
 		when(submissionStatusRepo.findByName( any(String.class))).then( new Answer<SubmissionStatus>() {
@@ -939,6 +991,7 @@ public abstract class AbstractControllerTest extends MockData {
 		organizationCategoryRepo.deleteAll();
 		organizationRepo.deleteAll();
 		submissionFieldProfileRepo.deleteAll();
+		submissionListColumnRepo.deleteAll();
 		submissionRepo.deleteAll();
 		submissionStatusRepo.deleteAll();
 		userRepo.deleteAll();
