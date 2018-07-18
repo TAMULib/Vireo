@@ -62,6 +62,7 @@ import org.tdl.vireo.model.repo.ActionLogRepo;
 import org.tdl.vireo.model.repo.ConfigurationRepo;
 import org.tdl.vireo.model.repo.ControlledVocabularyRepo;
 import org.tdl.vireo.model.repo.CustomActionDefinitionRepo;
+import org.tdl.vireo.model.repo.DegreeLevelRepo;
 import org.tdl.vireo.model.repo.DegreeRepo;
 import org.tdl.vireo.model.repo.DepositLocationRepo;
 import org.tdl.vireo.model.repo.DocumentTypeRepo;
@@ -263,6 +264,9 @@ public abstract class AbstractControllerTest extends MockData {
 
 	@Mock
 	protected CustomActionDefinitionRepo customActionDefinitionRepo;
+
+	@Mock
+	protected DegreeLevelRepo degreeLevelRepo;
 
 	@Mock
 	protected DegreeRepo degreeRepo;
@@ -483,6 +487,8 @@ public abstract class AbstractControllerTest extends MockData {
 				});
 
 		//Degree
+
+		when(degreeLevelRepo.findAllByOrderByPositionAsc()).thenReturn(mockDegreeLevelList);
 
 		when(degreeRepo.findAllByOrderByPositionAsc()).thenReturn(mockDegreeList);
 
@@ -973,6 +979,7 @@ public abstract class AbstractControllerTest extends MockData {
 		controlledVocabularyRepo.deleteAll();
 		customActionDefinitionRepo.deleteAll();
 		degreeRepo.deleteAll();
+		degreeLevelRepo.deleteAll();
 		depositLocationRepo.deleteAll();
 		degreeRepo.deleteAll();
 		documentTypeRepo.deleteAll();

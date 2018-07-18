@@ -139,9 +139,11 @@ public abstract class MockData {
 	protected static CustomActionValue TEST_CUSTOM_ACTION_VALUE1 = new CustomActionValue(TEST_CUSTOM_ACTION_DEF1, true);
 	protected static CustomActionValue TEST_CUSTOM_ACTION_VALUE2 = new CustomActionValue(TEST_CUSTOM_ACTION_DEF2, true);
 
-	protected static DegreeLevel TEST_DEGREE_LEVEL = new DegreeLevel("Degree Level name");
-	protected static Degree TEST_DEGREE1 = new Degree("A Degree Name", TEST_DEGREE_LEVEL, "ProquestCode for Degree1 ");
-	protected static Degree TEST_DEGREE2 = new Degree("Second Degree Name", TEST_DEGREE_LEVEL, "ProquestCode for Second Degree ");
+	protected static DegreeLevel TEST_DEGREE_LEVEL1 = new DegreeLevel("Undergraduate");
+	protected static DegreeLevel TEST_DEGREE_LEVEL2 = new DegreeLevel("Gzraduate");
+
+	protected static Degree TEST_DEGREE1 = new Degree("A Degree Name", TEST_DEGREE_LEVEL1, "ProquestCode for Degree1 ");
+	protected static Degree TEST_DEGREE2 = new Degree("Second Degree Name", TEST_DEGREE_LEVEL2, "ProquestCode for Second Degree ");
 
 	protected static GraduationMonth TEST_GRADUATION_MONTH1 = new GraduationMonth(6);
 	protected static GraduationMonth TEST_GRADUATION_MONTH2 = new GraduationMonth(8);
@@ -255,6 +257,8 @@ public abstract class MockData {
 
 	protected static List<Degree> mockDegreeList = new ArrayList<>(Arrays.asList(new Degree[] { TEST_DEGREE1, TEST_DEGREE2 }));
 
+	protected static List<DegreeLevel> mockDegreeLevelList = new ArrayList<>(Arrays.asList(new DegreeLevel[] { TEST_DEGREE_LEVEL1, TEST_DEGREE_LEVEL2 }));
+
 	protected static List<DocumentType> mockDocumentTypeList = new ArrayList<>(Arrays.asList(new DocumentType[] { TEST_DOCUMENT_TYPE1, TEST_DOCUMENT_TYPE2 }));
 
 	protected static List<EmailTemplate> mockEmailTemplateList = new ArrayList<>(Arrays.asList(new EmailTemplate[] { TEST_EMAIL_TEMPLATE1, TEST_EMAIL_TEMPLATE2, TEST_EMAIL_TEMPLATE3 }));
@@ -314,6 +318,9 @@ public abstract class MockData {
 		TEST_DEGREE1.setPosition(1l);
 		TEST_DEGREE2.setId(2l);
 		TEST_DEGREE2.setPosition(2l);
+
+		TEST_DEGREE_LEVEL1.setId(1l);
+		TEST_DEGREE_LEVEL2.setId(2l);
 
 		TEST_DOCUMENT_TYPE1.setId(1l);
 		TEST_DOCUMENT_TYPE2.setId(2l);
