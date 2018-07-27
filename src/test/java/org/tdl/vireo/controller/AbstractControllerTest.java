@@ -458,12 +458,12 @@ public abstract class AbstractControllerTest extends MockData {
 			}
 		});
 
-		when(vocabularyWordRepo.update(any(VocabularyWord.class))).then(new Answer<VocabularyWord>() {
+		/*when(vocabularyWordRepo.update(any(VocabularyWord.class))).then(new Answer<VocabularyWord>() {
 			@Override
 			public VocabularyWord answer(InvocationOnMock invocation) throws Throwable {
 				return updateVocabularyWord((VocabularyWord) invocation.getArguments()[0]);
 			}
-		});
+		});*/
 
 		// Custom Settings
 

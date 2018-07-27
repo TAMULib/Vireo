@@ -4,12 +4,14 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.List;
 
+import org.junit.After;
 import org.junit.Test;
 import org.tdl.vireo.model.Embargo;
+import org.tdl.vireo.model.EmbargoGuarantor;
 
 import edu.tamu.weaver.response.ApiStatus;
 
-public class EmbargoControllerTesst extends AbstractControllerTest {
+public class EmbargoControllerTest extends AbstractControllerTest {
 
 	@SuppressWarnings("unchecked")
 	@Test
@@ -22,19 +24,14 @@ public class EmbargoControllerTesst extends AbstractControllerTest {
 
 	@Test
 	public void testCreateEmbargo() {
-		response = embargoController.createEmbargo(TEST_EMBARGO1);
+		response = embargoController.createEmbargo(new Embargo("Embargo1_name", "Embargo1_description", new Integer(10), EmbargoGuarantor.PROQUEST, true));
 		assertEquals(ApiStatus.SUCCESS, response.getMeta().getStatus());
 		Embargo createdEmbargo = (Embargo) response.getPayload().get("Embargo");
-		assertEquals("The created embargo does not have correct name ", TEST_EMBARGO1.getName(),
-				createdEmbargo.getName());
-		assertEquals("The created embargo does not have correct description ", TEST_EMBARGO1.getDescription(),
-				createdEmbargo.getDescription());
-		assertEquals("The created embargo does not have correct duration ", TEST_EMBARGO1.getDuration(),
-				createdEmbargo.getDuration());
-		assertEquals("The created embargo does not have correct giurantor ", TEST_EMBARGO1.getGuarantor(),
-				createdEmbargo.getGuarantor());
-		assertEquals("The created embargo does not have correct active flag ", TEST_EMBARGO1.isActive(),
-				createdEmbargo.isActive());
+		assertEquals("The created embargo does not have correct name ", TEST_EMBARGO1.getName(), createdEmbargo.getName());
+		assertEquals("The created embargo does not have correct description ", TEST_EMBARGO1.getDescription(), createdEmbargo.getDescription());
+		assertEquals("The created embargo does not have correct duration ", TEST_EMBARGO1.getDuration(), createdEmbargo.getDuration());
+		assertEquals("The created embargo does not have correct giurantor ", TEST_EMBARGO1.getGuarantor(), createdEmbargo.getGuarantor());
+		assertEquals("The created embargo does not have correct active flag ", TEST_EMBARGO1.isActive(), createdEmbargo.isActive());
 	}
 
 	@Test
@@ -43,8 +40,7 @@ public class EmbargoControllerTesst extends AbstractControllerTest {
 		response = embargoController.updateEmbargo(TEST_EMBARGO1);
 		assertEquals(ApiStatus.SUCCESS, response.getMeta().getStatus());
 		Embargo updatedEmbargo = (Embargo) response.getPayload().get("Embargo");
-		assertEquals("The updated degree does not have updated name ", TEST_EMBARGO1.getName(),
-				updatedEmbargo.getName());
+		assertEquals("The updated degree does not have updated name ", TEST_EMBARGO1.getName(), updatedEmbargo.getName());
 	}
 
 	@Test
@@ -66,5 +62,11 @@ public class EmbargoControllerTesst extends AbstractControllerTest {
 		// TODO
 		response = embargoController.sortEmbargoes(TEST_EMBARGO1.getGuarantor().toString(), "description");
 		assertEquals(ApiStatus.SUCCESS, response.getMeta().getStatus());
+	}
+
+	@After
+	public void cleanUp() {
+		response = null;
+		embargoRepo.deleteAll();
 	}
 }

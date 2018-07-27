@@ -26,6 +26,7 @@ import org.tdl.vireo.model.EmailRecipientContact;
 import org.tdl.vireo.model.EmailRecipientOrganization;
 import org.tdl.vireo.model.EmailRecipientSubmitter;
 import org.tdl.vireo.model.EmailTemplate;
+import org.tdl.vireo.model.EmailWorkflowRule;
 import org.tdl.vireo.model.Embargo;
 import org.tdl.vireo.model.EmbargoGuarantor;
 import org.tdl.vireo.model.FieldGloss;
@@ -130,8 +131,8 @@ public abstract class MockData {
 	protected final static String TEST_USER3_EMAIL = "aggieJill@tamu.edu";
 	protected final static String TEST_USER4_EMAIL = "jimInny@tdl.org";
 
-	protected Configuration TEST_CONFIGURATION_SETTING1 = new ManagedConfiguration("name1", "value1", "type1");
-	protected Configuration TEST_CONFIGURATION_SETTING2 = new ManagedConfiguration("name2", "value2", "type2");
+	protected static ManagedConfiguration TEST_CONFIGURATION_SETTING1 = new ManagedConfiguration("name1", "value1", "lookAndFeel");
+	protected static ManagedConfiguration TEST_CONFIGURATION_SETTING2 = new ManagedConfiguration("name2", "value2", "type2");
 
 	protected static CustomActionDefinition TEST_CUSTOM_ACTION_DEF1 = new CustomActionDefinition("Custom Action Label 1", false);
 	protected static CustomActionDefinition TEST_CUSTOM_ACTION_DEF2 = new CustomActionDefinition("Custom Action Label 2", false);
@@ -180,10 +181,11 @@ public abstract class MockData {
 	protected static InputType TEST_INPUT_TYPE1 = new InputType("INPUT_CONTACT");
 	protected static InputType TEST_INPUT_TYPE2 = new InputType("Another input type");
 
-	protected static ControlledVocabulary TEST_CONTROLLED_VOCABULARY_1 = new ControlledVocabulary("Controlled Vocabulary Name1", TEST_LANGUAGE1, false);
-	protected static ControlledVocabulary TEST_CONTROLLED_VOCABULARY_2 = new ControlledVocabulary("Controlled Vocabulary Name2", TEST_LANGUAGE2, false);
+	protected static ControlledVocabulary TEST_CONTROLLED_VOCABULARY_1 = new ControlledVocabulary("A Controlled Vocabulary Name", TEST_LANGUAGE1, false);
+	protected static ControlledVocabulary TEST_CONTROLLED_VOCABULARY_2 = new ControlledVocabulary("Another Controlled Vocabulary Name2", TEST_LANGUAGE2, false);
 
 	protected static ControlledVocabularyCache TEST_CONTROLLED_VOCABULARY_CACHE = new ControlledVocabularyCache(1l, TEST_CONTROLLED_VOCABULARY_1.getName());
+	protected static ControlledVocabularyCache TEST_CONTROLLED_VOCABULARY_CACHE2 = new ControlledVocabularyCache(2l, TEST_CONTROLLED_VOCABULARY_2.getName());
 
 	protected static List<ControlledVocabulary> mockControlledVocabularyList = new ArrayList<ControlledVocabulary>(Arrays.asList(new ControlledVocabulary[] { TEST_CONTROLLED_VOCABULARY_1, TEST_CONTROLLED_VOCABULARY_2 }));
 
@@ -239,6 +241,9 @@ public abstract class MockData {
 	protected static EmailRecipient TEST_ORGANIZATION_RECIPIENT = new EmailRecipientOrganization(TEST_ORGANIZATION1);
 	protected static EmailRecipient TEST_CONTACT_RECIPIENT = new EmailRecipientContact("Contact Email Recipient Label", TEST_FIELD_PREDICATE1);
 
+	protected static EmailWorkflowRule TEST_EMAIL_WORKFLOW_RULE1 = new EmailWorkflowRule(TEST_SUBMISSION_STATUS1, TEST_ASSIGNEE_RECIPIENT, TEST_EMAIL_TEMPLATE1);
+	protected static EmailWorkflowRule TEST_EMAIL_WORKFLOW_RULE2 = new EmailWorkflowRule(TEST_SUBMISSION_STATUS2, TEST_SUBMITTER_RECIPIENT, TEST_EMAIL_TEMPLATE2);
+
 	protected static FieldProfile TEST_FIELD_PROFILE1 = new FieldProfile(TEST_WORKFLOW1, TEST_FIELD_PREDICATE1, TEST_INPUT_TYPE1, true, false, true, false, true, true, "defaultValue");
 
 	protected static VocabularyWord TEST_VOCABULARY_WORD1 = new VocabularyWord("Vocabulary Word Name1",	"Vocabulary Word Definition1", "Vocabulary Word Identifier1", mockContactList);
@@ -247,7 +252,7 @@ public abstract class MockData {
 	protected static Note TEST_NOTE1 = new Note(TEST_WORKFLOW1, " Note1_name "," This is a text for note1 ");
 	protected static Note TEST_NOTE2 = new Note(TEST_WORKFLOW2," Note2_name "," This is a text for note2 ");
 
-	protected static List<Configuration> mockConfigurationSettings;
+	protected static List<Configuration> mockConfigurationSettings = Arrays.asList(new ManagedConfiguration[] { (ManagedConfiguration)TEST_CONFIGURATION_SETTING1, (ManagedConfiguration)TEST_CONFIGURATION_SETTING2 });
 
 	protected static List<CustomActionDefinition> mockCustomActionDefList = new ArrayList<>(Arrays.asList(new CustomActionDefinition[] { TEST_CUSTOM_ACTION_DEF1, TEST_CUSTOM_ACTION_DEF2 }));
 
@@ -262,6 +267,8 @@ public abstract class MockData {
 	protected static List<DocumentType> mockDocumentTypeList = new ArrayList<>(Arrays.asList(new DocumentType[] { TEST_DOCUMENT_TYPE1, TEST_DOCUMENT_TYPE2 }));
 
 	protected static List<EmailTemplate> mockEmailTemplateList = new ArrayList<>(Arrays.asList(new EmailTemplate[] { TEST_EMAIL_TEMPLATE1, TEST_EMAIL_TEMPLATE2, TEST_EMAIL_TEMPLATE3 }));
+
+	protected static List<EmailWorkflowRule> mockEmailWorkflowRuleList = new ArrayList<>(Arrays.asList(new EmailWorkflowRule[] { TEST_EMAIL_WORKFLOW_RULE1, TEST_EMAIL_WORKFLOW_RULE2 }));
 
 	protected static List<Embargo> mockEmbargoList = new ArrayList<>(Arrays.asList(new Embargo[] { TEST_EMBARGO1, TEST_EMBARGO2 }));
 
@@ -303,6 +310,9 @@ public abstract class MockData {
 
 	static {
 
+		TEST_CONFIGURATION_SETTING1.setId(1l);
+		TEST_CONFIGURATION_SETTING2.setId(2l);
+
 		TEST_CONTROLLED_VOCABULARY_1.setId(1l);
 		TEST_CONTROLLED_VOCABULARY_1.setDictionary(mockVocabularyWordList);
 		TEST_CONTROLLED_VOCABULARY_2.setId(2l);
@@ -329,6 +339,9 @@ public abstract class MockData {
 		TEST_EMAIL_TEMPLATE1.setId(1l);
 		TEST_EMAIL_TEMPLATE2.setId(2l);
 		TEST_EMAIL_TEMPLATE3.setId(3l);
+
+		TEST_EMAIL_WORKFLOW_RULE1.setId(1l);
+		TEST_EMAIL_WORKFLOW_RULE2.setId(2l);
 
 		TEST_EMBARGO1.setId(1l);
 		TEST_EMBARGO2.setId(2l);
@@ -400,6 +413,10 @@ public abstract class MockData {
 		TEST_WORKFLOW2.setId(2l);
 	}
 
+	public ActionLog createAdvisorPublicActionLog(Submission submission, String entry) {
+		return new ActionLog(submission.getSubmissionStatus(), Calendar.getInstance(), entry, false);
+	}
+
 	public ActionLog createPublicSubmissionActionLog(Submission submission, User user, String entry) {
 		return new ActionLog(submission.getSubmissionStatus(), user, Calendar.getInstance(), entry, false);
 	}
@@ -408,10 +425,15 @@ public abstract class MockData {
 		return new ActionLog(submission.getSubmissionStatus(), user, Calendar.getInstance(), entry, false);
 	}
 
-	public Configuration saveConfiguration(ManagedConfiguration modifiedConfiguration) {
-		ManagedConfiguration managedConfiguration = null;
-		if (modifiedConfiguration.getName().equals(TEST_CONFIGURATION_SETTING1.getName())) {
-			managedConfiguration = (ManagedConfiguration) TEST_CONFIGURATION_SETTING1;
+	public ManagedConfiguration saveConfiguration(ManagedConfiguration modifiedConfiguration) {
+		ManagedConfiguration managedConfiguration = new ManagedConfiguration();
+		for(Configuration mc : mockConfigurationSettings) {
+			if(mc.getName().equals(modifiedConfiguration.getName())) {
+				managedConfiguration.setName(modifiedConfiguration.getName());
+				managedConfiguration.setValue(modifiedConfiguration.getValue());
+				managedConfiguration.setType(modifiedConfiguration.getType());
+				break;
+			}
 		}
 		return managedConfiguration;
 	}
@@ -569,6 +591,10 @@ public abstract class MockData {
 	public EmailTemplate findEmailTemplateByNameOverride(String string) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	public EmailWorkflowRule createEmailWorkFlowRule(SubmissionStatus submissionStatus, EmailRecipient emailRecipient, EmailTemplate emailTemplate) {
+		return new EmailWorkflowRule(submissionStatus, emailRecipient, emailTemplate);
 	}
 
 	public Embargo updateEmabrgo(Embargo modifiedEmbargo) {
@@ -948,10 +974,24 @@ public abstract class MockData {
 				user.setLastName(updatedUser.getLastName());
 				user.setPassword(updatedUser.getPassword());
 				user.setRole(updatedUser.getRole());
-				return user;
 			}
+			return user;
 		}
 		return null;
+	}
+
+	public VocabularyWord createVocabularyWord(ControlledVocabulary controlledVocabulary, String name, String definition, String identifier, List<String> contacts) {
+		return new VocabularyWord(controlledVocabulary, name, definition, identifier, contacts);
+	}
+
+	public VocabularyWord findVocabularyWordByNameAndControlledVocabulary(String name, ControlledVocabulary controlledVocabulary) {
+		VocabularyWord vocabularyWord = null;
+		for(VocabularyWord vw : mockVocabularyWordList) {
+			if( (vw.getName().equals(name)) && (vw.getControlledVocabulary().equals(controlledVocabulary)) ) {
+				vocabularyWord = vw; break;
+			}
+		}
+		return vocabularyWord;
 	}
 
 	public WorkflowStep createWorkflowStepForOrganization(String workFlowName, Organization originatingOrganization) {
@@ -966,6 +1006,12 @@ public abstract class MockData {
 			}
 		}
 		return workflowStep;
+	}
+
+	public ControlledVocabularyCache getControlledVocabularyCache(String controlledVocabularyName) {
+		ControlledVocabularyCache controlledVocabularyCache = new ControlledVocabularyCache(1l, controlledVocabularyName);
+		controlledVocabularyCache.setNewVocabularyWords(mockVocabularyWordList);
+		return controlledVocabularyCache;
 	}
 
 	public WorkflowStep updateWorkFlowStepByWorkflowStepAndReqOrganization(WorkflowStep modifiedWorkflowStep, Organization requestingOrganization) {

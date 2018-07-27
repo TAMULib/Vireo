@@ -10,6 +10,9 @@ import org.junit.Test;
 import org.tdl.vireo.model.Organization;
 import org.tdl.vireo.model.WorkflowStep;
 
+import com.fasterxml.jackson.core.ObjectCodec;
+import com.fasterxml.jackson.databind.JsonNode;
+
 import edu.tamu.weaver.response.ApiStatus;
 
 public class OrganizationControllerTest extends AbstractControllerTest {
@@ -91,27 +94,34 @@ public class OrganizationControllerTest extends AbstractControllerTest {
 	}
 
 	@Test
-	public void testDeleteWorkflowStep() throws Exception {
+	public void testDeleteWorkflowStep() {
 		//TODO
+		TEST_ORGANIZATION1.setAggregateWorkflowSteps(mockWorkflowStepList);
+		TEST_WORKFLOW1.setOriginatingOrganization(TEST_ORGANIZATION1);
+		response = organizationController.deleteWorkflowStep(TEST_ORGANIZATION1.getId(), TEST_WORKFLOW1);
+		assertEquals(ApiStatus.SUCCESS, response.getMeta().getStatus());
 	}
 
 	@Test
 	public void testShiftWorkflowStepUp() {
 		//TODO
+		response = organizationController.shiftWorkflowStepUp(TEST_ORGANIZATION1.getId(), TEST_WORKFLOW1.getId());
+		assertEquals(ApiStatus.SUCCESS, response.getMeta().getStatus());
 	}
 
 	@Test
 	public void testShiftWorkflowStepDown() {
 		//TODO
+		response = organizationController.shiftWorkflowStepDown(TEST_ORGANIZATION1.getId(), TEST_WORKFLOW1.getId());
+		assertEquals(ApiStatus.SUCCESS, response.getMeta().getStatus());
 	}
 
 	@Test
-	public void testAddEmailWorkflowRule() {
+	public void testAddEmailWorkflowRule()  {
 		//TODO
-		//Map<String, Object> data = new HashMap<String, Object>();
-		//data.put("submissionStatusId",TEST_SUBMISSION_STATUS1.getId().intValue());
-		//data.put("recipient", TEST_ASSIGNEE_RECIPIENT);
-		//data.put("templateId", TEST_EMAIL_TEMPLATE1.getId().intValue());
+		Map<String, Object> data = new HashMap<String, Object>();
+		data.put("submissionStatusId",TEST_SUBMISSION_STATUS1.getId().intValue());
+		data.put("templateId", TEST_EMAIL_TEMPLATE1.getId().intValue());
 		//response = organizationController.addEmailWorkflowRule(TEST_ORGANIZATION1.getId(), data);
 	}
 
@@ -129,5 +139,4 @@ public class OrganizationControllerTest extends AbstractControllerTest {
 	public void testChangeEmailWorkflowRuleActivation() {
 		//TODO
 	}
-
 }
