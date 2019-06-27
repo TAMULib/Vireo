@@ -119,7 +119,7 @@ vireo.controller("SubmissionStatusController", function ($controller, $scope, $q
             if (listener.dragging && currentElement[0].id === listener.trash.id) {
                 listener.trash.hover = true;
                 listener.trash.element = currentElement;
-                listener.trash.element.addClass('dragging');
+                listener.trash.element.addClass("dragging");
             } else {
                 listener.trash.hover = false;
             }
