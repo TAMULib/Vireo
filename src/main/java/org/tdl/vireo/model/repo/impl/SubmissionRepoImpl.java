@@ -246,20 +246,6 @@ public class SubmissionRepoImpl extends AbstractWeaverRepoImpl<Submission, Submi
                 submission.setApproveApplicationDate(Calendar.getInstance());
             }
             break;
-        case PENDING_PUBLICATION:
-            break;
-        case PUBLISHED:
-            break;
-        case WITHDRAWN:
-            break;
-        case ON_HOLD:
-        case CANCELED:
-        case CORRECTIONS_RECIEVED:
-        case IN_PROGRESS:
-        case NEEDS_CORRECTIONS:
-        case NONE:
-        case UNDER_REVIEW:
-        case WAITING_ON_REQUIREMENTS:
         default:
             break;
         }
