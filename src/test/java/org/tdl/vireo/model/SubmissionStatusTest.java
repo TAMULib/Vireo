@@ -57,7 +57,7 @@ public class SubmissionStatusTest extends AbstractEntityTest {
         assertEquals("Submission status did not delete!", 0, submissionStatusRepo.count());
 
         // verify that submission status cannot be deleted when isDefault is TRUE.
-        parentSubmissionStatus = submissionStatusRepo.create(TEST_PARENT_SUBMISSION_STATUS_NAME, TEST_PARENT_SUBMISSION_STATUS_ARCHIVED, TEST_PARENT_SUBMISSION_STATUS_PUBLISHABLE, TEST_PARENT_SUBMISSION_STATUS_DELETABLE, TEST_PARENT_SUBMISSION_STATUS_EDITABLE_BY_REVIEWER, TEST_PARENT_SUBMISSION_STATUS_EDITABLE_BY_STUDENT, TEST_PARENT_SUBMISSION_STATUS_ACTIVE, TEST_PARENT_SUBMISSION_STATUS_CLEAR_APPROVAL, true, null);
+        parentSubmissionStatus = submissionStatusRepo.create(TEST_PARENT_SUBMISSION_STATUS_NAME, TEST_PARENT_SUBMISSION_STATUS_ARCHIVED, TEST_PARENT_SUBMISSION_STATUS_PUBLISHABLE, TEST_PARENT_SUBMISSION_STATUS_DELETABLE, TEST_PARENT_SUBMISSION_STATUS_EDITABLE_BY_REVIEWER, TEST_PARENT_SUBMISSION_STATUS_EDITABLE_BY_STUDENT, TEST_PARENT_SUBMISSION_STATUS_ACTIVE, true, TEST_PARENT_SUBMISSION_STATUS_CLEAR_APPROVAL, null);
         submissionStatusRepo.delete(parentSubmissionStatus);
         assertEquals("Submission status should not be deleted!", 1, submissionStatusRepo.count());
     }
