@@ -66,6 +66,7 @@ public abstract class AbstractEntityTest {
     protected static final boolean TEST_SUBMISSION_STATUS_EDITABLE_BY_STUDENT = true;
     protected static final boolean TEST_SUBMISSION_STATUS_ACTIVE = true;
     protected static final boolean TEST_SUBMISSION_STATUS_DEFAULT = false;
+    protected static final boolean TEST_SUBMISSION_STATUS_CLEAR_APPROVAL = false;
     protected static final boolean TEST_ACTION_LOG_FLAG = true;
     protected static final boolean TEST_CUSTOM_ACTION_DEFINITION_VISIBLE_BY_STUDENT = true;
     protected static final boolean TEST_CUSTOM_ACTION_VALUE = true;
@@ -170,6 +171,7 @@ public abstract class AbstractEntityTest {
     protected static final boolean TEST_PARENT_SUBMISSION_STATUS_EDITABLE_BY_STUDENT = true;
     protected static final boolean TEST_PARENT_SUBMISSION_STATUS_ACTIVE = true;
     protected static final boolean TEST_PARENT_SUBMISSION_STATUS_DEFAULT = false;
+    protected static final boolean TEST_PARENT_SUBMISSION_STATUS_CLEAR_APPROVAL = false;
 
     protected static final boolean TEST_PARENT_WORKFLOW_INHERITABILITY = true;
     protected static final boolean TEST_CHILD_WORKFLOW_INHERITABILITY = true;
@@ -186,6 +188,7 @@ public abstract class AbstractEntityTest {
     protected static final boolean TEST_TRANSITION_SUBMISSION_STATUS_EDITABLE_BY_STUDENT = true;
     protected static final boolean TEST_TRANSITION_SUBMISSION_STATUS_ACTIVE = true;
     protected static final boolean TEST_TRANSITION_SUBMISSION_STATUS_DEFAULT = false;
+    protected static final boolean TEST_TRANSITION_SUBMISSION_STATUS_CLEAR_APPROVAL = true;
     protected static final boolean TEST_WORKFLOW_INHERITABILITY = true;
     protected static final String TEST_SEVERABLE_FIELD_PROFILE_USAGE = "Test Severable Field Profile Usage";
     protected static final boolean TEST_SEVERABLE_FIELD_PROFILE_REPEATABLE = false;

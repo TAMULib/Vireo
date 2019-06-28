@@ -20,8 +20,8 @@ public class SubmissionStatusRepoImpl extends AbstractWeaverRepoImpl<SubmissionS
     }
 
     @Override
-    public SubmissionStatus create(String name, Boolean archived, Boolean publishable, Boolean deletable, Boolean editableByReviewer, Boolean editableByStudent, Boolean active, Boolean isDefault, SubmissionState submissionState) {
-        return submissionStatusRepo.create(new SubmissionStatus(name, archived, publishable, deletable, editableByReviewer, editableByStudent, active, isDefault, submissionState == null ? SubmissionState.NONE : submissionState));
+    public SubmissionStatus create(String name, Boolean archived, Boolean publishable, Boolean deletable, Boolean editableByReviewer, Boolean editableByStudent, Boolean active, Boolean isDefault, Boolean clearApproval, SubmissionState submissionState) {
+        return submissionStatusRepo.create(new SubmissionStatus(name, archived, publishable, deletable, editableByReviewer, editableByStudent, active, isDefault, clearApproval, submissionState == null ? SubmissionState.NONE : submissionState));
     }
 
     @Override

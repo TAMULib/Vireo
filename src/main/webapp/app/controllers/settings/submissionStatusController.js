@@ -48,6 +48,7 @@ vireo.controller("SubmissionStatusController", function ($controller, $scope, $q
                 isEditableByStudent: false,
                 isActive: false,
                 isDefault: false,
+                clearApproval: false,
                 submissionState: $scope.submissionStates.NONE
             };
 

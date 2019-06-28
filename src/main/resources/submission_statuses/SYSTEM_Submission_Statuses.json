@@ -7,6 +7,7 @@
   "isEditableByStudent": false,
   "isActive": null,
   "isDefault": true,
+  "clearApproval": true,
   "submissionState": 1,
   "transitionSubmissionStatuses": [{
       "name": "Submitted",
@@ -17,6 +18,7 @@
       "isEditableByStudent": false,
       "isActive": true,
       "isDefault": true,
+      "clearApproval": true,
       "submissionState": 2,
       "transitionSubmissionStatuses": [{
         "name": "Under Review",
@@ -27,6 +29,7 @@
         "isEditableByStudent": false,
         "isActive": true,
         "isDefault": true,
+        "clearApproval": true,
         "submissionState": 3,
         "transitionSubmissionStatuses": [{
             "name": "Needs Correction",
@@ -37,6 +40,7 @@
             "isEditableByStudent": true,
             "isActive": true,
             "isDefault": true,
+            "clearApproval": true,
             "submissionState": 4,
             "transitionSubmissionStatuses": [{
               "name": "Corrections Received",
@@ -47,6 +51,7 @@
               "isEditableByStudent": false,
               "isActive": true,
               "isDefault": true,
+              "clearApproval": true,
               "submissionState": 5,
               "transitionSubmissionStatuses": [{
                   "name": "Under Review"
@@ -60,6 +65,7 @@
                   "isEditableByStudent": false,
                   "isActive": true,
                   "isDefault": true,
+                  "clearApproval": true,
                   "submissionState": 6,
                   "transitionSubmissionStatuses": [{
                       "name": "Under Review"
@@ -73,6 +79,7 @@
                       "isEditableByStudent": false,
                       "isActive": true,
                       "isDefault": true,
+                      "clearApproval": false,
                       "submissionState": 7,
                       "transitionSubmissionStatuses": [{
                         "name": "Pending Publication",
@@ -83,6 +90,7 @@
                         "isEditableByStudent": false,
                         "isActive": false,
                         "isDefault": true,
+                        "clearApproval": false,
                         "submissionState": 8,
                         "transitionSubmissionStatuses": [{
                           "name": "Published",
@@ -93,6 +101,7 @@
                           "isEditableByStudent": false,
                           "isActive": false,
                           "isDefault": true,
+                          "clearApproval": false,
                           "submissionState": 9,
                           "transitionSubmissionStatuses": [{
                             "name": "Pending Publication"
@@ -126,6 +135,7 @@
       "isEditableByStudent": false,
       "isActive": true,
       "isDefault": true,
+      "clearApproval": true,
       "submissionState": 10,
       "transitionSubmissionStatuses": []
     },
@@ -138,6 +148,7 @@
       "isEditableByStudent": false,
       "isActive": false,
       "isDefault": true,
+      "clearApproval": false,
       "submissionState": 11,
       "transitionSubmissionStatuses": []
     },
@@ -150,6 +161,7 @@
       "isEditableByStudent": false,
       "isActive": false,
       "isDefault": true,
+      "clearApproval": true,
       "submissionState": 12,
       "transitionSubmissionStatuses": []
     }

@@ -8,6 +8,7 @@ var dataSubmissionStatus1 = {
     isEditableByReviewer: false,
     isEditableByStudent: false,
     isPublishable: false,
+    clearApproval: true,
     submissionState: "IN_PROGRESS"
 };
 
@@ -21,6 +22,7 @@ var dataSubmissionStatus2 = {
     isEditableByReviewer: false,
     isEditableByStudent: false,
     isPublishable: false,
+    clearApproval: false,
     submissionState: "SUBMITTED"
 };
 
@@ -34,6 +36,7 @@ var dataSubmissionStatus3 = {
     isEditableByReviewer: false,
     isEditableByStudent: false,
     isPublishable: false,
+    clearApproval: false,
     submissionState: "WITHDRAWN"
 };
 
@@ -47,6 +50,7 @@ var dataSubmissionStatus4 = {
     isEditableByReviewer: false,
     isEditableByStudent: false,
     isPublishable: false,
+    clearApproval: true,
     submissionState: "IN_PROGRESS"
 };
 
@@ -60,6 +64,7 @@ var dataSubmissionStatus5 = {
     isEditableByReviewer: false,
     isEditableByStudent: false,
     isPublishable: false,
+    clearApproval: false,
     submissionState: "SUBMITTED"
 };
 
@@ -73,6 +78,7 @@ var dataSubmissionStatus6 = {
     isEditableByReviewer: false,
     isEditableByStudent: false,
     isPublishable: false,
+    clearApproval: false,
     submissionState: "WITHDRAWN"
 };
 
