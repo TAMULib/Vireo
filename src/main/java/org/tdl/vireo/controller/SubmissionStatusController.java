@@ -9,7 +9,10 @@ import static edu.tamu.weaver.validation.model.BusinessValidationType.UPDATE;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.tdl.vireo.model.SubmissionState;
@@ -31,29 +34,29 @@ public class SubmissionStatusController {
     @Autowired
     private SubmissionStatusRepo submissionStatusRepo;
 
-    @RequestMapping("/create")
+    @PostMapping("/create")
     @PreAuthorize("hasRole('MANAGER')")
     @WeaverValidation(business = { @WeaverValidation.Business(value = CREATE) })
-    public ApiResponse createSubmissionStatus(@WeaverValidatedModel SubmissionStatus submissionStatus) {
+    public ApiResponse createSubmissionStatus(@WeaverValidatedModel @RequestBody SubmissionStatus submissionStatus) {
         return new ApiResponse(SUCCESS, submissionStatusRepo.create(submissionStatus));
     }
 
-    @RequestMapping("/all")
+    @GetMapping("/all")
     @PreAuthorize("hasRole('REVIEWER')")
     public ApiResponse getAllSubmissionStatuses() {
         return new ApiResponse(SUCCESS, submissionStatusRepo.findAll());
     }
 
-    @RequestMapping("/default/{submissionState}")
+    @GetMapping("/default/{submissionState}")
     @PreAuthorize("hasRole('MANAGER')")
     public ApiResponse getDefault(@PathVariable SubmissionState submissionState) {
         return new ApiResponse(SUCCESS, submissionStatusRepo.findBySubmissionStateAndIsDefaultTrue(submissionState));
     }
 
-    @RequestMapping("/update")
+    @PostMapping("/update")
     @PreAuthorize("hasRole('MANAGER')")
     @WeaverValidation(business = { @WeaverValidation.Business(value = UPDATE) })
-    public ApiResponse updateSubmissionStatus(@WeaverValidatedModel SubmissionStatus submissionStatus) {
+    public ApiResponse updateSubmissionStatus(@WeaverValidatedModel @RequestBody SubmissionStatus submissionStatus) {
         SubmissionStatus defaultSubmissionStatus = null;
 
         if (submissionStatus.isDefault()) {
@@ -63,7 +66,7 @@ public class SubmissionStatusController {
         ApiResponse response = new ApiResponse(SUCCESS, submissionStatusRepo.update(submissionStatus));
 
         // broadcast that the previous default has been changed.
-        if (submissionStatus.isDefault()) {
+        if (defaultSubmissionStatus != null) {
             defaultSubmissionStatus = submissionStatusRepo.findOne(defaultSubmissionStatus.getId());
             simpMessagingTemplate.convertAndSend("/channel/submission-status", new ApiResponse(SUCCESS, ApiAction.UPDATE, defaultSubmissionStatus));
         }
@@ -71,7 +74,7 @@ public class SubmissionStatusController {
         return response;
     }
 
-    @RequestMapping("/delete")
+    @PostMapping("/delete")
     @PreAuthorize("hasRole('MANAGER')")
     @WeaverValidation(business = { @WeaverValidation.Business(value = DELETE) })
     public ApiResponse deleteSubmissionStatus(@WeaverValidatedModel SubmissionStatus submissionStatus) {

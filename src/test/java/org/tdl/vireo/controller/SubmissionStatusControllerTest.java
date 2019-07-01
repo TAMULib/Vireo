@@ -3,14 +3,11 @@ package org.tdl.vireo.controller;
 import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.access.AccessDeniedException;
@@ -29,13 +26,11 @@ import edu.tamu.weaver.response.ApiStatus;
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = { Application.class })
 public class SubmissionStatusControllerTest extends AbstractControllerTest {
-    private Logger LOG = LoggerFactory.getLogger(this.getClass());
-
-    private static final SubmissionStatus TEST_SUBMISSION_STATUS1 = new SubmissionStatus("Submission Status Name 1", false, false, false, false, false, false, true, false, SubmissionState.IN_PROGRESS);
-    private static final SubmissionStatus TEST_SUBMISSION_STATUS2 = new SubmissionStatus("Submission Status Name 2", false, false, false, false, false, false, false, true, SubmissionState.IN_PROGRESS);
-    private static final SubmissionStatus TEST_SUBMISSION_STATUS3 = new SubmissionStatus("Submission Status Name 3", true, false, false, false, false, false, true, true, SubmissionState.IN_PROGRESS);
-    private static final SubmissionStatus TEST_SUBMISSION_STATUS4 = new SubmissionStatus("Submission Status Name 4", true, true, true, true, true, true, true, false, SubmissionState.SUBMITTED);
-    private static final SubmissionStatus TEST_SUBMISSION_STATUS5 = new SubmissionStatus("Submission Status Name 5", true, true, true, true, true, true, false, true, SubmissionState.APPROVED);
+    private static final SubmissionStatus TEST_SUBMISSION_STATUS1 = new SubmissionStatus("Submission Status Name 1", false, false, false, false, false, false, true, false, SubmissionState.IN_PROGRESS, new ArrayList<SubmissionStatus>());
+    private static final SubmissionStatus TEST_SUBMISSION_STATUS2 = new SubmissionStatus("Submission Status Name 2", false, false, false, false, false, false, false, true, SubmissionState.IN_PROGRESS, new ArrayList<SubmissionStatus>());
+    private static final SubmissionStatus TEST_SUBMISSION_STATUS3 = new SubmissionStatus("Submission Status Name 3", true, false, false, false, false, false, true, true, SubmissionState.IN_PROGRESS, new ArrayList<SubmissionStatus>());
+    private static final SubmissionStatus TEST_SUBMISSION_STATUS4 = new SubmissionStatus("Submission Status Name 4", true, true, true, true, true, true, true, false, SubmissionState.SUBMITTED, new ArrayList<SubmissionStatus>());
+    private static final SubmissionStatus TEST_SUBMISSION_STATUS5 = new SubmissionStatus("Submission Status Name 5", true, true, true, true, true, true, false, true, SubmissionState.APPROVED, new ArrayList<SubmissionStatus>());
 
     @Autowired
     private SubmissionStatusRepo submissionStatusRepo;

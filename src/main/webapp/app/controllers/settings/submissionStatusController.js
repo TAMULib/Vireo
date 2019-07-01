@@ -36,10 +36,6 @@ vireo.controller("SubmissionStatusController", function ($controller, $scope, $q
                 }
             }
 
-            if (angular.isDefined($scope.modalData) && angular.isDefined($scope.modalData.refresh)) {
-                $scope.modalData.refresh();
-            }
-
             $scope.modalData = {
                 isArchived: false,
                 isPublishable: false,
@@ -49,7 +45,8 @@ vireo.controller("SubmissionStatusController", function ($controller, $scope, $q
                 isActive: false,
                 isDefault: false,
                 clearApproval: false,
-                submissionState: $scope.submissionStates.NONE
+                submissionState: $scope.submissionStates.NONE,
+                transitionSubmissionStatuses: []
             };
 
             $scope.closeModal();
@@ -65,6 +62,7 @@ vireo.controller("SubmissionStatusController", function ($controller, $scope, $q
             $scope.resetSubmissionStatus();
             if (submissionStatus) {
                 $scope.modalData = submissionStatus;
+                $scope.modalData.refresh();
 
                 // TODO: improve handling of isActive = NULL because it can be a boolean or a NULL in the database.
                 if ($scope.modalData.isActive !== true && $scope.modalData.isActive !== false) {
@@ -131,10 +129,6 @@ vireo.controller("SubmissionStatusController", function ($controller, $scope, $q
 
         $scope.dragControlListeners.orderChanged = function (event) {};
 
-        $scope.submissionStatusRepo.listen(function (data) {
-            $scope.resetSubmissionStatus();
-        });
-
         $scope.totalDefaultsForSubmissionState = function (submissionState) {
             var total = 0;
 
@@ -157,6 +151,7 @@ vireo.controller("SubmissionStatusController", function ($controller, $scope, $q
             // reset the repo to ensure secondary changes are also presented.
             if (data.meta.status === "SUCCESS") {
                 $scope.submissionStatusRepo.reset();
+                $scope.resetSubmissionStatus();
             }
         });
 

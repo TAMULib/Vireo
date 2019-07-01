@@ -43,6 +43,13 @@
             results="modalData.ValidationResults">
         </validatedselect>
 
+        <div class="form-group">
+            <label for="edit-transition-submission-statuses">Transition Submission Statuses</label>
+            <select class="form-control" name="edit-transition-submission-statuses" ng-model="modalData.transitionSubmissionStatuses" multiple>
+              <option ng-repeat="option in submissionStatuses" ng-value="option.id">{{option.name}}</option>
+            </select>
+        </div>
+
         <div ng-if="modalData.submissionState !== 'NONE' && invalidDefaultForState(modalData.isDefault, modalData.submissionState)">
             <b>A default must be specified for the selected state.</b>
         </div>

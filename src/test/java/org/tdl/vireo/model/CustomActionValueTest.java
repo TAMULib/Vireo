@@ -3,6 +3,8 @@ package org.tdl.vireo.model;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.util.ArrayList;
+
 import org.junit.After;
 import org.junit.Before;
 
@@ -16,7 +18,7 @@ public class CustomActionValueTest extends AbstractEntityTest {
         testUser = userRepo.create(TEST_USER_EMAIL, TEST_USER_FIRSTNAME, TEST_USER_LASTNAME, TEST_USER_ROLE);
         assertEquals("The user repository is not empty!", 1, userRepo.count());
 
-        submissionStatus = submissionStatusRepo.create(TEST_SUBMISSION_STATUS_NAME, TEST_SUBMISSION_STATUS_ARCHIVED, TEST_SUBMISSION_STATUS_PUBLISHABLE, TEST_SUBMISSION_STATUS_DELETABLE, TEST_SUBMISSION_STATUS_EDITABLE_BY_REVIEWER, TEST_SUBMISSION_STATUS_EDITABLE_BY_STUDENT, TEST_SUBMISSION_STATUS_ACTIVE, TEST_SUBMISSION_STATUS_DEFAULT, TEST_SUBMISSION_STATUS_CLEAR_APPROVAL, null);
+        submissionStatus = submissionStatusRepo.create(TEST_SUBMISSION_STATUS_NAME, TEST_SUBMISSION_STATUS_ARCHIVED, TEST_SUBMISSION_STATUS_PUBLISHABLE, TEST_SUBMISSION_STATUS_DELETABLE, TEST_SUBMISSION_STATUS_EDITABLE_BY_REVIEWER, TEST_SUBMISSION_STATUS_EDITABLE_BY_STUDENT, TEST_SUBMISSION_STATUS_ACTIVE, TEST_SUBMISSION_STATUS_DEFAULT, TEST_SUBMISSION_STATUS_CLEAR_APPROVAL, null, new ArrayList<SubmissionStatus>());
         assertEquals("The submissionStatus repository is not empty!", 1, submissionStatusRepo.count());
 
         Organization organization = organizationRepo.create(TEST_ORGANIZATION_NAME, organizationCategoryRepo.create(TEST_ORGANIZATION_CATEGORY_NAME));

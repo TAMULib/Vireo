@@ -22,6 +22,11 @@ public interface SubmissionStatusRepo extends WeaverRepo<SubmissionStatus>, Subm
 
     @Transactional
     @Modifying
+    @Query("update SubmissionStatus ss set ss.isDefault = false where ss.isDefault = true and ss.submissionState = ?1 and not ss.id = ?2")
+    public int updateDefaultsToFalse(SubmissionState submissionState, long exceptId);
+
+    @Transactional
+    @Modifying
     @Query("delete from SubmissionStatus ss where ss.isDefault = false and ss.id = ?1")
     public void deletePreserveDefault(long id);
 

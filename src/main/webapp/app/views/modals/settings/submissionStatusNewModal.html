@@ -42,6 +42,13 @@
             validations="submissionStatusRepo.getValidations()"
             results="modalData.ValidationResults">
         </validatedselect>
+
+        <div class="form-group">
+            <label for="new-transition-submission-statuses">Transition Submission Statuses</label>
+            <select class="form-control" name="new-transition-submission-statuses" ng-model="modalData.transitionSubmissionStatuses" multiple>
+              <option ng-repeat="option in submissionStatuses" ng-value="option.id">{{option.name}}</option>
+            </select>
+        </div>
     </div>
 
     <div class="modal-footer">

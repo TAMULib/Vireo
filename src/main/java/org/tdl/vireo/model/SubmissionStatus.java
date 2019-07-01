@@ -20,6 +20,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
+import edu.tamu.weaver.data.resolver.BaseEntityIdResolver;
 import edu.tamu.weaver.response.ApiView;
 import edu.tamu.weaver.validation.model.ValidatingBaseEntity;
 
@@ -67,7 +68,7 @@ public class SubmissionStatus extends ValidatingBaseEntity {
     private SubmissionState submissionState;
 
     @ManyToMany(cascade = { DETACH, REFRESH, MERGE }, fetch = EAGER)
-    @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, scope = SubmissionStatus.class, property = "id")
+    @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, scope = SubmissionStatus.class, property = "id", resolver = BaseEntityIdResolver.class)
     @JsonIdentityReference(alwaysAsId = true)
     private List<SubmissionStatus> transitionSubmissionStatuses;
 
@@ -86,8 +87,9 @@ public class SubmissionStatus extends ValidatingBaseEntity {
      * @param isActive
      * @param isDefault
      * @param submissionState
+     * @param transitionSubmissionStatuses
      */
-    public SubmissionStatus(String name, Boolean isArchived, Boolean isPublishable, Boolean isDeletable, Boolean isEditableByReviewer, Boolean isEditableByStudent, Boolean isActive, Boolean isDefault, Boolean clearApproval, SubmissionState submissionState) {
+    public SubmissionStatus(String name, Boolean isArchived, Boolean isPublishable, Boolean isDeletable, Boolean isEditableByReviewer, Boolean isEditableByStudent, Boolean isActive, Boolean isDefault, Boolean clearApproval, SubmissionState submissionState, List<SubmissionStatus> transitionSubmissionStatuses) {
         this();
         setName(name);
         isArchived(isArchived);
@@ -99,6 +101,7 @@ public class SubmissionStatus extends ValidatingBaseEntity {
         isDefault(isDefault);
         setClearApproval(clearApproval);
         setSubmissionState(submissionState);
+        setTransitionSubmissionStatuses(transitionSubmissionStatuses);
     }
 
     /**

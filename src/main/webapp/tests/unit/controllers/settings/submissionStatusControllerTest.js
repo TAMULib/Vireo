@@ -177,13 +177,11 @@ describe("controller: SubmissionStatusController", function () {
             scope.modalData = submissionStatus;
 
             spyOn(scope.submissionStatusRepo, "clearValidationResults");
-            spyOn(submissionStatus, "refresh");
             spyOn(scope, "closeModal");
 
             scope.resetSubmissionStatus();
 
             expect(scope.submissionStatusRepo.clearValidationResults).toHaveBeenCalled();
-            expect(submissionStatus.refresh).toHaveBeenCalled();
             expect(scope.closeModal).toHaveBeenCalled();
             expect(scope.modalData).toBeDefined();
 
@@ -192,13 +190,6 @@ describe("controller: SubmissionStatusController", function () {
 
             scope.forms.myForm.$pristine = false;
             scope.resetSubmissionStatus();
-
-            submissionStatus.refresh = function() {};
-            spyOn(submissionStatus, "refresh");
-
-            scope.modalData = undefined;
-            scope.resetSubmissionStatus();
-            expect(submissionStatus.refresh).not.toHaveBeenCalled();
         });
         it("selectSubmissionStatus should select submission status", function () {
             var submissionStatus = new mockSubmissionStatus(q);
@@ -211,8 +202,10 @@ describe("controller: SubmissionStatusController", function () {
             expect(scope.resetSubmissionStatus).toHaveBeenCalled();
             expect(scope.modalData).not.toBeDefined();
 
+            spyOn(submissionStatus, "refresh");
             scope.selectSubmissionStatus(submissionStatus);
             expect(scope.modalData.id).toBe(submissionStatus.id);
+            expect(submissionStatus.refresh).toHaveBeenCalled();
 
             scope.modalData = undefined;
             submissionStatus.isActive = undefined;
@@ -313,7 +306,6 @@ describe("controller: SubmissionStatusController", function () {
 
     describe("Does the scope initialize as expected", function () {
         it("Listen on '/channel/submission-status' should work as expected", function () {
-            // TODO: finish/fix this test.
             var submissionStatus1 = new mockSubmissionStatus(q);
             var meta = {
                 status: "SUCCESS",
@@ -321,20 +313,17 @@ describe("controller: SubmissionStatusController", function () {
                 message: "Your request was successful"
             };
 
-            SubmissionStatusRepo.listen = function(path) {
-                var defer = q.defer();
+            SubmissionStatusRepo.listen = function(path, method) {
                 var payload = {
                     SubmissionStatus: submissionStatus1
                 };
+                var data = {
+                    meta: meta,
+                    payload: payload,
+                    status: 200
+                };
 
-                defer.resolve({
-                    body: angular.toJson({
-                        meta: meta,
-                        payload: payload,
-                        status: 200
-                    })
-                });
-                return defer.promise;
+                method(data);
             };
 
             spyOn(SubmissionStatusRepo, "reset");
@@ -342,7 +331,7 @@ describe("controller: SubmissionStatusController", function () {
             initializeController();
             scope.$digest();
             timeout.flush();
-            //expect(SubmissionStatusRepo.reset).toHaveBeenCalled();
+            expect(SubmissionStatusRepo.reset).toHaveBeenCalled();
 
             SubmissionStatusRepo.reset = function() {};
             spyOn(SubmissionStatusRepo, "reset");
@@ -351,7 +340,7 @@ describe("controller: SubmissionStatusController", function () {
             initializeController();
             scope.$digest();
             timeout.flush();
-            //expect(SubmissionStatusRepo.reset).toHaveBeenCalled();
+            expect(SubmissionStatusRepo.reset).toHaveBeenCalled();
 
             SubmissionStatusRepo.reset = function() {};
             spyOn(SubmissionStatusRepo, "reset");
@@ -360,7 +349,16 @@ describe("controller: SubmissionStatusController", function () {
             initializeController();
             scope.$digest();
             timeout.flush();
-            //expect(SubmissionStatusRepo.reset).toHaveBeenCalled();
+            expect(SubmissionStatusRepo.reset).toHaveBeenCalled();
+
+            SubmissionStatusRepo.reset = function() {};
+            spyOn(SubmissionStatusRepo, "reset");
+            meta.status = "INVALID";
+
+            initializeController();
+            scope.$digest();
+            timeout.flush();
+            expect(SubmissionStatusRepo.reset).not.toHaveBeenCalled();
         });
     });
 
