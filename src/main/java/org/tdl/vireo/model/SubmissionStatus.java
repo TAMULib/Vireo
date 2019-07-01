@@ -58,6 +58,10 @@ public class SubmissionStatus extends ValidatingBaseEntity {
     @JsonProperty("isDefault")
     private Boolean isDefault;
 
+    @Column(nullable = false)
+    @JsonProperty("clearApproval")
+    private Boolean clearApproval;
+
     @JsonView(ApiView.Partial.class)
     @Column(nullable = false)
     private SubmissionState submissionState;
@@ -83,7 +87,7 @@ public class SubmissionStatus extends ValidatingBaseEntity {
      * @param isDefault
      * @param submissionState
      */
-    public SubmissionStatus(String name, Boolean isArchived, Boolean isPublishable, Boolean isDeletable, Boolean isEditableByReviewer, Boolean isEditableByStudent, Boolean isActive, Boolean isDefault, SubmissionState submissionState) {
+    public SubmissionStatus(String name, Boolean isArchived, Boolean isPublishable, Boolean isDeletable, Boolean isEditableByReviewer, Boolean isEditableByStudent, Boolean isActive, Boolean isDefault, Boolean clearApproval, SubmissionState submissionState) {
         this();
         setName(name);
         isArchived(isArchived);
@@ -93,6 +97,7 @@ public class SubmissionStatus extends ValidatingBaseEntity {
         isEditableByStudent(isEditableByStudent);
         isActive(isActive);
         isDefault(isDefault);
+        setClearApproval(clearApproval);
         setSubmissionState(submissionState);
     }
 
@@ -214,6 +219,21 @@ public class SubmissionStatus extends ValidatingBaseEntity {
      */
     public void isDefault(Boolean isDefault) {
         this.isDefault = isDefault;
+    }
+
+    /**
+     * @param clearApproval
+     *            the clearApproval to set
+     */
+    public void setClearApproval(Boolean clearApproval) {
+        this.clearApproval = clearApproval;
+    }
+
+    /**
+     * @return clearApproval
+     */
+    public Boolean getClearApproval() {
+        return clearApproval;
     }
 
     /**

@@ -47,6 +47,7 @@ import org.tdl.vireo.model.Sort;
 import org.tdl.vireo.model.Submission;
 import org.tdl.vireo.model.SubmissionFieldProfile;
 import org.tdl.vireo.model.SubmissionListColumn;
+import org.tdl.vireo.model.SubmissionState;
 import org.tdl.vireo.model.SubmissionStatus;
 import org.tdl.vireo.model.SubmissionWorkflowStep;
 import org.tdl.vireo.model.User;
@@ -201,12 +202,13 @@ public class SubmissionRepoImpl extends AbstractWeaverRepoImpl<Submission, Submi
 
         submission.setSubmissionStatus(submissionStatus);
 
-        switch (submissionStatus.getSubmissionState()) {
-        case SUBMITTED:
-
+        if (submissionStatus.getClearApproval() && submissionStatus.getSubmissionState() != SubmissionState.APPROVED) {
             submission.setApproveApplication(false);
             submission.setApproveApplicationDate(null);
+        }
 
+        switch (submissionStatus.getSubmissionState()) {
+        case SUBMITTED:
             submission.setSubmissionDate(Calendar.getInstance());
 
             List<FieldValue> proquestFieldValues = submission.getFieldValuesByInputType(inputTypeRepo.findByName("INPUT_PROQUEST"));
@@ -239,26 +241,12 @@ public class SubmissionRepoImpl extends AbstractWeaverRepoImpl<Submission, Submi
             }
             break;
         case APPROVED:
-            submission.setApproveApplication(true);
-            submission.setApproveApplicationDate(Calendar.getInstance());
+            if (oldSubmissionStatus.getSubmissionState() != submissionStatus.getSubmissionState()) {
+                submission.setApproveApplication(true);
+                submission.setApproveApplicationDate(Calendar.getInstance());
+            }
             break;
-        case PENDING_PUBLICATION:
-            break;
-        case PUBLISHED:
-            break;
-        case WITHDRAWN:
-            break;
-        case ON_HOLD:
-        case CANCELED:
-        case CORRECTIONS_RECIEVED:
-        case IN_PROGRESS:
-        case NEEDS_CORRECTIONS:
-        case NONE:
-        case UNDER_REVIEW:
-        case WAITING_ON_REQUIREMENTS:
         default:
-            submission.setApproveApplication(false);
-            submission.setApproveApplicationDate(null);
             break;
         }
 
@@ -350,6 +338,7 @@ public class SubmissionRepoImpl extends AbstractWeaverRepoImpl<Submission, Submi
         Long total = jdbcTemplate.queryForObject(queryBuilder.getCountQuery(), Long.class);
 
         List<Long> ids = jdbcTemplate.query(queryBuilder.getQuery(), new RowMapper<Long>() {
+            @Override
             public Long mapRow(ResultSet rs, int rowNum) throws SQLException {
                 return rs.getLong("ID");
             }
