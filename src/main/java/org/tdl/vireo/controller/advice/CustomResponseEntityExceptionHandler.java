@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+import org.tdl.vireo.exception.SubmissionException;
+import org.tdl.vireo.exception.SubmissionStatusException;
 import org.tdl.vireo.exception.SwordDepositException;
 
 import edu.tamu.weaver.response.ApiResponse;
@@ -35,6 +37,20 @@ public class CustomResponseEntityExceptionHandler extends ResponseEntityExceptio
     @ResponseBody
     public ApiResponse handleSwordDepositException(SwordDepositException exception) {
         logger.debug(exception.getMessage(), exception);
+        return new ApiResponse(ERROR, exception.getMessage());
+    }
+
+    @ExceptionHandler(SubmissionException.class)
+    @ResponseStatus(value = HttpStatus.BAD_REQUEST)
+    @ResponseBody
+    public ApiResponse handleSubmissionException(SubmissionException exception) {
+        return new ApiResponse(ERROR, exception.getMessage());
+    }
+
+    @ExceptionHandler(SubmissionStatusException.class)
+    @ResponseStatus(value = HttpStatus.BAD_REQUEST)
+    @ResponseBody
+    public ApiResponse handleSubmissionStatusException(SubmissionStatusException exception) {
         return new ApiResponse(ERROR, exception.getMessage());
     }
 

@@ -148,6 +148,33 @@ describe("controller: SubmissionStatusController", function () {
 
             response = scope.invalidDefaultForState(false, "IN_PROGRESS");
             expect(response).toEqual(false);
+
+            scope.submissionStatuses = [];
+
+            response = scope.invalidDefaultForState(true, "IN_PROGRESS", 1);
+            expect(response).toEqual(false);
+
+            response = scope.invalidDefaultForState(false, "IN_PROGRESS", 1);
+            expect(response).toEqual(true);
+
+            scope.submissionStatuses = [
+                new mockSubmissionStatus(q),
+                new mockSubmissionStatus(q)
+            ];
+
+            response = scope.invalidDefaultForState(true, "IN_PROGRESS", 1);
+            expect(response).toEqual(false);
+
+            response = scope.invalidDefaultForState(false, "IN_PROGRESS", 1);
+            expect(response).toEqual(true);
+
+            scope.submissionStatuses[1].mock(dataSubmissionStatus2);
+
+            response = scope.invalidDefaultForState(true, "IN_PROGRESS", 1);
+            expect(response).toEqual(false);
+
+            response = scope.invalidDefaultForState(false, "IN_PROGRESS", 1);
+            expect(response).toEqual(true);
         });
         it("launchEditModal should open a modal", function () {
             scope.modalData = null;

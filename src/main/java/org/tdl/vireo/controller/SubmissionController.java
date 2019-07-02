@@ -47,6 +47,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.tdl.vireo.exception.DepositException;
 import org.tdl.vireo.exception.OrganizationDoesNotAcceptSubmissionsExcception;
+import org.tdl.vireo.exception.SubmissionException;
+import org.tdl.vireo.exception.SubmissionStatusException;
 import org.tdl.vireo.model.CustomActionValue;
 import org.tdl.vireo.model.DepositLocation;
 import org.tdl.vireo.model.FieldValue;
@@ -393,22 +395,18 @@ public class SubmissionController {
     @PreAuthorize("hasRole('STUDENT')")
     public ApiResponse submit(@WeaverUser User user, @PathVariable Long submissionId) {
         Submission submission = submissionRepo.read(submissionId);
-
-        ApiResponse response;
-        if (submission != null) {
-            SubmissionStatus submissionStatus = submissionStatusRepo.findBySubmissionStateAndIsDefaultTrue(SubmissionState.SUBMITTED);
-            if (submissionStatus != null) {
-                submission = submissionRepo.updateStatus(submission, submissionStatus, user);
-                response = new ApiResponse(SUCCESS, submission);
-            } else {
-                response = new ApiResponse(ERROR, "Could not find a default submission status for the submission state " + SubmissionState.SUBMITTED);
-            }
-        } else {
-            response = new ApiResponse(ERROR, "Could not find a submission with ID " + submissionId);
+        if (submission == null) {
+            throw new SubmissionException("Could not find a submission with ID " + submissionId);
         }
 
+        SubmissionStatus submissionStatus = submissionStatusRepo.findBySubmissionStateAndIsDefaultTrue(SubmissionState.SUBMITTED);
+        if (submissionStatus == null) {
+            throw new SubmissionException("Could not find a default submission status for the submission state " + SubmissionState.SUBMITTED);
+        }
+
+        submission = submissionRepo.updateStatus(submission, submissionStatus, user);
         submissionEmailService.sendWorkflowEmails(user, submission);
-        return response;
+        return new ApiResponse(SUCCESS, submission);
     }
 
     @RequestMapping("/batch-update-status/{submissionStatusName}")

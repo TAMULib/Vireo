@@ -3,6 +3,7 @@ package org.tdl.vireo.model.repo.impl;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.tdl.vireo.exception.SubmissionStatusException;
 import org.tdl.vireo.model.SubmissionState;
 import org.tdl.vireo.model.SubmissionStatus;
 import org.tdl.vireo.model.repo.SubmissionStatusRepo;
@@ -43,12 +44,20 @@ public class SubmissionStatusRepoImpl extends AbstractWeaverRepoImpl<SubmissionS
     }
 
     private void updateDefaultsToFalse(SubmissionStatus submissionStatus) {
-        if (submissionStatus.isDefault() && submissionStatus.getSubmissionState() != null) {
-            if (submissionStatus.getId() == null) {
-                submissionStatusRepo.updateDefaultsToFalse(submissionStatus.getSubmissionState());
+        if (submissionStatus.getSubmissionState() != SubmissionState.NONE) {
+            if (submissionStatus.isDefault()) {
+                if (submissionStatus.getId() == null) {
+                    submissionStatusRepo.updateDefaultsToFalse(submissionStatus.getSubmissionState());
+                }
+                else {
+                    submissionStatusRepo.updateDefaultsToFalse(submissionStatus.getSubmissionState(), submissionStatus.getId());
+                }
             }
             else {
-                submissionStatusRepo.updateDefaultsToFalse(submissionStatus.getSubmissionState(), submissionStatus.getId());
+                SubmissionStatus defaultStatus = submissionStatusRepo.findBySubmissionStateAndIsDefaultTrue(submissionStatus.getSubmissionState());
+                if (defaultStatus == null || defaultStatus.getId() == submissionStatus.getId()) {
+                    throw new SubmissionStatusException("Cannot save Submission Status " + submissionStatus.getName() + ", the " + submissionStatus.getSubmissionState().name() + " state must have a default.");
+                }
             }
         }
     }

@@ -129,13 +129,15 @@ vireo.controller("SubmissionStatusController", function ($controller, $scope, $q
 
         $scope.dragControlListeners.orderChanged = function (event) {};
 
-        $scope.totalDefaultsForSubmissionState = function (submissionState) {
+        $scope.totalDefaultsForSubmissionState = function (submissionState, submissionId) {
             var total = 0;
 
             for (var key in $scope.submissionStatuses) {
                 if ($scope.submissionStatuses[key].submissionState === submissionState) {
                     if ($scope.submissionStatuses[key].isDefault === true) {
-                        total++;
+                        if (!angular.isDefined(submissionId) || $scope.submissionStatuses[key].id !== submissionId) {
+                            total++;
+                        }
                     }
                 }
             }
@@ -143,8 +145,17 @@ vireo.controller("SubmissionStatusController", function ($controller, $scope, $q
             return total;
         };
 
-        $scope.invalidDefaultForState = function(isDefault, submissionState) {
-            return isDefault === false && $scope.totalDefaultsForSubmissionState(submissionState) !== 1;
+        $scope.invalidDefaultForState = function(isDefault, submissionState, submissionId) {
+            if (isDefault === true || isDefault === "true") {
+                return false;
+            }
+
+            var id = submissionId;
+            if (angular.isDefined(submissionId)) {
+                id = parseInt(submissionId);
+            }
+
+            return $scope.totalDefaultsForSubmissionState(submissionState, id) !== 1;
         };
 
         $scope.submissionStatusRepo.listen([ApiResponseActions.CREATE, ApiResponseActions.UPDATE, ApiResponseActions.DELETE], function (data) {

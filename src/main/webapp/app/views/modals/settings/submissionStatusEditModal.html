@@ -32,6 +32,10 @@
         <toggleButton id="edit-is-publishable" label="Publishable:" scope-value="modalData.isPublishable" toggle-options="{{toggleOptions}}"></toggleButton>
         <toggleButton id="edit-clear-approval" label="Clear Approval:" scope-value="modalData.clearApproval" toggle-options="{{toggleOptions}}"></toggleButton>
 
+        <div ng-if="modalData.submissionState !== 'NONE' && invalidDefaultForState(modalData.isDefault, modalData.submissionState, modalData.id)">
+            <b>A default must be specified for the selected state.</b>
+        </div>
+
         <validatedselect
             id="edit-submission-state"
             options="submissionStates"
@@ -49,10 +53,6 @@
               <option ng-repeat="option in submissionStatuses" ng-value="option.id">{{option.name}}</option>
             </select>
         </div>
-
-        <div ng-if="modalData.submissionState !== 'NONE' && invalidDefaultForState(modalData.isDefault, modalData.submissionState)">
-            <b>A default must be specified for the selected state.</b>
-        </div>
     </div>
 
     <div class="modal-footer">
@@ -64,6 +64,6 @@
             id="edit-submissionStatus-save"
             type="submit"
             class="btn btn-primary"
-            ng-disabled="forms.update.$invalid || invalidDefaultForState(modalData.isDefault, modalData.submissionState)">Update</button>
+            ng-disabled="forms.update.$invalid || invalidDefaultForState(modalData.isDefault, modalData.submissionState, modalData.id)">Update</button>
     </div>
 </form>

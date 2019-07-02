@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.tdl.vireo.exception.SubmissionStatusException;
 import org.tdl.vireo.model.SubmissionState;
 import org.tdl.vireo.model.SubmissionStatus;
 import org.tdl.vireo.model.repo.SubmissionStatusRepo;
@@ -81,12 +82,12 @@ public class SubmissionStatusController {
         submissionStatusRepo.delete(submissionStatus);
         submissionStatusRepo.flush();
 
-        if (!submissionStatusRepo.exists(submissionStatus.getId())) {
-            simpMessagingTemplate.convertAndSend("/channel/submission-status", new ApiResponse(SUCCESS, ApiAction.DELETE, submissionStatus));
-            return new ApiResponse(SUCCESS, ApiAction.DELETE, "Submission Status " + submissionStatus.getName() + " has been deleted!");
+        if (submissionStatusRepo.exists(submissionStatus.getId())) {
+            throw new SubmissionStatusException("Submission Status " + submissionStatus.getName() + " could not be deleted!");
         }
 
-        return new ApiResponse(ERROR, ApiAction.DELETE, "Submission Status " + submissionStatus.getName() + " could not be deleted!");
+        simpMessagingTemplate.convertAndSend("/channel/submission-status", new ApiResponse(SUCCESS, ApiAction.DELETE, submissionStatus));
+        return new ApiResponse(SUCCESS, ApiAction.DELETE, "Submission Status " + submissionStatus.getName() + " has been deleted!");
     }
 
 }
