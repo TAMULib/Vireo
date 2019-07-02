@@ -1,4 +1,4 @@
-vireo.repo("SubmissionStatusRepo", function SubmissionStatusRepo() {
+vireo.repo("SubmissionStatusRepo", function SubmissionStatusRepo(WsApi) {
 
 	var submissionStatusRepo = this;
 
@@ -19,6 +19,14 @@ vireo.repo("SubmissionStatusRepo", function SubmissionStatusRepo() {
 		});
 		return foundStatus;
 	};
+
+    submissionStatusRepo.getDefault = function(state) {
+        angular.extend(submissionStatusRepo.mapping.default, {
+            'method': 'default/' + state
+        });
+
+        return WsApi.fetch(submissionStatusRepo.mapping.default);
+    };
 
 	return submissionStatusRepo;
 

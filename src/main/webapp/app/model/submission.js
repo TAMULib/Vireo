@@ -1,8 +1,10 @@
-var submissionModel = function ($q, ActionLog, FieldValue, FileService, Organization, EmailRecipient, EmailRecipientType, WsApi) {
+var submissionModel = function ($q, ActionLog, FieldValue, FileService, Organization, SubmissionStates, SubmissionStatus, SubmissionStatusRepo, EmailRecipient, EmailRecipientType, WsApi) {
 
     return function Submission() {
 
         var submission = this;
+
+        submission.submissionStatusRepo = SubmissionStatusRepo;
 
         submission.isValid = false;
 
@@ -575,7 +577,26 @@ var submissionModel = function ($q, ActionLog, FieldValue, FileService, Organiza
         };
 
         submission.submit = function () {
-            return submission.changeStatus('Submitted');
+            return $q(function(resolve, reject) {
+                submission.submissionStatusRepo.getDefault(SubmissionStates.SUBMITTED).then(function (res) {
+                    var apiRes = angular.fromJson(res.body);
+                    if (apiRes.meta.status === "SUCCESS") {
+                        var submittedStatus = new SubmissionStatus(apiRes.payload.SubmissionStatus);
+                        submission.changeStatus(submittedStatus.name).then(function (res) {
+                            var changeRes = angular.fromJson(res.body);
+                            if (changeRes.meta.status === "SUCCESS") {
+                                resolve(changeRes.submission);
+                            }
+                            else {
+                                reject();
+                            }
+                        });
+                    }
+                    else {
+                        reject();
+                    }
+                });
+            });
         };
 
         submission.setSubmissionDate = function (newDate) {
