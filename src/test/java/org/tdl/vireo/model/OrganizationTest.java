@@ -4,6 +4,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.util.ArrayList;
+
 import javax.transaction.Transactional;
 
 import org.junit.After;
@@ -22,7 +24,7 @@ public class OrganizationTest extends AbstractEntityTest {
 
         assertEquals("The category does not exist!", 1, organizationCategoryRepo.count());
 
-        submissionStatus = submissionStatusRepo.create(TEST_SUBMISSION_STATUS_NAME, TEST_SUBMISSION_STATUS_ARCHIVED, TEST_SUBMISSION_STATUS_PUBLISHABLE, TEST_SUBMISSION_STATUS_DELETABLE, TEST_SUBMISSION_STATUS_EDITABLE_BY_REVIEWER, TEST_SUBMISSION_STATUS_EDITABLE_BY_STUDENT, TEST_SUBMISSION_STATUS_ACTIVE, TEST_SUBMISSION_STATUS_DEFAULT, TEST_SUBMISSION_STATUS_CLEAR_APPROVAL, null);
+        submissionStatus = submissionStatusRepo.create(TEST_SUBMISSION_STATUS_NAME, TEST_SUBMISSION_STATUS_ARCHIVED, TEST_SUBMISSION_STATUS_PUBLISHABLE, TEST_SUBMISSION_STATUS_DELETABLE, TEST_SUBMISSION_STATUS_EDITABLE_BY_REVIEWER, TEST_SUBMISSION_STATUS_EDITABLE_BY_STUDENT, TEST_SUBMISSION_STATUS_ACTIVE, TEST_SUBMISSION_STATUS_DEFAULT, TEST_SUBMISSION_STATUS_CLEAR_APPROVAL, null, new ArrayList<SubmissionStatus>());
 
         assertEquals("The submissionStatus does not exist!", 1, submissionStatusRepo.count());
 

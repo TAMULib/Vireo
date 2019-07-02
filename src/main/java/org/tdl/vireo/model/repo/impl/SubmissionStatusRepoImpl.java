@@ -1,5 +1,7 @@
 package org.tdl.vireo.model.repo.impl;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.tdl.vireo.model.SubmissionState;
 import org.tdl.vireo.model.SubmissionStatus;
@@ -20,8 +22,8 @@ public class SubmissionStatusRepoImpl extends AbstractWeaverRepoImpl<SubmissionS
     }
 
     @Override
-    public SubmissionStatus create(String name, Boolean archived, Boolean publishable, Boolean deletable, Boolean editableByReviewer, Boolean editableByStudent, Boolean active, Boolean isDefault, Boolean clearApproval, SubmissionState submissionState) {
-        return submissionStatusRepo.create(new SubmissionStatus(name, archived, publishable, deletable, editableByReviewer, editableByStudent, active, isDefault, clearApproval, submissionState == null ? SubmissionState.NONE : submissionState));
+    public SubmissionStatus create(String name, Boolean archived, Boolean publishable, Boolean deletable, Boolean editableByReviewer, Boolean editableByStudent, Boolean active, Boolean isDefault, Boolean clearApproval, SubmissionState submissionState, List<SubmissionStatus> transitionSubmissionStatuses) {
+        return submissionStatusRepo.create(new SubmissionStatus(name, archived, publishable, deletable, editableByReviewer, editableByStudent, active, isDefault, clearApproval, submissionState == null ? SubmissionState.NONE : submissionState, transitionSubmissionStatuses));
     }
 
     @Override
@@ -41,8 +43,13 @@ public class SubmissionStatusRepoImpl extends AbstractWeaverRepoImpl<SubmissionS
     }
 
     private void updateDefaultsToFalse(SubmissionStatus submissionStatus) {
-        if (submissionStatus.isDefault()) {
-            submissionStatusRepo.updateDefaultsToFalse(submissionStatus.getSubmissionState());
+        if (submissionStatus.isDefault() && submissionStatus.getSubmissionState() != null) {
+            if (submissionStatus.getId() == null) {
+                submissionStatusRepo.updateDefaultsToFalse(submissionStatus.getSubmissionState());
+            }
+            else {
+                submissionStatusRepo.updateDefaultsToFalse(submissionStatus.getSubmissionState(), submissionStatus.getId());
+            }
         }
     }
 

@@ -3,6 +3,8 @@ package org.tdl.vireo.model;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.util.ArrayList;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -25,7 +27,7 @@ public class SubmissionTest extends AbstractEntityTest {
         graduateOfficeEmployee1 = userRepo.create(TEST_SUBMISSION_REVIEWER2_EMAIL, TEST_SUBMISSION_REVIEWER1_FIRSTNAME, TEST_SUBMISSION_REVIEWER1_LASTNAME, TEST_SUBMISSION_REVIEWER1_ROLE);
         assertEquals("The second reviewer does not exist!", 3, userRepo.count());
 
-        submissionStatus = submissionStatusRepo.create(TEST_SUBMISSION_STATUS_NAME, TEST_SUBMISSION_STATUS_ARCHIVED, TEST_SUBMISSION_STATUS_PUBLISHABLE, TEST_SUBMISSION_STATUS_DELETABLE, TEST_SUBMISSION_STATUS_EDITABLE_BY_REVIEWER, TEST_SUBMISSION_STATUS_EDITABLE_BY_STUDENT, TEST_SUBMISSION_STATUS_ACTIVE, TEST_SUBMISSION_STATUS_DEFAULT, TEST_SUBMISSION_STATUS_CLEAR_APPROVAL, null);
+        submissionStatus = submissionStatusRepo.create(TEST_SUBMISSION_STATUS_NAME, TEST_SUBMISSION_STATUS_ARCHIVED, TEST_SUBMISSION_STATUS_PUBLISHABLE, TEST_SUBMISSION_STATUS_DELETABLE, TEST_SUBMISSION_STATUS_EDITABLE_BY_REVIEWER, TEST_SUBMISSION_STATUS_EDITABLE_BY_STUDENT, TEST_SUBMISSION_STATUS_ACTIVE, TEST_SUBMISSION_STATUS_DEFAULT, TEST_SUBMISSION_STATUS_CLEAR_APPROVAL, null, new ArrayList<SubmissionStatus>());
         assertEquals("The submission state does not exist!", 1, submissionStatusRepo.count());
 
         parentCategory = organizationCategoryRepo.create(TEST_CATEGORY_NAME);
