@@ -42,6 +42,10 @@ describe("service: submissionStatusRepo", function () {
             expect(repo.findByName).toBeDefined();
             expect(typeof repo.findByName).toEqual("function");
         });
+        it("getDefault should be defined", function () {
+            expect(repo.getDefault).toBeDefined();
+            expect(typeof repo.getDefault).toEqual("function");
+        });
     });
 
     describe("Do the repo methods work as expected", function () {
@@ -57,6 +61,14 @@ describe("service: submissionStatusRepo", function () {
             var response;
 
             response = repo.findByName("mock");
+            scope.$digest();
+
+            // TODO
+        });
+        it("getDefault should return a submission status", function () {
+            var response;
+
+            response = repo.getDefault("SUBMITTED");
             scope.$digest();
 
             // TODO

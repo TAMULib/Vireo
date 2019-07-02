@@ -622,6 +622,12 @@ var apiMapping = {
             'controller': 'submission',
             'method': 'change-status'
         },
+        submit: {
+            'endpoint': '/private/queue',
+            'controller': 'submission',
+            'method': 'submit',
+            'httpMethod': 'POST'
+        },
         publish: {
             'endpoint': '/private/queue',
             'controller': 'submission',

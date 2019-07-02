@@ -37,6 +37,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -54,6 +55,7 @@ import org.tdl.vireo.model.Role;
 import org.tdl.vireo.model.Submission;
 import org.tdl.vireo.model.SubmissionFieldProfile;
 import org.tdl.vireo.model.SubmissionListColumn;
+import org.tdl.vireo.model.SubmissionState;
 import org.tdl.vireo.model.SubmissionStatus;
 import org.tdl.vireo.model.User;
 import org.tdl.vireo.model.depositor.Depositor;
@@ -383,6 +385,28 @@ public class SubmissionController {
         } else {
             response = new ApiResponse(ERROR, "Could not find a submission with ID " + submissionId);
         }
+        submissionEmailService.sendWorkflowEmails(user, submission);
+        return response;
+    }
+
+    @PostMapping("/{submissionId}/submit")
+    @PreAuthorize("hasRole('STUDENT')")
+    public ApiResponse submit(@WeaverUser User user, @PathVariable Long submissionId) {
+        Submission submission = submissionRepo.read(submissionId);
+
+        ApiResponse response;
+        if (submission != null) {
+            SubmissionStatus submissionStatus = submissionStatusRepo.findBySubmissionStateAndIsDefaultTrue(SubmissionState.SUBMITTED);
+            if (submissionStatus != null) {
+                submission = submissionRepo.updateStatus(submission, submissionStatus, user);
+                response = new ApiResponse(SUCCESS, submission);
+            } else {
+                response = new ApiResponse(ERROR, "Could not find a default submission status for the submission state " + SubmissionState.SUBMITTED);
+            }
+        } else {
+            response = new ApiResponse(ERROR, "Could not find a submission with ID " + submissionId);
+        }
+
         submissionEmailService.sendWorkflowEmails(user, submission);
         return response;
     }
