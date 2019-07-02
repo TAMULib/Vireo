@@ -1,8 +1,8 @@
 describe('model: Submission', function () {
-    var model, q, rootScope, scope, ActionLog, FieldValue, FileService, Organization, WsApi;
+    var model, q, rootScope, scope, ActionLog, FieldValue, FileService, Organization, SubmissionRepo, WsApi;
 
     var initializeVariables = function(settings) {
-        inject(function ($q, $rootScope, _ActionLog_, _FieldValue_, _FileService_ /*, _Organization_*/, _WsApi_) {
+        inject(function ($q, $rootScope, _ActionLog_, _FieldValue_, _FileService_ /*, _Organization_*/, _SubmissionRepo_, _WsApi_) {
             q = $q;
             rootScope = $rootScope;
 
@@ -10,6 +10,7 @@ describe('model: Submission', function () {
             FieldValue = _FieldValue_;
             FileService = _FileService_;
             // Organization = _Organization_;
+            SubmissionRepo = _SubmissionRepo_;
             WsApi = _WsApi_;
         });
     };
@@ -579,11 +580,11 @@ describe('model: Submission', function () {
             expect(WsApi.fetch).toHaveBeenCalled();
         });
         it('submit should change the status', function () {
-            spyOn(model, "changeStatus");
+            spyOn(SubmissionRepo, "submit").and.callThrough();
 
             model.submit();
 
-            expect(model.changeStatus).toHaveBeenCalled();
+            expect(SubmissionRepo.submit).toHaveBeenCalled();
         });
         // FIXME: asynchronous issues.
         /*it('submitCorrections should call WsApi', function () {

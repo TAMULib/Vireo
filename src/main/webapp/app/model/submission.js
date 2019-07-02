@@ -1,8 +1,10 @@
-var submissionModel = function ($q, ActionLog, FieldValue, FileService, Organization, EmailRecipient, EmailRecipientType, WsApi) {
+var submissionModel = function ($q, ActionLog, FieldValue, FileService, Organization, EmailRecipient, EmailRecipientType, SubmissionRepo, WsApi) {
 
     return function Submission() {
 
         var submission = this;
+
+        var submissionRepo = SubmissionRepo;
 
         submission.isValid = false;
 
@@ -575,7 +577,7 @@ var submissionModel = function ($q, ActionLog, FieldValue, FileService, Organiza
         };
 
         submission.submit = function () {
-            return submission.changeStatus('Submitted');
+            return submissionRepo.submit(submission.id);
         };
 
         submission.setSubmissionDate = function (newDate) {
