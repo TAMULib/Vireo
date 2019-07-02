@@ -107,8 +107,8 @@ public class SubmissionEmailServiceTest extends MockData {
 
     private static final InputType TEST_INPUT_TYPE1 = new InputType("Test Input Type 1");
 
-    private static final SubmissionStatus TEST_SUBMISSION_STATUS1 = new SubmissionStatus("Test Submission Status 1", false, false, false, false, false, true, SubmissionState.IN_PROGRESS);
-    private static final SubmissionStatus TEST_SUBMISSION_STATUS2 = new SubmissionStatus("Test Submission Status 2", true, false, false, false, false, false, SubmissionState.CANCELED);
+    private static final SubmissionStatus TEST_SUBMISSION_STATUS1 = new SubmissionStatus("Test Submission Status 1", false, false, false, false, false, false, true, false, SubmissionState.IN_PROGRESS, new ArrayList<SubmissionStatus>());
+    private static final SubmissionStatus TEST_SUBMISSION_STATUS2 = new SubmissionStatus("Test Submission Status 2", true, false, false, false, false, false, false, false, SubmissionState.CANCELED, new ArrayList<SubmissionStatus>());
 
     private static final Calendar TEST_CALENDAR1 = new Calendar.Builder().build();
 
