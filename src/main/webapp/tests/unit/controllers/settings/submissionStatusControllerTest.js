@@ -57,6 +57,10 @@ describe("controller: SubmissionStatusController", function () {
     });
 
     describe("Are the scope methods defined", function () {
+        it("canRemoveSubmissionStatus should be defined", function () {
+            expect(scope.canRemoveSubmissionStatus).toBeDefined();
+            expect(typeof scope.canRemoveSubmissionStatus).toEqual("function");
+        });
         it("createSubmissionStatus should be defined", function () {
             expect(scope.createSubmissionStatus).toBeDefined();
             expect(typeof scope.createSubmissionStatus).toEqual("function");
@@ -111,6 +115,13 @@ describe("controller: SubmissionStatusController", function () {
     });
 
     describe("Do the scope methods work as expected", function () {
+        it("canRemoveSubmissionStatus should return a boolean", function () {
+            expect(scope.canRemoveSubmissionStatus()).toBe(false);
+            expect(scope.canRemoveSubmissionStatus(false)).toBe(false);
+            expect(scope.canRemoveSubmissionStatus("false")).toBe(false);
+            expect(scope.canRemoveSubmissionStatus(true)).toBe(true);
+            expect(scope.canRemoveSubmissionStatus("true")).toBe(true);
+        });
         it("createSubmissionStatus should create a submission status", function () {
             scope.modalData = new mockSubmissionStatus(q);
 

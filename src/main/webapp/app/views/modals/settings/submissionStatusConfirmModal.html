@@ -10,11 +10,11 @@
     <validationmessage results="submissionStatusRepo.getValidationResults()"></validationmessage>
 
     <div class="modal-body">
-        <span ng-show="!modalData.isDefault">
+        <span ng-show="!canRemoveSubmissionStatus(modalData.isDefault)">
             <h4><b>Click confirm to remove the Submission Status:</b></h4>
             <span class="glyphicon glyphicon glyphicon-user"></span>
         </span>
-        <span ng-show="modalData.isDefault">
+        <span ng-show="canRemoveSubmissionStatus(modalData.isDefault)">
             <h4><b>Cannot delete default Submission Status:</b></h4>
             <span class="glyphicon glyphicon glyphicon-globe"></span>
         </span>
@@ -23,6 +23,6 @@
 
     <div class="modal-footer">
         <button type="button" class="btn btn-default" ng-click="resetSubmissionStatus()">Cancel</button>
-        <button id="submissionStatus-confirm" type="submit" class="btn btn-primary" ng-disabled="modalData.isDefault">Confirm</button>
+        <button id="submissionStatus-confirm" type="submit" class="btn btn-primary" ng-disabled="canRemoveSubmissionStatus(modalData.isDefault)">Confirm</button>
     </div>
 </form>

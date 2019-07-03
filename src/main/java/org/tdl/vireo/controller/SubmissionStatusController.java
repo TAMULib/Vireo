@@ -1,6 +1,5 @@
 package org.tdl.vireo.controller;
 
-import static edu.tamu.weaver.response.ApiStatus.ERROR;
 import static edu.tamu.weaver.response.ApiStatus.SUCCESS;
 import static edu.tamu.weaver.validation.model.BusinessValidationType.CREATE;
 import static edu.tamu.weaver.validation.model.BusinessValidationType.DELETE;
@@ -78,7 +77,7 @@ public class SubmissionStatusController {
     @PostMapping("/delete")
     @PreAuthorize("hasRole('MANAGER')")
     @WeaverValidation(business = { @WeaverValidation.Business(value = DELETE) })
-    public ApiResponse deleteSubmissionStatus(@WeaverValidatedModel SubmissionStatus submissionStatus) {
+    public ApiResponse deleteSubmissionStatus(@WeaverValidatedModel @RequestBody SubmissionStatus submissionStatus) {
         submissionStatusRepo.delete(submissionStatus);
         submissionStatusRepo.flush();
 

@@ -96,6 +96,10 @@ vireo.controller("SubmissionStatusController", function ($controller, $scope, $q
             $scope.modalData.save();
         };
 
+        $scope.canRemoveSubmissionStatus = function (isDefault) {
+            return angular.isDefined(isDefault) && (isDefault === true || isDefault === "true");
+        };
+
         $scope.removeSubmissionStatus = function () {
             $scope.modalData.delete();
         };
