@@ -10,11 +10,13 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.tdl.vireo.Application;
+import org.tdl.vireo.exception.SubmissionStatusException;
 import org.tdl.vireo.model.SubmissionState;
 import org.tdl.vireo.model.SubmissionStatus;
 import org.tdl.vireo.model.repo.SubmissionStatusRepo;
@@ -56,16 +58,23 @@ public class SubmissionStatusControllerTest extends AbstractControllerTest {
 
         response = submissionStatusController.createSubmissionStatus(TEST_SUBMISSION_STATUS4);
         assertEquals(ApiStatus.SUCCESS, response.getMeta().getStatus());
+    }
+
+    @Test(expected=SubmissionStatusException.class)
+    @WithMockUser(roles = {"MANAGER"})
+    public void createSubmissionStatusException() {
+        ApiResponse response = submissionStatusController.createSubmissionStatus(TEST_SUBMISSION_STATUS1);
+        assertEquals(ApiStatus.SUCCESS, response.getMeta().getStatus());
 
         response = submissionStatusController.createSubmissionStatus(TEST_SUBMISSION_STATUS5);
-        assertEquals(ApiStatus.SUCCESS, response.getMeta().getStatus());
+        assertEquals(HttpStatus.BAD_REQUEST, response.getMeta().getStatus());
 
         SubmissionStatus existingSubmission = (SubmissionStatus) response.getPayload().get("SubmissionStatus");
         existingSubmission.setName(existingSubmission.getName() + " (already sent)");
 
         // should fail when duplicate ID already exists.
         response = submissionStatusController.createSubmissionStatus(existingSubmission);
-        assertEquals(ApiStatus.INVALID, response.getMeta().getStatus());
+        assertEquals(HttpStatus.BAD_REQUEST, response.getMeta().getStatus());
     }
 
     @Test(expected=AccessDeniedException.class)
@@ -116,10 +125,9 @@ public class SubmissionStatusControllerTest extends AbstractControllerTest {
 
         SubmissionStatus changingSubmissionStatus = submissionStatusRepo.findByName(TEST_SUBMISSION_STATUS1.getName());
 
-        changingSubmissionStatus.setName(changingSubmissionStatus.getName() + " (updated)");
+        changingSubmissionStatus.setName(TEST_SUBMISSION_STATUS1.getName() + " (updated)");
         changingSubmissionStatus.isActive(!TEST_SUBMISSION_STATUS1.isActive());
         changingSubmissionStatus.isArchived(!TEST_SUBMISSION_STATUS1.isArchived());
-        changingSubmissionStatus.isDefault(!TEST_SUBMISSION_STATUS1.isDefault());
         changingSubmissionStatus.isDeletable(!TEST_SUBMISSION_STATUS1.isDeletable());
         changingSubmissionStatus.isEditableByReviewer(!TEST_SUBMISSION_STATUS1.isEditableByReviewer());
         changingSubmissionStatus.isEditableByStudent(!TEST_SUBMISSION_STATUS1.isEditableByStudent());
@@ -146,7 +154,6 @@ public class SubmissionStatusControllerTest extends AbstractControllerTest {
         changingSubmissionStatus.setName(changingSubmissionStatus.getName() + " (updated)");
         changingSubmissionStatus.isActive(!TEST_SUBMISSION_STATUS1.isActive());
         changingSubmissionStatus.isArchived(!TEST_SUBMISSION_STATUS1.isArchived());
-        changingSubmissionStatus.isDefault(!TEST_SUBMISSION_STATUS1.isDefault());
         changingSubmissionStatus.isDeletable(!TEST_SUBMISSION_STATUS1.isDeletable());
         changingSubmissionStatus.isEditableByReviewer(!TEST_SUBMISSION_STATUS1.isEditableByReviewer());
         changingSubmissionStatus.isEditableByStudent(!TEST_SUBMISSION_STATUS1.isEditableByStudent());
@@ -167,6 +174,28 @@ public class SubmissionStatusControllerTest extends AbstractControllerTest {
         assertEquals(changingSubmissionStatus.isEditableByStudent(), updatedSubmissionStatus.isEditableByStudent());
         assertEquals(changingSubmissionStatus.isPublishable(), updatedSubmissionStatus.isPublishable());
         assertEquals(changingSubmissionStatus.getSubmissionState(), updatedSubmissionStatus.getSubmissionState());
+    }
+
+    @Test(expected=SubmissionStatusException.class)
+    @WithMockUser(roles = {"MANAGER"})
+    public void updateSubmissionStatusException() {
+        submissionStatusController.createSubmissionStatus(TEST_SUBMISSION_STATUS1);
+
+        SubmissionStatus changingSubmissionStatus = submissionStatusRepo.findByName(TEST_SUBMISSION_STATUS1.getName());
+
+        changingSubmissionStatus.setName(TEST_SUBMISSION_STATUS1.getName() + " (updated)");
+        changingSubmissionStatus.isActive(!TEST_SUBMISSION_STATUS1.isActive());
+        changingSubmissionStatus.isArchived(!TEST_SUBMISSION_STATUS1.isArchived());
+        changingSubmissionStatus.isDefault(!TEST_SUBMISSION_STATUS1.isDefault());
+        changingSubmissionStatus.isDeletable(!TEST_SUBMISSION_STATUS1.isDeletable());
+        changingSubmissionStatus.isEditableByReviewer(!TEST_SUBMISSION_STATUS1.isEditableByReviewer());
+        changingSubmissionStatus.isEditableByStudent(!TEST_SUBMISSION_STATUS1.isEditableByStudent());
+        changingSubmissionStatus.isPublishable(!TEST_SUBMISSION_STATUS1.isPublishable());
+        changingSubmissionStatus.setSubmissionState(SubmissionState.WITHDRAWN);
+
+        ApiResponse response = submissionStatusController.updateSubmissionStatus(changingSubmissionStatus);
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getMeta().getStatus());
     }
 
     @Test

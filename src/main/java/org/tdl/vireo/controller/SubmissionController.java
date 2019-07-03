@@ -48,7 +48,6 @@ import org.springframework.web.multipart.MultipartFile;
 import org.tdl.vireo.exception.DepositException;
 import org.tdl.vireo.exception.OrganizationDoesNotAcceptSubmissionsExcception;
 import org.tdl.vireo.exception.SubmissionException;
-import org.tdl.vireo.exception.SubmissionStatusException;
 import org.tdl.vireo.model.CustomActionValue;
 import org.tdl.vireo.model.DepositLocation;
 import org.tdl.vireo.model.FieldValue;
