@@ -137,12 +137,15 @@ var mockStudentSubmission = function($q) {
     };
 
     model.enableListeners = function (simple) {
-        model.actionLogListenPromise = $q.defer().promise;
-        model.customActionValuesListenPromise = $q.defer().promise;
         model.fieldValuesListenPromise = $q.defer().promise;
         model.fieldValuesRemovedListenPromise = $q.defer().promise;
 
-        model.actionLogListenReloadDefer = $q.defer();
+        if (simple !== true) {
+            model.actionLogListenPromise = $q.defer().promise;
+            model.customActionValuesListenPromise = $q.defer().promise;
+
+            model.actionLogListenReloadDefer = $q.defer();
+        }
     };
 
     model.fetchDocumentTypeFileInfo = function () {
