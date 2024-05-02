@@ -27,7 +27,7 @@ vireo.controller('SubmissionHistoryController', function ($controller, $location
 
     var manuscriptFetchLock = {};
 
-    var handleResponse = function (res) {
+    var resetTableOnSuccessResponse = function (res) {
         if (!!res && !!res.body) {
             var apiRes = angular.fromJson(res.body);
             if (apiRes.meta.status === "SUCCESS") {
@@ -42,11 +42,11 @@ vireo.controller('SubmissionHistoryController', function ($controller, $location
                 submission.enableListeners(true);
 
                 if (!!submission.fieldValuesListenPromise) {
-                    submission.fieldValuesListenPromise.then(null, null, handleResponse);
+                    submission.fieldValuesListenPromise.then(null, null, resetTableOnSuccessResponse);
                 }
 
                 if (!!submission.fieldValuesRemovedListenPromise) {
-                    submission.fieldValuesRemovedListenPromise.then(null, null, handleResponse);
+                    submission.fieldValuesRemovedListenPromise.then(null, null, resetTableOnSuccessResponse);
                 }
             }
         });
@@ -55,7 +55,12 @@ vireo.controller('SubmissionHistoryController', function ($controller, $location
     });
 
     StudentSubmissionRepo.listenForChanges().then(null, null, function(res) {
-        StudentSubmissionRepo.reset().then(handleResponse);
+        if (!!res && !!res.body) {
+            var apiRes = angular.fromJson(res.body);
+            if (apiRes.meta.status === "SUCCESS") {
+                StudentSubmissionRepo.reset().then(resetTableOnSuccessResponse);
+            }
+        }
     });
 
     $scope.getDocumentTitle = function (row) {
