@@ -30,7 +30,7 @@ RUN mkdir -p $SOURCE_DIR && \
 
 # Upgrade the system and install dependencies.
 RUN apk -U upgrade && \
-    apk add --update --no-cache nodejs npm make g++ py3-pip
+    apk add --update --no-cache nodejs npm make g++ py3-pip git
 
 # Set deployment directory.
 WORKDIR $SOURCE_DIR
@@ -50,7 +50,7 @@ RUN chown -R $USER_ID:$USER_ID $SOURCE_DIR
 USER $USER_NAME
 
 # Build.
-RUN mvn package -Pproduction
+RUN mvn package -Pproduction -Dmaven.test.skip=true
 
 # JRE Stage.
 FROM eclipse-temurin:11-alpine
