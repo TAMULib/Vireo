@@ -203,6 +203,10 @@ vireo.controller("SubmissionListController", function (NgTableParams, $controlle
 
         update(true);
 
+        const withoutActiveFilter = function(value) {
+            return $scope.activeFilters.namedSearchFilters.filter((nsf) => nsf.filterValues.indexOf(value) >= 0).length == 0;
+        };
+
         var assignableUsers = UserRepo.getAssignableUsers(0, 0);
         var savedFilters = SavedFilterRepo.getAll();
         var emailTemplates = EmailTemplateRepo.getAll();
@@ -217,6 +221,15 @@ vireo.controller("SubmissionListController", function (NgTableParams, $controlle
         var packagers = PackagerRepo.getAll();
         var controlledVocabularies = ControlledVocabularyRepo.getAll();
         var submissionTypeList = FieldValueRepo.findValuesByPredicateValue('submission_type');
+        var graduationSemesters = FieldValueRepo.findValuesByPredicateValue('dc.date.issued', function (a, b) {
+            const [monthA, yearA] = a.split(' ');
+            const [monthB, yearB] = b.split(' ');
+
+            const dateA = new Date(`${monthA} 1, ${yearA}`);
+            const dateB = new Date(`${monthB} 1, ${yearB}`);
+
+            return dateB - dateA;
+        });
 
         var addBatchCommentEmail = function (message) {
             batchCommentEmail.adding = true;
@@ -625,6 +638,8 @@ vireo.controller("SubmissionListController", function (NgTableParams, $controlle
             "embargos": embargos,
             "submissionTypeList": submissionTypeList,
             "assignableUsers": assignableUsers,
+            "graduationSemesters": graduationSemesters,
+            "withoutActiveFilter": withoutActiveFilter,
             "defaultLimit": 3,
             "getTypeAheadByPredicateName": getTypeAheadByPredicateName,
             "datepickerOptions": datepickerOptions
@@ -646,6 +661,8 @@ vireo.controller("SubmissionListController", function (NgTableParams, $controlle
             "submissionStatuses": submissionStatuses,
             "newStatus": submissionStatuses[0],
             "assignableUsers": assignableUsers,
+            "graduationSemesters": graduationSemesters,
+            "withoutActiveFilter": withoutActiveFilter,
             "batchAssignTo": batchAssignTo,
             "batchPublish": batchPublish,
             "resetBatchCommentEmailModal": resetBatchCommentEmailModal,
