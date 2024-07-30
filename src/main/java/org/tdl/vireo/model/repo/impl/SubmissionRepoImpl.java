@@ -621,7 +621,7 @@ public class SubmissionRepoImpl extends AbstractWeaverRepoImpl<Submission, Submi
 
                     for (String filterString : submissionListColumn.getFilters()) {
                         sqlBuilder = new StringBuilder();
-                        sqlBuilder.append("s").append(".id = ").append(filterString);
+                        sqlBuilder.append("s.id = ").append(filterString);
                         sqlWhereBuilderList.add(sqlBuilder);
                         getFromBuildersMap(sqlCountWhereFilterBuilders, "id").add(sqlBuilder);
                     }
@@ -643,10 +643,10 @@ public class SubmissionRepoImpl extends AbstractWeaverRepoImpl<Submission, Submi
                         sqlBuilder = new StringBuilder();
 
                         if (submissionListColumn.getExactMatch()) {
-                            sqlBuilder.append("ss").append(".name = '").append(filterString).append("'");
+                            sqlBuilder.append("ss.name = '").append(filterString).append("'");
                         } else {
                             // TODO: determine if status will ever be search using a like
-                            sqlBuilder.append("LOWER(ss").append(".name) LIKE '%").append(escapeString(filterString)).append("%'");
+                            sqlBuilder.append("LOWER(ss.name) LIKE '%").append(escapeString(filterString)).append("%'");
                         }
 
                         sqlWhereBuilderList.add(sqlBuilder);
@@ -656,7 +656,7 @@ public class SubmissionRepoImpl extends AbstractWeaverRepoImpl<Submission, Submi
                     // all column search filter
                     for (String filterString : allColumnSearchFilters) {
                         sqlBuilder = new StringBuilder();
-                        sqlBuilder.append("LOWER(ss").append(".name) LIKE '%").append(escapeString(filterString)).append("%'");
+                        sqlBuilder.append("LOWER(ss.name) LIKE '%").append(escapeString(filterString)).append("%'");
                         sqlAllColumnsWhereBuilderList.add(sqlBuilder);
                     }
 
@@ -680,10 +680,10 @@ public class SubmissionRepoImpl extends AbstractWeaverRepoImpl<Submission, Submi
                         sqlBuilder = new StringBuilder();
 
                         if (submissionListColumn.getExactMatch()) {
-                            sqlBuilder.append("o").append(".name = '").append(filterString).append("'");
+                            sqlBuilder.append("o.name = '").append(filterString).append("'");
                         } else {
                             // TODO: determine if organization name will ever be search using a like
-                            sqlBuilder.append("LOWER(o").append(".name) LIKE '%").append(escapeString(filterString)).append("%'");
+                            sqlBuilder.append("LOWER(o.name) LIKE '%").append(escapeString(filterString)).append("%'");
                         }
 
                         sqlWhereBuilderList.add(sqlBuilder);
@@ -693,7 +693,7 @@ public class SubmissionRepoImpl extends AbstractWeaverRepoImpl<Submission, Submi
                     // all column search filter
                     for (String filterString : allColumnSearchFilters) {
                         sqlBuilder = new StringBuilder();
-                        sqlBuilder.append("LOWER(o").append(".name) LIKE '%").append(escapeString(filterString)).append("%'");
+                        sqlBuilder.append("LOWER(o.name) LIKE '%").append(escapeString(filterString)).append("%'");
                         sqlAllColumnsWhereBuilderList.add(sqlBuilder);
                     }
 
@@ -717,11 +717,11 @@ public class SubmissionRepoImpl extends AbstractWeaverRepoImpl<Submission, Submi
                     for (String filterString : submissionListColumn.getFilters()) {
                         sqlBuilder = new StringBuilder();
                         if (submissionListColumn.getExactMatch()) {
-                            sqlBuilder.append("oc").append(".name = '").append(filterString).append("'");
+                            sqlBuilder.append("oc.name = '").append(filterString).append("'");
                         } else {
                             // TODO: determine if organization category name
                             // will ever be search using a like
-                            sqlBuilder.append("LOWER(oc").append(".name) LIKE '%").append(escapeString(filterString)).append("%'");
+                            sqlBuilder.append("LOWER(oc.name) LIKE '%").append(escapeString(filterString)).append("%'");
                         }
 
                         sqlWhereBuilderList.add(sqlBuilder);
@@ -731,7 +731,7 @@ public class SubmissionRepoImpl extends AbstractWeaverRepoImpl<Submission, Submi
                     // all column search filter
                     for (String filterString : allColumnSearchFilters) {
                         sqlBuilder = new StringBuilder();
-                        sqlBuilder.append("LOWER(oc").append(".name) LIKE '%").append(escapeString(filterString)).append("%'");
+                        sqlBuilder.append("LOWER(oc.name) LIKE '%").append(escapeString(filterString)).append("%'");
                         sqlAllColumnsWhereBuilderList.add(sqlBuilder);
                     }
 
@@ -752,11 +752,11 @@ public class SubmissionRepoImpl extends AbstractWeaverRepoImpl<Submission, Submi
                         sqlBuilder = new StringBuilder();
 
                         if (filterString == null) {
-                            sqlBuilder.append("a").append(".email IS NULL");
+                            sqlBuilder.append("a.email IS NULL");
                         } else if (submissionListColumn.getExactMatch()) {
-                            sqlBuilder.append("a").append(".email = '").append(filterString).append("'");
+                            sqlBuilder.append("a.email = '").append(filterString).append("'");
                         } else {
-                            sqlBuilder.append("LOWER(a").append(".email) LIKE '%").append(escapeString(filterString)).append("%'");
+                            sqlBuilder.append("LOWER(a.email) LIKE '%").append(escapeString(filterString)).append("%'");
                         }
 
                         sqlWhereBuilderList.add(sqlBuilder);
@@ -766,7 +766,7 @@ public class SubmissionRepoImpl extends AbstractWeaverRepoImpl<Submission, Submi
                     // all column search filter
                     for (String filterString : allColumnSearchFilters) {
                         sqlBuilder = new StringBuilder();
-                        sqlBuilder.append("LOWER(a").append(".email) LIKE '%").append(escapeString(filterString)).append("%'");
+                        sqlBuilder.append("LOWER(a.email) LIKE '%").append(escapeString(filterString)).append("%'");
                         sqlAllColumnsWhereBuilderList.add(sqlBuilder);
                     }
 
@@ -789,11 +789,11 @@ public class SubmissionRepoImpl extends AbstractWeaverRepoImpl<Submission, Submi
                         sqlBuilder = new StringBuilder();
 
                         if (filterString == null) {
-                            sqlBuilder.append("al").append(".entry IS NULL");
+                            sqlBuilder.append("al.entry IS NULL");
                         } else if (submissionListColumn.getExactMatch()) {
-                            sqlBuilder.append("al").append(".entry = '").append(filterString).append("'");
+                            sqlBuilder.append("al.entry = '").append(filterString).append("'");
                         } else {
-                            sqlBuilder.append("LOWER(al").append(".entry) LIKE '%").append(escapeString(filterString)).append("%'");
+                            sqlBuilder.append("LOWER(al.entry) LIKE '%").append(escapeString(filterString)).append("%'");
                         }
 
                         sqlWhereBuilderList.add(sqlBuilder);
@@ -803,7 +803,7 @@ public class SubmissionRepoImpl extends AbstractWeaverRepoImpl<Submission, Submi
                     // all column search filter
                     for (String filterString : allColumnSearchFilters) {
                         sqlBuilder = new StringBuilder();
-                        sqlBuilder.append("LOWER(al").append(".entry) LIKE '%").append(escapeString(filterString)).append("%'");
+                        sqlBuilder.append("LOWER(al.entry) LIKE '%").append(escapeString(filterString)).append("%'");
                         sqlAllColumnsWhereBuilderList.add(sqlBuilder);
                     }
 
@@ -826,13 +826,13 @@ public class SubmissionRepoImpl extends AbstractWeaverRepoImpl<Submission, Submi
                         if (filterString.contains("|")) {
                             String[] dates = filterString.split(Pattern.quote("|"));
                             sqlBuilder = new StringBuilder()
-                                .append("al.").append("action_date")
+                                .append("al.action_date")
                                 .append(" BETWEEN CAST('").append(dates[0])
                                 .append("' AS DATE) AND CAST('").append(dates[1])
                                 .append("' AS DATE)");
                         } else {
                             sqlBuilder = new StringBuilder()
-                                .append("al.").append("action_date")
+                                .append("al.action_date")
                                 .append(" = CAST('").append(filterString)
                                 .append("' AS DATE)");
                         }
@@ -916,9 +916,9 @@ public class SubmissionRepoImpl extends AbstractWeaverRepoImpl<Submission, Submi
 
                     for (String filterString : submissionListColumn.getFilters()) {
                         if (sqlWheresExcludeBuilder.length() > 0) {
-                            sqlWheresExcludeBuilder.append(" AND s").append(".id <> ").append(filterString);
+                            sqlWheresExcludeBuilder.append(" AND s.id <> ").append(filterString);
                         } else {
-                            sqlWheresExcludeBuilder.append(" s").append(".id <> ").append(filterString);
+                            sqlWheresExcludeBuilder.append(" s.id <> ").append(filterString);
                         }
                     }
 
@@ -1003,7 +1003,7 @@ public class SubmissionRepoImpl extends AbstractWeaverRepoImpl<Submission, Submi
 
                     for (String filterString : submissionListColumn.getFilters()) {
                         sqlBuilder = new StringBuilder();
-                        sqlBuilder.append("LOWER(s").append(".depositurl) LIKE '%").append(escapeString(filterString)).append("%'");
+                        sqlBuilder.append("LOWER(s.depositurl) LIKE '%").append(escapeString(filterString)).append("%'");
                         sqlWhereBuilderList.add(sqlBuilder);
                         getFromBuildersMap(sqlCountWhereFilterBuilders, "depositurl").add(sqlBuilder);
                     }
@@ -1011,7 +1011,7 @@ public class SubmissionRepoImpl extends AbstractWeaverRepoImpl<Submission, Submi
                     // all column search filter
                     for (String filterString : allColumnSearchFilters) {
                         sqlBuilder = new StringBuilder();
-                        sqlBuilder.append("LOWER(s").append(".depositurl) LIKE '%").append(escapeString(filterString)).append("%'");
+                        sqlBuilder.append("LOWER(s.depositurl) LIKE '%").append(escapeString(filterString)).append("%'");
                         sqlAllColumnsWhereBuilderList.add(sqlBuilder);
                     }
 
@@ -1024,7 +1024,7 @@ public class SubmissionRepoImpl extends AbstractWeaverRepoImpl<Submission, Submi
 
                     for (String filterString : submissionListColumn.getFilters()) {
                         sqlBuilder = new StringBuilder();
-                        sqlBuilder.append("LOWER(s").append(".reviewer_notes) LIKE '%").append(escapeString(filterString)).append("%'");
+                        sqlBuilder.append("LOWER(s.reviewer_notes) LIKE '%").append(escapeString(filterString)).append("%'");
                         sqlWhereBuilderList.add(sqlBuilder);
                         getFromBuildersMap(sqlCountWhereFilterBuilders, "reviewer_notes").add(sqlBuilder);
                     }
@@ -1032,7 +1032,7 @@ public class SubmissionRepoImpl extends AbstractWeaverRepoImpl<Submission, Submi
                     // all column search filter
                     for (String filterString : allColumnSearchFilters) {
                         sqlBuilder = new StringBuilder();
-                        sqlBuilder.append("LOWER(s").append(".reviewer_notes) LIKE '%").append(escapeString(filterString)).append("%'");
+                        sqlBuilder.append("LOWER(s.reviewer_notes) LIKE '%").append(escapeString(filterString)).append("%'");
                         sqlAllColumnsWhereBuilderList.add(sqlBuilder);
                     }
 

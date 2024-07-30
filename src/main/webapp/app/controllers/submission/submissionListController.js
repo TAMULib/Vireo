@@ -219,13 +219,32 @@ vireo.controller("SubmissionListController", function (NgTableParams, $controlle
         var controlledVocabularies = ControlledVocabularyRepo.getAll();
         var submissionTypeList = FieldValueRepo.findValuesByPredicateValue('submission_type');
         var graduationSemesters = FieldValueRepo.findValuesByPredicateValue('dc.date.issued', function (a, b) {
-            const [monthA, yearA] = a.split(' ');
-            const [monthB, yearB] = b.split(' ');
+            try {
+                if (typeof a !== 'string' || typeof b !== 'string') {
+                    throw new Error('Invalid input type. Both inputs must be strings.');
+                }
 
-            const dateA = new Date(`${monthA} 1, ${yearA}`);
-            const dateB = new Date(`${monthB} 1, ${yearB}`);
+                const regex = /^[A-Za-z]+\s\d{4}$/;
 
-            return dateB - dateA;
+                if (!regex.test(a) || !regex.test(b)) {
+                    throw new Error('Invalid input format. Inputs must be in the format "Month Year".');
+                }
+
+                const [monthA, yearA] = a.split(' ');
+                const [monthB, yearB] = b.split(' ');
+
+                const dateA = new Date(`${monthA} 1, ${yearA}`);
+                const dateB = new Date(`${monthB} 1, ${yearB}`);
+
+                if (isNaN(dateA) || isNaN(dateB)) {
+                    throw new Error('Invalid date. Inputs must be valid dates.');
+                }
+
+                return dateB - dateA;
+            } catch (error) {
+                console.error(error.message);
+                return 0;
+            }
         });
 
         var addBatchCommentEmail = function (message) {
@@ -361,11 +380,13 @@ vireo.controller("SubmissionListController", function (NgTableParams, $controlle
             });
         };
 
+        var hasSinglePredicate = (c) => c.predicate === undefined || c.predicate === null || c.predicate.trim().indexOf(' ') === -1;
+
         var setFilterColumns = function(userFilterColumns, inactiveFilterColumns) {
             // exclude columns which have multiple predicates
             angular.extend(filterColumns, {
-                userFilterColumns: userFilterColumns.filter(c => (c.predicate === undefined || c.predicate == null) || c.predicate.trim().indexOf(' ') === -1),
-                inactiveFilterColumns: inactiveFilterColumns.filter(c => (c.predicate === undefined || c.predicate == null) || c.predicate.trim().indexOf(' ') === -1)
+                userFilterColumns: userFilterColumns.filter(hasSinglePredicate),
+                inactiveFilterColumns: inactiveFilterColumns.filter(hasSinglePredicate)
             });
         }
 
