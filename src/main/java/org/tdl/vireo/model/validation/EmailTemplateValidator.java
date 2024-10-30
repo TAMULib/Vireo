@@ -11,7 +11,7 @@ public class EmailTemplateValidator extends BaseModelValidator {
         String nameProperty = "name";
         this.addInputValidator(new InputValidator(InputValidationType.required, "Email Template requires a name", nameProperty, true));
         this.addInputValidator(new InputValidator(InputValidationType.minlength, "Email Template name must be at least 2 characters", nameProperty, 2));
-        this.addInputValidator(new InputValidator(InputValidationType.maxlength, "Email Template name cannot be more than 50 characters", nameProperty, 50));
+        this.addInputValidator(new InputValidator(InputValidationType.maxlength, "Email Template name cannot be more than 100 characters", nameProperty, 100));
 
         String subjectProperty = "subject";
         this.addInputValidator(new InputValidator(InputValidationType.required, "Email Template requires a subject", subjectProperty, true));
