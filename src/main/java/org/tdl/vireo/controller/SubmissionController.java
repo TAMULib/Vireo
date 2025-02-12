@@ -812,6 +812,7 @@ public class SubmissionController {
                             submission.setDepositURL(depositURL);
                             submission = submissionRepo.updateStatus(submission, submissionStatus, user);
                         } catch (Exception e) {
+                            LOG.warn("Package export failure on submission {} caused by: {}", submission.getId(), e.getMessage(), e);
                             throw new DepositException("Failed package export on submission " + submission.getId());
                         }
                     }
