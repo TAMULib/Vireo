@@ -30,7 +30,7 @@ RUN mkdir -p $SOURCE_DIR && \
 
 # Upgrade the system and install dependencies.
 RUN apk -U upgrade && \
-    apk add --update --no-cache nodejs npm make g++ py3-pip
+    apk add --update --no-cache nodejs npm make g++ py3-pip git
 
 # Set deployment directory.
 WORKDIR $SOURCE_DIR
