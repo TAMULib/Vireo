@@ -14,8 +14,10 @@ import java.nio.file.Path;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -643,15 +645,31 @@ public class SubmissionController {
                             }
                         }
                         // LICENSES
+                        HashSet<String> previousLicenseFileNames = new HashSet<String>();
                         for (FieldValue ldfv : submission.getLicenseDocumentFieldValues()) {
                             Path path = assetService.getAssetsAbsolutePath(ldfv.getValue());
                             byte[] fileBytes = Files.readAllBytes(path);
-                            int sfxIndx;
-                            String licFileName = ldfv.getFileName();
-                            if((sfxIndx = licFileName.indexOf("."))>0){
-                                licFileName = licFileName.substring(0,sfxIndx).toUpperCase()+licFileName.substring(sfxIndx);
+
+                            String originalLicFileName = ldfv.getFileName();
+                            String exportableLicFileName = "";
+                            String licFileNameBase = FilenameUtils.getBaseName(originalLicFileName).toUpperCase();
+                            Boolean hasFileExtension = FilenameUtils.getExtension(originalLicFileName).length() > 0;
+                            String licFileExtension = FilenameUtils.EXTENSION_SEPARATOR_STR + FilenameUtils.getExtension(originalLicFileName);
+                            if(hasFileExtension) {
+                                exportableLicFileName = licFileNameBase + licFileExtension;
+                            } else {
+                                exportableLicFileName = originalLicFileName;
                             }
-                            b.putNextEntry(new ZipEntry(personName+"_permission/"+licFileName));
+                            if (previousLicenseFileNames.contains(exportableLicFileName)) {
+                                if (hasFileExtension) {
+                                    exportableLicFileName = licFileNameBase + "_" + Instant.now().getEpochSecond()+licFileExtension;
+                                } else {
+                                    exportableLicFileName += "_" + Instant.now().getEpochSecond();
+                                }
+                            }
+                            previousLicenseFileNames.add(exportableLicFileName);
+
+                            b.putNextEntry(new ZipEntry(personName+"_permission/"+exportableLicFileName));
                             b.write(fileBytes);
                             b.closeEntry();
                         }
