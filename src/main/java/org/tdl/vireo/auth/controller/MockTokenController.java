@@ -48,8 +48,8 @@ public class MockTokenController extends WeaverMockTokenController {
         mockAdminClaims.put(shibValues.get(ConfigurationName.APPLICATION_AUTH_SHIB_ATTRIBUTE_NETID), "aggieJack");
         mockAdminClaims.put(shibValues.get(ConfigurationName.APPLICATION_AUTH_SHIB_ATTRIBUTE_INSTITUTION_IDENTIFIER), "inst-id-123");
         mockAdminClaims.put(shibValues.get(ConfigurationName.APPLICATION_AUTH_SHIB_ATTRIBUTE_INSTITUTIONAL_IDENTIFIER), "123456789");
-        mockAdminClaims.put(shibValues.get(ConfigurationName.APPLICATION_AUTH_SHIB_ATTRIBUTE_LAST_NAME), "Daniels");
-        mockAdminClaims.put(shibValues.get(ConfigurationName.APPLICATION_AUTH_SHIB_ATTRIBUTE_FIRST_NAME), "Jack");
+        mockAdminClaims.put(shibValues.get(ConfigurationName.APPLICATION_AUTH_SHIB_ATTRIBUTE_LAST_NAME), "Daníels");
+        mockAdminClaims.put(shibValues.get(ConfigurationName.APPLICATION_AUTH_SHIB_ATTRIBUTE_FIRST_NAME), "Jấck");
         mockAdminClaims.put(shibValues.get(ConfigurationName.APPLICATION_AUTH_SHIB_ATTRIBUTE_EMAIL), "aggieJack@tamu.edu");
 
         mockAdminClaims.put(shibValues.get(ConfigurationName.APPLICATION_AUTH_SHIB_ATTRIBUTE_BIRTH_YEAR), "1977");
