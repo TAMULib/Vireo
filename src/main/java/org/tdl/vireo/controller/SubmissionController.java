@@ -619,86 +619,87 @@ public class SubmissionController {
             break;
 
         case "ProQuest":
-            ByteArrayOutputStream sos_pq = new ByteArrayOutputStream();
-
             try {
+                response.setContentType(packager.getMimeType());
+                response.setHeader("Content-Disposition", "inline; filename=" + packagerName + "." + packager.getFileExtension());
+
                 ZipOutputStream zos = new ZipOutputStream(sos_pq, StandardCharsets.UTF_8);
+
                 for (Submission submission : submissionRepo.batchDynamicSubmissionQuery(filter, columns)) {
+
                     List<FieldValue> fieldValues = submission.getFieldValuesByPredicateValue("first_name");
                     Optional<String> firstNameOpt = fieldValues.size() > 0 ? Optional.of(fieldValues.get(0).getValue()) : Optional.empty();
                     String firstName = firstNameOpt.isPresent() ? firstNameOpt.get() : "";
                     firstName = firstName.substring(0,1).toUpperCase()+firstName.substring(1);
+
                     fieldValues = submission.getFieldValuesByPredicateValue("last_name");
                     Optional<String> lastNameOpt = fieldValues.size() > 0 ? Optional.of(fieldValues.get(0).getValue()) : Optional.empty();
                     String lastName = lastNameOpt.isPresent() ? lastNameOpt.get() : "";
                     lastName = lastName.substring(0,1).toUpperCase()+lastName.substring(1);
-                    String personName = lastName+"_"+firstName;
 
-                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                    try (ZipOutputStream b = new ZipOutputStream(baos)){
-                        ExportPackage exportPackage = packagerUtility.packageExport(packager, submission);
-                        if (exportPackage.isMap()) {
-                            for (Map.Entry<String, File> fileEntry : ((Map<String, File>) exportPackage.getPayload()).entrySet()) {
-                                b.putNextEntry(new ZipEntry(personName+"_DATA.xml"));
-                                b.write(Files.readAllBytes(fileEntry.getValue().toPath()));
-                                b.closeEntry();
-                            }
-                        }
-                        // LICENSES
-                        HashSet<String> previousLicenseFileNames = new HashSet<String>();
-                        for (FieldValue ldfv : submission.getLicenseDocumentFieldValues()) {
-                            Path path = assetService.getAssetsAbsolutePath(ldfv.getValue());
-                            byte[] fileBytes = Files.readAllBytes(path);
+                    String personName = lastName+"_"+firstName+"_"+submission.getId();;
 
-                            String originalLicFileName = ldfv.getFileName();
-                            String exportableLicFileName = "";
-                            String licFileNameBase = FilenameUtils.getBaseName(originalLicFileName).toUpperCase();
-                            Boolean hasFileExtension = FilenameUtils.getExtension(originalLicFileName).length() > 0;
-                            String licFileExtension = FilenameUtils.EXTENSION_SEPARATOR_STR + FilenameUtils.getExtension(originalLicFileName);
-                            if(hasFileExtension) {
-                                exportableLicFileName = licFileNameBase + licFileExtension;
-                            } else {
-                                exportableLicFileName = originalLicFileName;
-                            }
-                            if (previousLicenseFileNames.contains(exportableLicFileName)) {
-                                if (hasFileExtension) {
-                                    exportableLicFileName = licFileNameBase + "_" + Instant.now().getEpochSecond()+licFileExtension;
-                                } else {
-                                    exportableLicFileName += "_" + Instant.now().getEpochSecond();
-                                }
-                            }
-                            previousLicenseFileNames.add(exportableLicFileName);
-
-                            b.putNextEntry(new ZipEntry(personName+"_permission/"+exportableLicFileName));
-                            b.write(fileBytes);
+                    zos.putNextEntry(new ZipEntry("upload_"+personName+".zip"));
+                    
+                    ZipOutputStream b = new ZipOutputStream(zos);
+                    ExportPackage exportPackage = packagerUtility.packageExport(packager, submission);
+                    if (exportPackage.isMap()) {
+                        for (Map.Entry<String, File> fileEntry : ((Map<String, File>) exportPackage.getPayload()).entrySet()) {
+                            b.putNextEntry(new ZipEntry(personName+"_DATA.xml"));
+                            Files.copy(fileEntry.getValue().toPath(), b);
                             b.closeEntry();
                         }
-                        // PRIMARY_DOC
-                        FieldValue primaryDoc = submission.getPrimaryDocumentFieldValue();
-                        Path path = assetService.getAssetsAbsolutePath(primaryDoc.getValue());
+                    }
+
+                    // LICENSES
+                    HashSet<String> previousLicenseFileNames = new HashSet<String>();
+                    for (FieldValue ldfv : submission.getLicenseDocumentFieldValues()) {
+                        Path path = assetService.getAssetsAbsolutePath(ldfv.getValue());
                         byte[] fileBytes = Files.readAllBytes(path);
-                        String fName = primaryDoc.getFileName();
-                        int fNameIndx = fName.indexOf(".");
-                        String fType = "";//default
-                        if(fNameIndx>0){
-                            fType = fName.substring(fNameIndx);
+
+                        String originalLicFileName = ldfv.getFileName();
+                        String exportableLicFileName = "";
+                        String licFileNameBase = FilenameUtils.getBaseName(originalLicFileName).toUpperCase();
+                        Boolean hasFileExtension = FilenameUtils.getExtension(originalLicFileName).length() > 0;
+                        String licFileExtension = FilenameUtils.EXTENSION_SEPARATOR_STR + FilenameUtils.getExtension(originalLicFileName);
+                        if(hasFileExtension) {
+                            exportableLicFileName = licFileNameBase + licFileExtension;
+                        } else {
+                            exportableLicFileName = originalLicFileName;
                         }
-                        b.putNextEntry(new ZipEntry(personName+fType));
+                        if (previousLicenseFileNames.contains(exportableLicFileName)) {
+                            if (hasFileExtension) {
+                                exportableLicFileName = licFileNameBase + "_" + Instant.now().getEpochSecond()+licFileExtension;
+                            } else {
+                                exportableLicFileName += "_" + Instant.now().getEpochSecond();
+                            }
+                        }
+                        previousLicenseFileNames.add(exportableLicFileName);
+
+                        b.putNextEntry(new ZipEntry(personName+"_permission/"+exportableLicFileName));
                         b.write(fileBytes);
                         b.closeEntry();
-
-                    }catch(IOException ioe){
-                        ioe.printStackTrace();
                     }
-                    zos.putNextEntry(new ZipEntry("upload_"+personName+".zip"));
-                    baos.close();
-                    zos.write(baos.toByteArray());
-                    zos.closeEntry();
+
+                    // PRIMARY_DOC
+                    FieldValue primaryDoc = submission.getPrimaryDocumentFieldValue();
+                    Path path = assetService.getAssetsAbsolutePath(primaryDoc.getValue());
+                    byte[] fileBytes = Files.readAllBytes(path);
+                    String fName = primaryDoc.getFileName();
+                    int fNameIndx = fName.indexOf(".");
+                    String fType = "";//default
+                    if(fNameIndx>0){
+                        fType = fName.substring(fNameIndx);
+                    }
+                    b.putNextEntry(new ZipEntry(personName+fType));
+                    b.write(fileBytes);
+                    b.closeEntry();
+
+                    b.finishi();
+                    zop.closeEntry();
                 }
+
                 zos.close();
-                response.setContentType(packager.getMimeType());
-                response.getOutputStream().write(sos_pq.toByteArray());
-                response.setHeader("Content-Disposition", "inline; filename=" + packagerName + "." + packager.getFileExtension());
             } catch (Exception e) {
                 handleBatchExportError(e, response);
             }
