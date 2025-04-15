@@ -623,7 +623,7 @@ public class SubmissionController {
                 response.setContentType(packager.getMimeType());
                 response.setHeader("Content-Disposition", "inline; filename=" + packagerName + "." + packager.getFileExtension());
 
-                ZipOutputStream zos = new ZipOutputStream(sos_pq, StandardCharsets.UTF_8);
+                ZipOutputStream zos = new ZipOutputStream(response.getOutputStream(), StandardCharsets.UTF_8);
 
                 for (Submission submission : submissionRepo.batchDynamicSubmissionQuery(filter, columns)) {
 
@@ -695,8 +695,8 @@ public class SubmissionController {
                     b.write(fileBytes);
                     b.closeEntry();
 
-                    b.finishi();
-                    zop.closeEntry();
+                    b.finish();
+                    zos.closeEntry();
                 }
 
                 zos.close();

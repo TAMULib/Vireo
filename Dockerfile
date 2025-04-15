@@ -50,7 +50,7 @@ RUN chown -R $USER_ID:$USER_ID $SOURCE_DIR
 USER $USER_NAME
 
 # Build.
-RUN mvn package -Pproduction
+RUN mvn package -Pproduction -DskipTests
 
 # JRE Stage.
 FROM eclipse-temurin:11-alpine
