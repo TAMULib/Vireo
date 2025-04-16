@@ -717,6 +717,8 @@ public class SubmissionController {
 
                 zos.close();
                 LOG.info("All submissions processed and zipped successfully.");
+                response.flushBuffer();
+                LOG.info("Flushed response buffer successfully.");
             } catch (Exception e) {
                 LOG.error("Error during ProQuest export: {}", e.getMessage(), e);
                 handleBatchExportError(e, response);
