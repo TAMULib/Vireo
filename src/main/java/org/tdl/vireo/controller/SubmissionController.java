@@ -622,7 +622,7 @@ public class SubmissionController {
         case "ProQuest":
             try {
                 response.setContentType(packager.getMimeType());
-                response.setHeader("Content-Disposition", "inline; filename=" + packagerName + "." + packager.getFileExtension());
+                response.setHeader("Content-Disposition", "attachment; filename=" + packagerName + "." + packager.getFileExtension());
 
                 ZipOutputStream zos = new ZipOutputStream(response.getOutputStream(), StandardCharsets.UTF_8);
 
