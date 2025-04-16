@@ -707,7 +707,7 @@ public class SubmissionController {
                     Files.copy(tempZipFile.toPath(), zos);
                     zos.closeEntry();
 
-                    tempZipFile.delete();
+                    boolean deleted = tempZipFile.delete();
                     if (!deleted) {
                     LOG.warn("Temp zip file {} could not be deleted", tempZipFile.getAbsolutePath());
                     }
