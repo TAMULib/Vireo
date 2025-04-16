@@ -639,64 +639,72 @@ public class SubmissionController {
 
                     String personName = lastName+"_"+firstName+"_"+submission.getId();;
 
-                    zos.putNextEntry(new ZipEntry("upload_"+personName+".zip"));
-                    
-                    ZipOutputStream b = new ZipOutputStream(zos);
-                    ExportPackage exportPackage = packagerUtility.packageExport(packager, submission);
-                    if (exportPackage.isMap()) {
-                        for (Map.Entry<String, File> fileEntry : ((Map<String, File>) exportPackage.getPayload()).entrySet()) {
-                            b.putNextEntry(new ZipEntry(personName+"_DATA.xml"));
-                            Files.copy(fileEntry.getValue().toPath(), b);
-                            b.closeEntry();
-                        }
-                    }
+                    File tempZipFile = File.createTempFile("upload_" + personName, ".zip");
 
-                    // LICENSES
-                    HashSet<String> previousLicenseFileNames = new HashSet<String>();
-                    for (FieldValue ldfv : submission.getLicenseDocumentFieldValues()) {
-                        Path path = assetService.getAssetsAbsolutePath(ldfv.getValue());
-                        byte[] fileBytes = Files.readAllBytes(path);
-
-                        String originalLicFileName = ldfv.getFileName();
-                        String exportableLicFileName = "";
-                        String licFileNameBase = FilenameUtils.getBaseName(originalLicFileName).toUpperCase();
-                        Boolean hasFileExtension = FilenameUtils.getExtension(originalLicFileName).length() > 0;
-                        String licFileExtension = FilenameUtils.EXTENSION_SEPARATOR_STR + FilenameUtils.getExtension(originalLicFileName);
-                        if(hasFileExtension) {
-                            exportableLicFileName = licFileNameBase + licFileExtension;
-                        } else {
-                            exportableLicFileName = originalLicFileName;
-                        }
-                        if (previousLicenseFileNames.contains(exportableLicFileName)) {
-                            if (hasFileExtension) {
-                                exportableLicFileName = licFileNameBase + "_" + Instant.now().getEpochSecond()+licFileExtension;
-                            } else {
-                                exportableLicFileName += "_" + Instant.now().getEpochSecond();
+                    try (ZipOutputStream b = new ZipOutputStream(new FileOutputStream(tempZipFile))) {
+                        
+                        ExportPackage exportPackage = packagerUtility.packageExport(packager, submission);
+                        if (exportPackage.isMap()) {
+                            for (Map.Entry<String, File> fileEntry : ((Map<String, File>) exportPackage.getPayload()).entrySet()) {
+                                b.putNextEntry(new ZipEntry(personName+"_DATA.xml"));
+                                Files.copy(fileEntry.getValue().toPath(), b);
+                                b.closeEntry();
                             }
                         }
-                        previousLicenseFileNames.add(exportableLicFileName);
 
-                        b.putNextEntry(new ZipEntry(personName+"_permission/"+exportableLicFileName));
+                        // LICENSES
+                        HashSet<String> previousLicenseFileNames = new HashSet<String>();
+                        for (FieldValue ldfv : submission.getLicenseDocumentFieldValues()) {
+                            Path path = assetService.getAssetsAbsolutePath(ldfv.getValue());
+                            byte[] fileBytes = Files.readAllBytes(path);
+
+                            String originalLicFileName = ldfv.getFileName();
+                            String exportableLicFileName = "";
+                            String licFileNameBase = FilenameUtils.getBaseName(originalLicFileName).toUpperCase();
+                            Boolean hasFileExtension = FilenameUtils.getExtension(originalLicFileName).length() > 0;
+                            String licFileExtension = FilenameUtils.EXTENSION_SEPARATOR_STR + FilenameUtils.getExtension(originalLicFileName);
+                            if(hasFileExtension) {
+                                exportableLicFileName = licFileNameBase + licFileExtension;
+                            } else {
+                                exportableLicFileName = originalLicFileName;
+                            }
+                            if (previousLicenseFileNames.contains(exportableLicFileName)) {
+                                if (hasFileExtension) {
+                                    exportableLicFileName = licFileNameBase + "_" + Instant.now().getEpochSecond()+licFileExtension;
+                                } else {
+                                    exportableLicFileName += "_" + Instant.now().getEpochSecond();
+                                }
+                            }
+                            previousLicenseFileNames.add(exportableLicFileName);
+
+                            b.putNextEntry(new ZipEntry(personName+"_permission/"+exportableLicFileName));
+                            b.write(fileBytes);
+                            b.closeEntry();
+                        }
+
+                        // PRIMARY_DOC
+                        FieldValue primaryDoc = submission.getPrimaryDocumentFieldValue();
+                        Path path = assetService.getAssetsAbsolutePath(primaryDoc.getValue());
+                        byte[] fileBytes = Files.readAllBytes(path);
+                        String fName = primaryDoc.getFileName();
+                        int fNameIndx = fName.indexOf(".");
+                        String fType = "";//default
+                        if(fNameIndx>0){
+                            fType = fName.substring(fNameIndx);
+                        }
+                        b.putNextEntry(new ZipEntry(personName+fType));
                         b.write(fileBytes);
                         b.closeEntry();
-                    }
 
-                    // PRIMARY_DOC
-                    FieldValue primaryDoc = submission.getPrimaryDocumentFieldValue();
-                    Path path = assetService.getAssetsAbsolutePath(primaryDoc.getValue());
-                    byte[] fileBytes = Files.readAllBytes(path);
-                    String fName = primaryDoc.getFileName();
-                    int fNameIndx = fName.indexOf(".");
-                    String fType = "";//default
-                    if(fNameIndx>0){
-                        fType = fName.substring(fNameIndx);
+                    } catch (IOException bError) {
+                        bError.printStackTrace();
                     }
-                    b.putNextEntry(new ZipEntry(personName+fType));
-                    b.write(fileBytes);
-                    b.closeEntry();
-
-                    b.finish();
+                    
+                    zos.putNextEntry(new ZipEntry("upload_"+personName+".zip"));
+                    Files.copy(tempZipFile.toPath(), zos);
                     zos.closeEntry();
+
+                    tempZipFile.delete();
                 }
 
                 zos.close();
