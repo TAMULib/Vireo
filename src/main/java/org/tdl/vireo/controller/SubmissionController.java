@@ -25,6 +25,7 @@ import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
+import java.io.FileOutputStream;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
