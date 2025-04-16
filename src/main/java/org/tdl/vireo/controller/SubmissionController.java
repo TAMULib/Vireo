@@ -638,7 +638,8 @@ public class SubmissionController {
                     String lastName = lastNameOpt.isPresent() ? lastNameOpt.get() : "";
                     lastName = lastName.substring(0,1).toUpperCase()+lastName.substring(1);
 
-                    String personName = lastName+"_"+firstName+"_"+submission.getId();;
+                    String personName = lastName+"_"+firstName+"_"+submission.getId();
+                    LOG.info("Processing submission: {}", personName);
 
                     File tempZipFile = File.createTempFile("upload_" + personName, ".zip");
 
@@ -698,7 +699,8 @@ public class SubmissionController {
                         b.closeEntry();
 
                     } catch (IOException bError) {
-                        bError.printStackTrace();
+                        LOG.error("Failed to create inner zip for submission {}: {}", personName, bError.getMessage(), bError);
+                        continue;
                     }
                     
                     zos.putNextEntry(new ZipEntry("upload_"+personName+".zip"));
@@ -706,10 +708,17 @@ public class SubmissionController {
                     zos.closeEntry();
 
                     tempZipFile.delete();
+                    if (!deleted) {
+                    LOG.warn("Temp zip file {} could not be deleted", tempZipFile.getAbsolutePath());
+                    }
+
+                    LOG.info("upload_{}.zip added successfully", personName);
                 }
 
                 zos.close();
+                LOG.info("All submissions processed and zipped successfully.");
             } catch (Exception e) {
+                LOG.error("Error during ProQuest export: {}", e.getMessage(), e);
                 handleBatchExportError(e, response);
             }
             break;
