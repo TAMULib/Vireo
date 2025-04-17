@@ -9,6 +9,29 @@
   "submissionState": 1,
   "transitionSubmissionStatuses": [
     {
+      "name": "Proposal In Progress",
+      "isArchived": false,
+      "isPublishable": false,
+      "isDeletable": false,
+      "isEditableByReviewer": true,
+      "isEditableByStudent": false,
+      "isActive": true,
+      "submissionState": 1,
+      "transitionSubmissionStatuses": [
+        {
+          "name": "Final Thesis In Progress",
+          "isArchived": false,
+          "isPublishable": false,
+          "isDeletable": false,
+          "isEditableByReviewer": true,
+          "isEditableByStudent": false,
+          "isActive": true,
+          "submissionState": 1,
+          "transitionSubmissionStatuses": []
+        }
+      ]
+    },
+    {
       "name": "Submitted",
       "isArchived": false,
       "isPublishable": false,
@@ -19,6 +42,29 @@
       "submissionState": 2,
       "transitionSubmissionStatuses": [
         {
+          "name": "Proposal Submitted",
+          "isArchived": false,
+          "isPublishable": false,
+          "isDeletable": false,
+          "isEditableByReviewer": true,
+          "isEditableByStudent": false,
+          "isActive": true,
+          "submissionState": 2,
+          "transitionSubmissionStatuses": [
+            {
+              "name": "Final Thesis Submitted",
+              "isArchived": false,
+              "isPublishable": false,
+              "isDeletable": false,
+              "isEditableByReviewer": true,
+              "isEditableByStudent": false,
+              "isActive": true,
+              "submissionState": 2,
+              "transitionSubmissionStatuses": []
+            }
+          ]
+        },
+        {
           "name": "Under Review",
           "isArchived": false,
           "isPublishable": false,
@@ -28,6 +74,29 @@
           "isActive": true,
           "submissionState": 3,
           "transitionSubmissionStatuses": [
+            {
+              "name": "Proposal Ready To Review",
+              "isArchived": false,
+              "isPublishable": false,
+              "isDeletable": false,
+              "isEditableByReviewer": true,
+              "isEditableByStudent": false,
+              "isActive": true,
+              "submissionState": 3,
+              "transitionSubmissionStatuses": [
+                {
+                  "name": "Team Proposal Ready To Review",
+                  "isArchived": false,
+                  "isPublishable": false,
+                  "isDeletable": false,
+                  "isEditableByReviewer": true,
+                  "isEditableByStudent": false,
+                  "isActive": true,
+                  "submissionState": 3,
+                  "transitionSubmissionStatuses": []
+                }
+              ]
+            },
             {
               "name": "Needs Correction",
               "isArchived": false,
@@ -75,6 +144,29 @@
                           "submissionState": 7,
                           "transitionSubmissionStatuses": [
                             {
+                              "name": "Pending Compliance Approval",
+                              "isArchived": false,
+                              "isPublishable": false,
+                              "isDeletable": false,
+                              "isEditableByReviewer": true,
+                              "isEditableByStudent": false,
+                              "isActive": true,
+                              "submissionState": 7,
+                              "transitionSubmissionStatuses": [
+                                {
+                                  "name": "Proposal Accepted",
+                                  "isArchived": false,
+                                  "isPublishable": false,
+                                  "isDeletable": false,
+                                  "isEditableByReviewer": true,
+                                  "isEditableByStudent": false,
+                                  "isActive": true,
+                                  "submissionState": 7,
+                                  "transitionSubmissionStatuses": []
+                                }
+                              ]
+                            },
+                            {
                               "name": "Pending Publication",
                               "isArchived": true,
                               "isPublishable": false,
@@ -84,6 +176,17 @@
                               "isActive": false,
                               "submissionState": 8,
                               "transitionSubmissionStatuses": [
+                                {
+                                  "name": "Final Thesis Approved Pending Publication",
+                                  "isArchived": true,
+                                  "isPublishable": false,
+                                  "isDeletable": false,
+                                  "isEditableByReviewer": true,
+                                  "isEditableByStudent": false,
+                                  "isActive": false,
+                                  "submissionState": 8,
+                                  "transitionSubmissionStatuses": []
+                                },
                                 {
                                   "name": "Published",
                                   "isArchived": true,
@@ -134,6 +237,28 @@
       "transitionSubmissionStatuses": []
     },
     {
+      "name": "Team Member On Hold",
+      "isArchived": false,
+      "isPublishable": false,
+      "isDeletable": false,
+      "isEditableByReviewer": true,
+      "isEditableByStudent": false,
+      "isActive": true,
+      "submissionState": 10,
+      "transitionSubmissionStatuses": []
+    },
+    {
+      "name": "Final Thesis Approved On Hold",
+      "isArchived": false,
+      "isPublishable": false,
+      "isDeletable": false,
+      "isEditableByReviewer": true,
+      "isEditableByStudent": false,
+      "isActive": true,
+      "submissionState": 10,
+      "transitionSubmissionStatuses": []
+    },
+    {
       "name": "Withdrawn",
       "isArchived": true,
       "isPublishable": false,
@@ -146,6 +271,17 @@
     },
     {
       "name": "Cancelled",
+      "isArchived": true,
+      "isPublishable": false,
+      "isDeletable": true,
+      "isEditableByReviewer": true,
+      "isEditableByStudent": false,
+      "isActive": false,
+      "submissionState": 12,
+      "transitionSubmissionStatuses": []
+    },
+    {
+      "name": "Rejected",
       "isArchived": true,
       "isPublishable": false,
       "isDeletable": true,
