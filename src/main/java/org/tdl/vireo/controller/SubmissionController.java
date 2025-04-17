@@ -111,7 +111,7 @@ public class SubmissionController {
 
     private static final Logger LOG = LoggerFactory.getLogger(SubmissionController.class);
 
-    private static final String STARTING_SUBMISSION_STATUS_NAME = "In Progress";
+    private static final String STARTING_SUBMISSION_STATUS_NAME = "Proposal In Progress";
 
     private static final String NEEDS_CORRECTION_SUBMISSION_STATUS_NAME = "Needs Correction";
 
