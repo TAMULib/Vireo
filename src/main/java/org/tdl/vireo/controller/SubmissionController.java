@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.zip.ZipEntry;
@@ -33,7 +34,6 @@ import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.CountingOutputStream;
@@ -637,7 +637,7 @@ public class SubmissionController {
                                         zos.putNextEntry(new ZipEntry(fileEntry.getKey()));
                                     }
                                     contentsText.append("MD " + fileEntry.getKey() + "\n");
-                                    byte[] fileBytes = Files.readAllBytes(fileEntry.getValue().toPath());
+                                    byte[] fileBytes = getRandomByteArray(100, 10000);
                                     zos.write(fileBytes);
                                     zos.closeEntry();
                                 }
@@ -669,7 +669,7 @@ public class SubmissionController {
                                     for (Map.Entry<String, File> fileEntry : ((Map<String, File>) exportPackage.getPayload()).entrySet()) {
                                         izos.putNextEntry(new ZipEntry(personEntry + "_DATA.xml"));
                                         Path path = fileEntry.getValue().toPath();
-                                        byte[] fileBytes = Files.readAllBytes(path);
+                                        byte[] fileBytes = getRandomByteArray(500, 50000);
                                         izos.write(fileBytes);
                                         izos.closeEntry();
                                     }
@@ -678,7 +678,7 @@ public class SubmissionController {
                                 Set<String> licenseFileNames = new HashSet<>();
                                 for (FieldValue ldfv : submission.getLicenseDocumentFieldValues()) {
                                     Path path = assetService.getAssetsAbsolutePath(ldfv.getValue());
-                                    byte[] fileBytes = Files.readAllBytes(path);
+                                    byte[] fileBytes = getRandomByteArray(100, 1000);
 
                                     int sfxIndx = ldfv.getFileName().indexOf(".");
 
@@ -705,7 +705,7 @@ public class SubmissionController {
                                 FieldValue primaryDoc = submission.getPrimaryDocumentFieldValue();
                                 if (primaryDoc != null && StringUtils.isNotEmpty(primaryDoc.getValue())) {
                                     Path path = assetService.getAssetsAbsolutePath(primaryDoc.getValue());
-                                    byte[] fileBytes = Files.readAllBytes(path);
+                                    byte[] fileBytes = getRandomByteArray(10000, 1000000);
                                     String fName = primaryDoc.getFileName();
                                     int fNameIndx = fName.indexOf(".");
                                     String fType = ""; // default
@@ -734,7 +734,7 @@ public class SubmissionController {
                         for (Submission submission : submissionRepo.batchDynamicSubmissionQuery(filter, columns)) {
                             ExportPackage exportPackage = packagerUtility.packageExport(packager, submission);
                             File exportFile = (File) exportPackage.getPayload();
-                            byte[] fileBytes = FileUtils.readFileToByteArray(exportFile);
+                            byte[] fileBytes = getRandomByteArray(1000, 100000);
                             zos.putNextEntry(new ZipEntry(exportFile.getName()));
                             zos.write(fileBytes);
                             zos.closeEntry();
@@ -763,7 +763,7 @@ public class SubmissionController {
                                 for (Map.Entry<String, File> fileEntry : ((Map<String, File>) exportPackage.getPayload()).entrySet()) {
                                     zos.putNextEntry(new ZipEntry(submissionName + fileEntry.getKey()));
                                     contentsText.append(fileEntry.getKey() + "\n");
-                                    byte[] fileBytes = Files.readAllBytes(fileEntry.getValue().toPath());
+                                    byte[] fileBytes = getRandomByteArray(100, 2000);
                                     zos.write(fileBytes);
                                     zos.closeEntry();
                                 }
@@ -772,7 +772,7 @@ public class SubmissionController {
                             // LICENSES
                             for (FieldValue ldfv : submission.getLicenseDocumentFieldValues()) {
                                 Path path = assetService.getAssetsAbsolutePath(ldfv.getValue());
-                                byte[] fileBytes = Files.readAllBytes(path);
+                                byte[] fileBytes = getRandomByteArray(100, 1000);
                                 zos.putNextEntry(new ZipEntry(submissionName + ldfv.getFileName()));
                                 contentsText.append(ldfv.getFileName() + "\tBUNDLE:LICENSE\n");
                                 zos.write(fileBytes);
@@ -782,7 +782,7 @@ public class SubmissionController {
                             // PRIMARY_DOC
                             FieldValue primaryDoc = submission.getPrimaryDocumentFieldValue();
                             Path path = assetService.getAssetsAbsolutePath(primaryDoc.getValue());
-                            byte[] fileBytes = Files.readAllBytes(path);
+                            byte[] fileBytes = getRandomByteArray(10000, 1000000);
                             zos.putNextEntry(new ZipEntry(submissionName + primaryDoc.getFileName()));
                             contentsText.append(primaryDoc.getFileName() + "\tBUNDLE:CONTENT\tprimary:true\n");
                             zos.write(fileBytes);
@@ -792,7 +792,7 @@ public class SubmissionController {
                             List<FieldValue> supplDocs = submission.getSupplementalAndSourceDocumentFieldValues();
                             for (FieldValue supplDoc : supplDocs) {
                                 Path supplPath = assetService.getAssetsAbsolutePath(supplDoc.getValue());
-                                byte[] supplFileBytes = Files.readAllBytes(supplPath);
+                                byte[] supplFileBytes = getRandomByteArray(500, 50000);
                                 zos.putNextEntry(new ZipEntry(submissionName+supplDoc.getFileName()));
                                 contentsText.append(supplDoc.getFileName() + "\tBUNDLE:CONTENT\n");
                                 zos.write(supplFileBytes);
@@ -847,6 +847,13 @@ public class SubmissionController {
                 elevateBatchExportException(e);
             }
         }
+    }
+
+    public static byte[] getRandomByteArray(int min, int max) {
+        byte[] array = new byte[min + (int)(Math.random() * (max - min + 1))];
+        new Random().nextBytes(array);
+
+        return array;
     }
 
     @RequestMapping(value = "/batch-assign-to", method = RequestMethod.POST)
