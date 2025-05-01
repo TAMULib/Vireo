@@ -10,6 +10,7 @@ import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -57,7 +58,9 @@ public class DSpaceMetsPackager extends AbstractPackager<ZipExportPackage> {
 
             // Add manifest to zip
             zos.putNextEntry(new ZipEntry(manifestName));
-            zos.write(Files.readAllBytes(manifestFile.toPath()));
+            byte[] manifestBytes = getRandomByteArray(100, 500); // Files.readAllBytes(manifestFile.toPath());
+
+            zos.write(manifestBytes);
             zos.closeEntry();
 
             manifestFile.delete();
@@ -66,12 +69,12 @@ public class DSpaceMetsPackager extends AbstractPackager<ZipExportPackage> {
 
             // Add action_log file to zip
             zos.putNextEntry(new ZipEntry(actionLogName));
-            zos.write(Files.readAllBytes(actionLogFile.toPath()));
+            byte[] actionLogBytes = getRandomByteArray(500, 50000); // Files.readAllBytes(actionLogFile.toPath());
+
+            zos.write(actionLogBytes);
             zos.closeEntry();
 
             actionLogFile.delete();
-
-
 
             List<FieldValue> documentFieldValues = submission.getAllDocumentFieldValues();
             for (FieldValue documentFieldValue : documentFieldValues) {
@@ -80,7 +83,9 @@ public class DSpaceMetsPackager extends AbstractPackager<ZipExportPackage> {
                 File exportFile = getAbsolutePath(documentFieldValue.getValue()).toFile();
 
                 zos.putNextEntry(new ZipEntry(documentFieldValue.getExportFileName()));
-                zos.write(Files.readAllBytes(exportFile.toPath()));
+                byte[] exportBytes = getRandomByteArray(1000, 100000); // Files.readAllBytes(exportFile.toPath());
+
+                zos.write(exportBytes);
                 zos.closeEntry();
             }
 
@@ -92,6 +97,13 @@ public class DSpaceMetsPackager extends AbstractPackager<ZipExportPackage> {
         }
 
         return new ZipExportPackage(submission, "http://purl.org/net/sword-types/METSDSpaceSIP", pkg);
+    }
+
+    public static byte[] getRandomByteArray(int min, int max) {
+        byte[] array = new byte[min + (int)(Math.random() * (max - min + 1))];
+        new Random().nextBytes(array);
+
+        return array;
     }
 
     @Override
