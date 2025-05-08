@@ -9,6 +9,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.slf4j.Logger;
@@ -244,43 +245,51 @@ public class SubmissionEmailService {
      * @param submission Submission.
      * @param actionLog ActionLog.
      */
-    public void sendActionEmails(Submission submission, ActionLog actionLog) {
+    public CompletableFuture<Integer> sendActionEmails(Submission submission, ActionLog actionLog) {
+        return CompletableFuture.supplyAsync(() -> {
 
-        List<EmailWorkflowRuleByAction> rules = submission.getOrganization().getAggregateEmailWorkflowRulesByAction();
-        Map<Long, List<String>> recipientLists = new HashMap<>();
+            List<EmailWorkflowRuleByAction> rules = submission.getOrganization().getAggregateEmailWorkflowRulesByAction();
+            Map<Long, List<String>> recipientLists = new HashMap<>();
 
-        for (EmailWorkflowRuleByAction rule : rules) {
-            if (rule.getAction().equals(actionLog.getAction()) && !rule.isDisabled()) {
-                LOG.info("Action Email Workflow Rule " + rule.getId() + " firing for submission " + submission.getId());
-                Long templateId = rule.getEmailTemplate().getId();
+            int emailsSent = 0;
 
-                if (!recipientLists.containsKey(templateId)) {
-                    recipientLists.put(templateId, new ArrayList<>());
-                }
+            for (EmailWorkflowRuleByAction rule : rules) {
+                if (rule.getAction().equals(actionLog.getAction()) && !rule.isDisabled()) {
+                    LOG.info("Action Email Workflow Rule " + rule.getId() + " firing for submission " + submission.getId());
+                    Long templateId = rule.getEmailTemplate().getId();
 
-                // TODO: Not all variables are currently being replaced.
-                String subject = templateUtility.compileString(rule.getEmailTemplate().getSubject(), submission);
-                String content = templateUtility.compileTemplate(rule.getEmailTemplate(), submission);
-
-                for (String email : rule.getEmailRecipient().getEmails(submission)) {
-                    if (recipientLists.get(templateId).contains(email)) {
-                        LOG.debug("\tSkipping (already sent) email to recipient at address " + email);
-                        continue;
+                    if (!recipientLists.containsKey(templateId)) {
+                        recipientLists.put(templateId, new ArrayList<>());
                     }
 
-                    recipientLists.get(templateId).add(email);
+                    // TODO: Not all variables are currently being replaced.
+                    String subject = templateUtility.compileString(rule.getEmailTemplate().getSubject(), submission);
+                    String content = templateUtility.compileTemplate(rule.getEmailTemplate(), submission);
 
-                    try {
-                        emailSender.sendEmail(email, subject, content);
-                    } catch (MessagingException me) {
-                        LOG.error("Problem sending email: " + me.getMessage());
-                        recipientLists.get(templateId).remove(email);
+                    for (String email : rule.getEmailRecipient().getEmails(submission)) {
+                        if (recipientLists.get(templateId).contains(email)) {
+                            LOG.debug("\tSkipping (already sent) email to recipient at address " + email);
+                            continue;
+                        }
+
+                        recipientLists.get(templateId).add(email);
+
+                        try {
+                            emailSender.sendEmail(email, subject, content);
+                            emailsSent++;
+                        } catch (MessagingException me) {
+                            LOG.error("Problem sending email: " + me.getMessage());
+                            recipientLists.get(templateId).remove(email);
+                            emailsSent--;
+                        }
                     }
+                } else {
+                    LOG.debug("\tRule disabled or of irrelevant status condition.");
                 }
-            } else {
-                LOG.debug("\tRule disabled or of irrelevant status condition.");
             }
-        }
+
+            return emailsSent;
+        });
     }
 
     /**

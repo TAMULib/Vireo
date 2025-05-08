@@ -3,6 +3,8 @@ package org.tdl.vireo.model.listener;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 
+import java.util.concurrent.CompletableFuture;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Lazy;
@@ -10,6 +12,7 @@ import org.springframework.stereotype.Component;
 import org.tdl.vireo.model.Action;
 import org.tdl.vireo.model.ActionLog;
 import org.tdl.vireo.model.Submission;
+import org.tdl.vireo.model.repo.ActionLogRepo;
 import org.tdl.vireo.service.SubmissionEmailService;
 
 /**
@@ -17,7 +20,7 @@ import org.tdl.vireo.service.SubmissionEmailService;
  *
  * See ActionLogRepoImpl.
  *
- * All action logs created require a submission and when any action log is saved
+ * All action logs created, ActionLogRepoCustom, require a submission and when any action log is saved
  * it saves the submission. Which we can reliable process all actions through a
  * submission create or update.
  *
@@ -28,9 +31,15 @@ public class SubmissionActionLogListener {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SubmissionActionLogListener.class);
 
+    private final ActionLogRepo actionLogRepo;
+
     private SubmissionEmailService submissionEmailService;
 
-    SubmissionActionLogListener(@Lazy SubmissionEmailService submissionEmailService) {
+    SubmissionActionLogListener(
+        @Lazy ActionLogRepo actionLogRepo,
+        @Lazy SubmissionEmailService submissionEmailService
+    ) {
+        this.actionLogRepo = actionLogRepo;
         this.submissionEmailService = submissionEmailService;
     }
 
@@ -57,8 +66,9 @@ public class SubmissionActionLogListener {
 
     private void processSubmissionActionLog(Submission submission, ActionLog actionLog) {
         Action action = actionLog.getAction();
-        // this should be applied by cascade ALL of submission one to many
-        actionLog.setProcessed(true);
+
+        // Option 1
+        // actionLog.setProcessed(true);
 
         switch (action) {
         case STUDENT_MESSAGE:
@@ -67,8 +77,13 @@ public class SubmissionActionLogListener {
         case ADVISOR_CLEAR_APPROVE_SUBMISSION:
         case ADVISOR_APPROVE_EMBARGO:
         case ADVISOR_CLEAR_APPROVE_EMBARGO:
-            submissionEmailService.sendActionEmails(submission, actionLog);
-            LOGGER.info("Submission {}: {} action logged processed", submission.getId(), action);
+            LOGGER.info("Submission {}: {} action processing email workflow rules", submission.getId(), action);
+            submissionEmailService.sendActionEmails(submission, actionLog).thenAccept(result -> {
+                // Option 2
+                actionLog.setProcessed(true);
+                actionLogRepo.save(actionLog);
+                LOGGER.info("Submission {}: {} action log processed", submission.getId(), action);
+            });
             break;
         case UNDETERMINED:
         default:
