@@ -86,7 +86,7 @@ public class ExcelPackager extends AbstractPackager<ExcelExportPackage> {
                         }
                         Object valueAsObject = EntityUtility.getValueFromPath(submission, valuePath);
 
-                        String value;
+                        String value = "";
 
                         if (valueAsObject instanceof Calendar) {
                             Calendar calendar = (Calendar) valueAsObject;
@@ -114,7 +114,17 @@ public class ExcelPackager extends AbstractPackager<ExcelExportPackage> {
                             value = user.getName().toString();
                         } else if (valueAsObject instanceof ActionLog){
                             ActionLog actionLog = (ActionLog) valueAsObject;
-                            value = actionLog.getEntry().toString();
+                            switch (column.getTitle()){
+                                case "Event Time":
+                                    Calendar actionDate = (Calendar) actionLog.getActionDate();
+                                    value = simpleDateFormat.format(actionDate.getTime());
+                                    break;
+                                case "Last Event":
+                                    value = actionLog.getEntry().toString();
+                                    break;
+                                default:
+                                    break;
+                            }
                         } else {
                             value = valueAsObject.toString();
                         }
