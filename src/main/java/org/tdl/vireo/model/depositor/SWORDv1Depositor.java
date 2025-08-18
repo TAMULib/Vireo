@@ -62,6 +62,7 @@ public class SWORDv1Depositor implements Depositor {
             Map<String, String> foundCollections = new HashMap<String, String>();
 
             logger.debug("Getting Collections via SWORD from: " + serviceDocumentUrl);
+            logger.info("[TROUBLESHOOTING-SWORD-DEPOSIT] Getting Collections via SWORD from: " + serviceDocumentUrl);
 
             URL repositoryURL = new URL(serviceDocumentUrl);
 
@@ -142,6 +143,10 @@ public class SWORDv1Depositor implements Depositor {
             throw new SwordDepositInternalServerErrorException("Bad deposit location or repository URL when trying to deposit().");
         }
 
+        logger.info("[TROUBLESHOOTING-SWORD-DEPOSIT] Starting deposit for Submission {}", exportPackage.getSubmission().getId());
+        logger.info("[TROUBLESHOOTING-SWORD-DEPOSIT] Starting deposit for ExportPackage format: {}, to location: {}, using depositor: {}", exportPackage.getFormat(), depLocation.getName(), depLocation.getDepositorName());
+        logger.info("[TROUBLESHOOTING-SWORD-DEPOSIT] Deposit timeout: {}", depLocation.getTimeout());
+
         // Only the host and port are used from the repository URL for sword depositing.
         URI sword = null;
         String depositUrl = null;
@@ -155,11 +160,15 @@ public class SWORDv1Depositor implements Depositor {
             throw new SwordDepositBadRequestException("Unable to publish, cannot parse URI from repository URL: " + depLocation.getRepository(), e);
         }
 
+        logger.info("[TROUBLESHOOTING-SWORD-DEPOSIT] depositUrl: {}", depositUrl);
+        
         try {
             FileHelperUtility fileHelperUtility = new FileHelperUtility();
             File exportFile = (File) exportPackage.getPayload();
             String exportMimeType = fileHelperUtility.getMimeType(exportFile);
 
+            logger.info("[TROUBLESHOOTING-SWORD-DEPOSIT] Prepared export file: {}, mimeType: {}", exportFile.getAbsolutePath(), exportMimeType);
+            
             // Building the client
             Client client = new Client();
             // get the timeout from the location, or default it to the default
@@ -187,8 +196,12 @@ public class SWORDv1Depositor implements Depositor {
                 message.setOnBehalfOf(depLocation.getOnBehalfOf());
             }
 
+            logger.info("[TROUBLESHOOTING-SWORD-DEPOSIT] Sending deposit (PostMessage) to: {}", message.getDestination());
+
             DepositResponse response = client.postFile(message);
 
+            logger.info("[TROUBLESHOOTING-SWORD-DEPOSIT] Received HTTP response code: {}", response.getHttpResponse());
+            
             if (response.getHttpResponse() < 200 || response.getHttpResponse() > 204) {
                 throw new SWORDClientException("Sword server responded with a non-success HTTP Status Code: " + response.getHttpResponse());
             }
@@ -196,6 +209,9 @@ public class SWORDv1Depositor implements Depositor {
             URI handle = new URI(response.getEntry().getId());
             depositUrl += "/handle" + handle.getPath();
 
+            logger.info("[TROUBLESHOOTING-SWORD-DEPOSIT] Deposit successful. Handle: {}", handle.toString());
+            logger.info("[TROUBLESHOOTING-SWORD-DEPOSIT] Completed depositing Submission {}", exportPackage.getSubmission().getId());
+            
             return new URI(depositUrl).toString();
         } catch (SWORDClientException | URISyntaxException re) {
             logger.debug(re.getMessage(), re);
