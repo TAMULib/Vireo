@@ -197,6 +197,7 @@ public class SWORDv1Depositor implements Depositor {
             }
 
             logger.info("[TROUBLESHOOTING-SWORD-DEPOSIT] Sending deposit (PostMessage) to: {}", message.getDestination());
+            logger.info("[TROUBLESHOOTING-SWORD-DEPOSIT] Depositing to collection: {}", depLocation.getCollection());
 
             DepositResponse response = client.postFile(message);
 
