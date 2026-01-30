@@ -226,6 +226,17 @@
       ]
     },
     {
+      "name": "Archived Team Members",
+      "isArchived": true,
+      "isPublishable": false,
+      "isDeletable": false,
+      "isEditableByReviewer": true,
+      "isEditableByStudent": false,
+      "isActive": false,
+      "submissionState": 9,
+      "transitionSubmissionStatuses": []
+    },
+    {
       "name": "On Hold",
       "isArchived": false,
       "isPublishable": false,
